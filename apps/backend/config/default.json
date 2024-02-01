@@ -1,0 +1,22 @@
+{
+  "logger": {
+    "level": "debug"
+  },
+  "database": {
+    "path": null
+  },
+  "auth": {
+    "hash": {
+      "saltRounds": null
+    },
+    "jwt": {
+      "secret": null
+    },
+    "accessToken": {
+      "expiresIn": 3600
+    },
+    "refreshToken": {
+      "expiresIn": 604800
+    }
+  }
+}

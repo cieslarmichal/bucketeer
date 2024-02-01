@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/knip@3/schema.json",
+  "workspaces": {
+    "apps/backend": {
+      "entry": "src/index.ts",
+      "project": "**/*.ts"
+    },
+    "apps/frontend": {
+      "entry": "src/main.tsx",
+      "project": "**/*.{ts,tsx}"
+    },
+    "common/*": {
+      "entry": "src/index.ts",
+      "project": "**/*.ts"
+    }
+  },
+  "ignore": ["**/.eslintrc"],
+  "ignoreDependencies": ["tslib", "husky", "lint-staged", "esbuild", "pino-pretty", "better-sqlite3", "eslint*", "vite"]
+}

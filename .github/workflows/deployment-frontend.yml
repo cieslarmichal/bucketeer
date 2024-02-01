@@ -1,0 +1,15 @@
+name: Deployment (FE)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-frontend:
+    name: Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy -c apps/frontend/fly.toml --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_DEPLOY_FRONTEND_TOKEN }}

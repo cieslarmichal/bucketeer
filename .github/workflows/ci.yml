@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20.10.0
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run build:dev
+      - run: npm run test:unit
+      - run: docker-compose -f docker-compose.dev.yml up -d
+      - run: npm run test:integration
+      # - run: NODE_ENV=ci npm run test:e2e

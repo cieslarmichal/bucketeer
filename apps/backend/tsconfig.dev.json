@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "types": ["./tests/extensions/customMatchers.d.ts"]
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["dist"],
+  "references": [
+    {
+      "path": "../../common/contracts/tsconfig.json"
+    },
+    {
+      "path": "../../common/tests/tsconfig.json"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "database": {
+    "path": "data/dev.db"
+  },
+  "auth": {
+    "hash": {
+      "saltRounds": 10
+    },
+    "jwt": {
+      "secret": "12321313423565365654546654121890008"
+    }
+  }
+}

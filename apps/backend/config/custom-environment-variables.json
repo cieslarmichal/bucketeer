@@ -1,0 +1,22 @@
+{
+  "logger": {
+    "level": "LOGGER_LEVEL"
+  },
+  "database": {
+    "path": "DATABASE_PATH"
+  },
+  "auth": {
+    "hash": {
+      "saltRounds": "AUTH_HASH_SALT_ROUNDS"
+    },
+    "jwt": {
+      "secret": "AUTH_JWT_SECRET"
+    },
+    "accessToken": {
+      "expiresIn": "AUTH_ACCESS_TOKEN_EXPIRES_IN"
+    },
+    "refreshToken": {
+      "expiresIn": "AUTH_REFRESH_TOKEN_EXPIRES_IN"
+    }
+  }
+}

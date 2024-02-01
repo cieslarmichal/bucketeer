@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: bucketeer-backend
+    build:
+      context: .
+      dockerfile: ./apps/backend/Dockerfile
+    environment:
+      NODE_ENV: production
+    volumes:
+      - ./apps/backend/data:/data
+    ports:
+      - '5000:5000'
+
+  frontend:
+    container_name: bucketeer-frontend
+    build:
+      context: .
+      dockerfile: ./apps/frontend/Dockerfile
+    environment:
+      NODE_ENV: production
+      VITE_API_BASE_URL: "https://api.panel.wspomnieniazwesela.pl"
+    ports:
+      - "8080:8080"
