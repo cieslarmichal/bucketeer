@@ -1,40 +1,49 @@
+import { type Readable } from 'node:stream';
+
 import { type Resource } from '../../entities/resource/resource.js';
 import { type ResourceMetadata } from '../../entities/resource/resourceMetadata.js';
 
-export interface ResourceExistsPayload {
+export interface UploadResourcePayload {
   readonly resourceName: string;
-  readonly directoryName: string;
+  readonly bucketName: string;
+  readonly data: Readable;
 }
 
 export interface DownloadResourcePayload {
   readonly resourceName: string;
-  readonly directoryName: string;
+  readonly bucketName: string;
 }
 
-export interface ListResourcesMetadataPayload {
-  readonly directoryName: string;
+export interface GetResourcesMetadataPayload {
+  readonly bucketName: string;
   readonly page: number;
   readonly pageSize: number;
 }
 
-export interface ListResourcesMetadataResult {
+export interface GetResourcesMetadataResult {
   readonly items: ResourceMetadata[];
   readonly totalPages: number;
 }
 
-export interface ListResourcesNamesPayload {
-  readonly directoryName: string;
+export interface GetResourcesNamesPayload {
+  readonly bucketName: string;
+}
+
+export interface ResourceExistsPayload {
+  readonly resourceName: string;
+  readonly bucketName: string;
 }
 
 export interface DeleteResourcePayload {
   readonly resourceName: string;
-  readonly directoryName: string;
+  readonly bucketName: string;
 }
 
 export interface ResourceBlobService {
-  resourceExists(payload: ResourceExistsPayload): Promise<boolean>;
+  uploadResource(payload: UploadResourcePayload): Promise<void>;
   downloadResource(payload: DownloadResourcePayload): Promise<Resource>;
-  listResourcesMetadata(payload: ListResourcesMetadataPayload): Promise<ListResourcesMetadataResult>;
-  listResourcesNames(payload: ListResourcesNamesPayload): Promise<string[]>;
+  getResourcesMetadata(payload: GetResourcesMetadataPayload): Promise<GetResourcesMetadataResult>;
+  getResourcesNames(payload: GetResourcesNamesPayload): Promise<string[]>;
+  resourceExists(payload: ResourceExistsPayload): Promise<boolean>;
   deleteResource(payload: DeleteResourcePayload): Promise<void>;
 }

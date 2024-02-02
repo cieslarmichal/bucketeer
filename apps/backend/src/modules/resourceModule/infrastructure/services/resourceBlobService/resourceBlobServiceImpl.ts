@@ -1,80 +1,103 @@
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  type ListObjectsV2CommandInput,
+} from '@aws-sdk/client-s3';
 import { type Readable } from 'node:stream';
 
-import { type ConfigProvider } from '../../../../../core/configProvider.js';
-import { type AzureBlobService } from '../../../../../libs/azureBlob/services/azureBlobService/azureBlobService.js';
+import { type S3Client } from '../../../../../libs/s3/clients/s3Client/s3Client.js';
 import { type Resource } from '../../../domain/entities/resource/resource.js';
+import { type ResourceMetadata } from '../../../domain/entities/resource/resourceMetadata.js';
 import {
   type ResourceExistsPayload,
   type DeleteResourcePayload,
-  type ListResourcesMetadataPayload,
+  type GetResourcesMetadataPayload,
   type ResourceBlobService,
   type DownloadResourcePayload,
-  type ListResourcesMetadataResult,
-  type ListResourcesNamesPayload,
+  type GetResourcesMetadataResult,
+  type GetResourcesNamesPayload,
+  type UploadResourcePayload,
 } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
 
 export class ResourceBlobServiceImpl implements ResourceBlobService {
-  public constructor(
-    private readonly azureBlobService: AzureBlobService,
-    private readonly configProvider: ConfigProvider,
-  ) {}
+  public constructor(private readonly s3Client: S3Client) {}
 
-  public async resourceExists(payload: ResourceExistsPayload): Promise<boolean> {
-    const { resourceName, directoryName } = payload;
+  public async uploadResource(payload: UploadResourcePayload): Promise<void> {
+    const { bucketName, resourceName, data } = payload;
 
-    const resourcePrefix = this.configProvider.getAzureStorageContainerResourcesPrefix();
-
-    const blobName = resourcePrefix.length > 0 ? `${resourcePrefix}/${resourceName}` : resourceName;
-
-    return this.azureBlobService.blobExists({
-      containerName: directoryName,
-      blobName,
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: resourceName,
+      Body: data,
     });
+
+    await this.s3Client.send(command);
   }
 
   public async downloadResource(payload: DownloadResourcePayload): Promise<Resource> {
-    const { resourceName, directoryName } = payload;
+    const { resourceName, bucketName } = payload;
 
-    const resourcePrefix = this.configProvider.getAzureStorageContainerResourcesPrefix();
-
-    const blobName = resourcePrefix.length > 0 ? `${resourcePrefix}/${resourceName}` : resourceName;
-
-    const { name, updatedAt, contentSize, contentType, data } = await this.azureBlobService.downloadBlob({
-      containerName: directoryName,
-      blobName,
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: resourceName,
     });
 
+    const result = await this.s3Client.send(command);
+
     return {
-      name,
-      updatedAt,
-      contentSize,
-      contentType,
-      data: data as Readable,
+      name: resourceName,
+      updatedAt: result.Metadata?.['LastModified'] as string,
+      contentSize: result.ContentLength as number,
+      contentType: result.ContentType as string,
+      data: result.Body as Readable,
     };
   }
 
-  public async listResourcesMetadata(payload: ListResourcesMetadataPayload): Promise<ListResourcesMetadataResult> {
-    const { directoryName, page, pageSize } = payload;
+  public async getResourcesMetadata(payload: GetResourcesMetadataPayload): Promise<GetResourcesMetadataResult> {
+    const { bucketName, page, pageSize } = payload;
 
-    const resourcePrefix = this.configProvider.getAzureStorageContainerResourcesPrefix();
+    let resourcesMetadata: ResourceMetadata[] = [];
 
-    const { items: blobsMetadata, totalPages } = await this.azureBlobService.getBlobsMetadata({
-      containerName: directoryName,
-      page,
-      pageSize,
-      prefix: resourcePrefix,
-    });
+    let totalPages = 0;
 
-    const resourcesMetadata = blobsMetadata.map((blobMetadata) => {
-      const { name, updatedAt, contentSize, contentType } = blobMetadata;
+    let continuationToken: string | undefined = undefined;
 
-      return {
-        name: resourcePrefix.length > 0 ? name.replace(`${resourcePrefix}/`, '') : name,
-        updatedAt,
-        contentSize,
-        contentType,
+    do {
+      const commandInput: ListObjectsV2CommandInput = {
+        Bucket: bucketName,
+        MaxKeys: pageSize,
       };
-    });
+
+      if (continuationToken) {
+        commandInput.ContinuationToken = continuationToken;
+      }
+
+      const command = new ListObjectsV2Command(commandInput);
+
+      const result = await this.s3Client.send(command);
+
+      totalPages++;
+
+      if (totalPages === page) {
+        resourcesMetadata = result.Contents
+          ? result.Contents.map((resultEntry) => {
+              const { Key, LastModified, Size } = resultEntry;
+
+              return {
+                name: Key as string,
+                updatedAt: String(LastModified),
+                contentSize: Size as number,
+              };
+            })
+          : [];
+      }
+
+      continuationToken = result.NextContinuationToken;
+    } while (continuationToken);
 
     return {
       items: resourcesMetadata,
@@ -82,33 +105,38 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
     };
   }
 
-  public async listResourcesNames(payload: ListResourcesNamesPayload): Promise<string[]> {
-    const { directoryName } = payload;
+  public async getResourcesNames(payload: GetResourcesNamesPayload): Promise<string[]> {
+    const { bucketName } = payload;
 
-    const resourcePrefix = this.configProvider.getAzureStorageContainerResourcesPrefix();
-
-    const blobsNames = await this.azureBlobService.getBlobsNames({
-      containerName: directoryName,
-      prefix: resourcePrefix,
+    const command = new ListObjectsV2Command({
+      Bucket: bucketName,
     });
 
-    const resourcesNames = blobsNames.map((blobName) =>
-      resourcePrefix.length > 0 ? blobName.replace(`${resourcePrefix}/`, '') : blobName,
-    );
+    const result = await this.s3Client.send(command);
 
-    return resourcesNames;
+    if (!result.Contents) {
+      return [];
+    }
+
+    return result.Contents.map((metadata) => metadata.Key as string);
+  }
+
+  public async resourceExists(payload: ResourceExistsPayload): Promise<boolean> {
+    const { resourceName, bucketName } = payload;
+
+    const resourcesNames = await this.getResourcesNames({ bucketName });
+
+    return resourcesNames.includes(resourceName);
   }
 
   public async deleteResource(payload: DeleteResourcePayload): Promise<void> {
-    const { resourceName, directoryName } = payload;
+    const { resourceName, bucketName } = payload;
 
-    const resourcePrefix = this.configProvider.getAzureStorageContainerResourcesPrefix();
-
-    const blobName = resourcePrefix.length > 0 ? `${resourcePrefix}/${resourceName}` : resourceName;
-
-    await this.azureBlobService.deleteBlob({
-      containerName: directoryName,
-      blobName,
+    const command = new DeleteObjectCommand({
+      Bucket: bucketName,
+      Key: resourceName,
     });
+
+    await this.s3Client.send(command);
   }
 }

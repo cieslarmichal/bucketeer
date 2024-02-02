@@ -28,7 +28,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
       directoryName,
     });
 
-    const blobsNames = await this.resourceBlobSerice.listResourcesNames({ directoryName });
+    const blobsNames = await this.resourceBlobSerice.getResourcesNames({ directoryName });
 
     if (!blobsNames.length) {
       this.loggerService.error({

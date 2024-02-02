@@ -139,7 +139,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
 
     expect(resource).toEqual({
       name: sampleFileName1,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(String),
       contentSize: 17839845,
       contentType: 'video/mp4',
       data: expect.any(Object),

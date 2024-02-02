@@ -29,7 +29,7 @@ export class FindResourcesMetadataQueryHandlerImpl implements FindResourcesMetad
       pageSize,
     });
 
-    const { items: resourcesMetadata, totalPages } = await this.resourceBlobSerice.listResourcesMetadata({
+    const { items: resourcesMetadata, totalPages } = await this.resourceBlobSerice.getResourcesMetadata({
       directoryName,
       page,
       pageSize,

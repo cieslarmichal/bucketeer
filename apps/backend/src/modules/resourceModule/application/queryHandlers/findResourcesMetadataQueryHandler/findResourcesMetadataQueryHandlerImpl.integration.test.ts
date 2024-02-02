@@ -133,14 +133,14 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
 
     expect(resourcesMetadata[file1Index]).toEqual({
       name: sampleFileName1,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(String),
       contentSize: 17839845,
       contentType: 'video/mp4',
     });
 
     expect(resourcesMetadata[file2Index]).toEqual({
       name: sampleFileName2,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(String),
       contentSize: 7735619,
       contentType: 'image/jpeg',
     });
