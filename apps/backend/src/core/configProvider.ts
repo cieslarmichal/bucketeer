@@ -1,6 +1,7 @@
 import config from 'config';
 
 import { OperationNotValidError } from '../common/errors/common/operationNotValidError.js';
+import { type AwsRegion } from '../common/types/awsRegion.js';
 import { type LogLevel } from '../libs/logger/types/logLevel.js';
 
 export class ConfigProvider {
@@ -10,6 +11,14 @@ export class ConfigProvider {
 
   public getServerPort(): number {
     return 5000;
+  }
+
+  public getAdminEmail(): string {
+    return this.getValue<string>('admin.email');
+  }
+
+  public getAdminPassword(): string {
+    return this.getValue<string>('admin.password');
   }
 
   public getLogLevel(): LogLevel {
@@ -34,6 +43,22 @@ export class ConfigProvider {
 
   public getHashSaltRounds(): number {
     return this.getValue<number>('auth.hash.saltRounds');
+  }
+
+  public getAwsAccessKeyId(): string {
+    return this.getValue<string>('aws.accessKeyId');
+  }
+
+  public getAwsSecretAccessKey(): string {
+    return this.getValue<string>('aws.secretAccessKey');
+  }
+
+  public getAwsEndpoint(): string | undefined {
+    return config.get('aws.endpoint');
+  }
+
+  public getAwsRegion(): AwsRegion {
+    return this.getValue<AwsRegion>('aws.region');
   }
 
   private getValue<T>(key: string): T {

@@ -1,4 +1,8 @@
 {
+  "admin": {
+    "email": "ADMIN_EMAIL",
+    "password": "ADMIN_PASSWORD"
+  },
   "logger": {
     "level": "LOGGER_LEVEL"
   },
@@ -18,5 +22,10 @@
     "refreshToken": {
       "expiresIn": "AUTH_REFRESH_TOKEN_EXPIRES_IN"
     }
+  },
+  "aws": {
+    "accessKeyId": "AWS_ACCESS_KEY_ID",
+    "secretAccessKey": "AWS_SECRET_ACCESS_KEY",
+    "region": "AWS_REGION"
   }
 }

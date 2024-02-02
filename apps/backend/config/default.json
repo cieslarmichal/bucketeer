@@ -1,4 +1,8 @@
 {
+  "admin": {
+    "email": "admin@gmail.com",
+    "password": "admin"
+  },
   "logger": {
     "level": "debug"
   },
@@ -18,5 +22,11 @@
     "refreshToken": {
       "expiresIn": 604800
     }
+  },
+  "aws": {
+    "accessKeyId": null,
+    "secretAccessKey": null,
+    "region": "eu-central-1",
+    "endpoint": null
   }
 }

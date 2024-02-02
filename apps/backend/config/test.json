@@ -9,5 +9,11 @@
     "jwt": {
       "secret": "12321313423565365654546654121890008"
     }
+  },
+  "aws": {
+    "accessKeyId": "test",
+    "secretAccessKey": "test",
+    "region": "eu-central-1",
+    "endpoint": "http://127.0.0.1:4566"
   }
 }
