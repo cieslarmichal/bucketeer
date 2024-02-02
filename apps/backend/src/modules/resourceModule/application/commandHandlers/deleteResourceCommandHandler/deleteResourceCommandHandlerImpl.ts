@@ -27,7 +27,7 @@ export class DeleteResourceCommandHandlerImpl implements DeleteResourceCommandHa
     });
 
     const existingResource = await this.resourceBlobSerice.resourceExists({
-      directoryName,
+      bucketName: directoryName,
       resourceName,
     });
 
@@ -40,7 +40,7 @@ export class DeleteResourceCommandHandlerImpl implements DeleteResourceCommandHa
     }
 
     await this.resourceBlobSerice.deleteResource({
-      directoryName,
+      bucketName: directoryName,
       resourceName,
     });
 

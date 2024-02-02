@@ -28,7 +28,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
       directoryName,
     });
 
-    const blobsNames = await this.resourceBlobSerice.getResourcesNames({ directoryName });
+    const blobsNames = await this.resourceBlobSerice.getResourcesNames({ bucketName: directoryName });
 
     if (!blobsNames.length) {
       this.loggerService.error({
@@ -60,7 +60,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
     for (const blobName of blobsNames) {
       if (!names.length || names.includes(blobName)) {
         const { data: blobData } = await this.resourceBlobSerice.downloadResource({
-          directoryName,
+          bucketName: directoryName,
           resourceName: blobName,
         });
 

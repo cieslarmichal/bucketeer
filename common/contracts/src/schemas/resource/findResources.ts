@@ -8,7 +8,6 @@ export interface FindResourcesResponseBody {
     readonly name: string;
     readonly updatedAt: string;
     readonly contentSize: number;
-    readonly contentType: string;
   }[];
   readonly metadata: {
     readonly page: number;

@@ -12,11 +12,11 @@ import { FindResourcesMetadataQueryHandlerImpl } from './application/queryHandle
 import { type ResourceBlobService } from './domain/services/resourceBlobService/resourceBlobService.js';
 import { ResourceBlobServiceImpl } from './infrastructure/services/resourceBlobService/resourceBlobServiceImpl.js';
 import { symbols } from './symbols.js';
-import { type ConfigProvider } from '../../core/configProvider.js';
 import { coreSymbols } from '../../core/symbols.js';
 import { type DependencyInjectionContainer } from '../../libs/dependencyInjection/dependencyInjectionContainer.js';
 import { type DependencyInjectionModule } from '../../libs/dependencyInjection/dependencyInjectionModule.js';
 import { type LoggerService } from '../../libs/logger/services/loggerService/loggerService.js';
+import { type S3Client } from '../../libs/s3/clients/s3Client/s3Client.js';
 import { type AccessControlService } from '../authModule/application/services/accessControlService/accessControlService.js';
 import { authSymbols } from '../authModule/symbols.js';
 import { type FindUserDirectoryQueryHandler } from '../userModule/application/queryHandlers/findUserDirectoryQueryHandler/findUserDirectoryQueryHandler.js';
@@ -26,11 +26,7 @@ export class ResourceModule implements DependencyInjectionModule {
   public declareBindings(container: DependencyInjectionContainer): void {
     container.bind<ResourceBlobService>(
       symbols.resourceBlobService,
-      () =>
-        new ResourceBlobServiceImpl(
-          container.get<AzureBlobService>(coreSymbols.azureBlobService),
-          container.get<ConfigProvider>(coreSymbols.configProvider),
-        ),
+      () => new ResourceBlobServiceImpl(container.get<S3Client>(coreSymbols.s3Client)),
     );
 
     container.bind<DeleteResourceCommandHandler>(

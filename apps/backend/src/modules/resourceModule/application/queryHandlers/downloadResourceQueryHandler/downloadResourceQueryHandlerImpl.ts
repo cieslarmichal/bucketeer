@@ -27,7 +27,7 @@ export class DownloadResourceQueryHandlerImpl implements DownloadResourceQueryHa
     });
 
     const resource = await this.resourceBlobSerice.downloadResource({
-      directoryName,
+      bucketName: directoryName,
       resourceName,
     });
 

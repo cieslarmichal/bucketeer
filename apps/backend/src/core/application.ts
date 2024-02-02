@@ -6,14 +6,13 @@ import { type SqliteDatabaseClient } from './database/sqliteDatabaseClient/sqlit
 import { SqliteDatabaseClientFactory } from './database/sqliteDatabaseClient/sqliteDatabaseClientFactory.js';
 import { HttpServer } from './httpServer.js';
 import { coreSymbols, symbols } from './symbols.js';
-import { AzureBlobServiceFactory } from '../libs/azureBlob/factories/azureBlobServiceFactory/azureBlobServiceFactory.js';
-import { type AzureBlobService } from '../libs/azureBlob/services/azureBlobService/azureBlobService.js';
-import { type AzureBlobConfig } from '../libs/azureBlob/types/azureBlobConfig.js';
 import { type DependencyInjectionContainer } from '../libs/dependencyInjection/dependencyInjectionContainer.js';
 import { DependencyInjectionContainerFactory } from '../libs/dependencyInjection/dependencyInjectionContainerFactory.js';
 import { type DependencyInjectionModule } from '../libs/dependencyInjection/dependencyInjectionModule.js';
 import { LoggerServiceFactory } from '../libs/logger/factories/loggerServiceFactory/loggerServiceFactory.js';
 import { type LoggerService } from '../libs/logger/services/loggerService/loggerService.js';
+import { type S3Client } from '../libs/s3/clients/s3Client/s3Client.js';
+import { S3ClientFactory, type S3Config } from '../libs/s3/factories/s3ClientFactory/s3ClientFactory.js';
 import { type UuidService } from '../libs/uuid/services/uuidService/uuidService.js';
 import { UuidServiceImpl } from '../libs/uuid/services/uuidService/uuidServiceImpl.js';
 import { AuthModule } from '../modules/authModule/authModule.js';
@@ -120,16 +119,14 @@ export class Application {
       SqliteDatabaseClientFactory.create({ databasePath: configProvider.getSqliteDatabasePath() }),
     );
 
-    const azureStorageConnectionString = configProvider.getAzureStorageConnectionString();
+    const s3Config: S3Config = {
+      accessKeyId: configProvider.getAwsAccessKeyId(),
+      secretAccessKey: configProvider.getAwsSecretAccessKey(),
+      region: configProvider.getAwsRegion(),
+      endpoint: configProvider.getAwsEndpoint(),
+    };
 
-    const azureBlobConfig: AzureBlobConfig = azureStorageConnectionString
-      ? { connectionString: azureStorageConnectionString }
-      : {
-          accountName: configProvider.getAzureStorageAccountName(),
-          accountKey: configProvider.getAzureStorageAccountKey(),
-        };
-
-    container.bind<AzureBlobService>(symbols.azureBlobService, () => AzureBlobServiceFactory.create(azureBlobConfig));
+    container.bind<S3Client>(symbols.s3Client, () => S3ClientFactory.create(s3Config));
 
     container.bind<ApplicationHttpController>(
       symbols.applicationHttpController,

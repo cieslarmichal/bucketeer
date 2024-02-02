@@ -32,7 +32,7 @@ export class DownloadImageQueryHandlerImpl implements DownloadImageQueryHandler 
     });
 
     const resource = await this.resourceBlobSerice.downloadResource({
-      directoryName,
+      bucketName: directoryName,
       resourceName,
     });
 

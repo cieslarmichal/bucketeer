@@ -291,7 +291,6 @@ export class ResourceHttpController implements HttpController {
       name: resource.name,
       updatedAt: resource.updatedAt,
       contentSize: resource.contentSize,
-      contentType: resource.contentType,
     };
   }
 }

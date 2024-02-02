@@ -4,7 +4,6 @@ import { expect, describe, it, beforeEach, afterEach } from 'vitest';
 import { Generator } from '@common/tests';
 
 import { type DownloadResourceQueryHandler } from './downloadResourceQueryHandler.js';
-import { type AzuriteService } from '../../../../../../tests/azurite/azuriteService.js';
 import { testSymbols } from '../../../../../../tests/container/symbols.js';
 import { TestContainer } from '../../../../../../tests/container/testContainer.js';
 import { ResourceNotFoundError } from '../../../../../common/errors/common/resourceNotFoundError.js';
@@ -13,11 +12,12 @@ import { coreSymbols } from '../../../../../core/symbols.js';
 import { type DependencyInjectionContainer } from '../../../../../libs/dependencyInjection/dependencyInjectionContainer.js';
 import { type UserTestUtils } from '../../../../userModule/tests/utils/userTestUtils/userTestUtils.js';
 import { symbols } from '../../../symbols.js';
+import { type S3TestUtils } from '../../../tests/utils/s3TestUtils.js';
 
 describe('FindResourcesMetadataQueryHandlerImpl', () => {
   let queryHandler: DownloadResourceQueryHandler;
 
-  let azuriteService: AzuriteService;
+  let s3TestUtils: S3TestUtils;
 
   let container: DependencyInjectionContainer;
 
@@ -29,7 +29,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
 
   const sampleFileName1 = 'sample_video1.mp4';
 
-  const containerName = 'resources';
+  const bucketName = 'resources';
 
   beforeEach(async () => {
     container = TestContainer.create();
@@ -40,11 +40,11 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
 
     userTestUtils = container.get<UserTestUtils>(testSymbols.userTestUtils);
 
-    azuriteService = container.get<AzuriteService>(testSymbols.azuriteService);
+    s3TestUtils = container.get<S3TestUtils>(testSymbols.s3TestUtils);
 
     await userTestUtils.truncate();
 
-    await azuriteService.createContainer(containerName);
+    await s3TestUtils.createBucket(bucketName);
   });
 
   afterEach(async () => {
@@ -52,7 +52,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
 
     await sqliteDatabaseClient.destroy();
 
-    await azuriteService.deleteContainer(containerName);
+    await s3TestUtils.deleteBucket(bucketName);
   });
 
   it('throws an error - when user does not exist', async () => {
@@ -95,7 +95,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     await userTestUtils.createAndPersistUserDirectory({
       input: {
         userId: user.id,
-        directoryName: containerName,
+        directoryName: bucketName,
       },
     });
 
@@ -119,12 +119,12 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     await userTestUtils.createAndPersistUserDirectory({
       input: {
         userId: user.id,
-        directoryName: containerName,
+        directoryName: bucketName,
       },
     });
 
-    await azuriteService.uploadBlob(
-      containerName,
+    await s3TestUtils.uploadObject(
+      bucketName,
       sampleFileName1,
       path.join(resourcesDirectory, sampleFileName1),
       'video/mp4',
