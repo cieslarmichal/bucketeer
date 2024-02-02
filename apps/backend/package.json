@@ -19,6 +19,7 @@
     "lint:fix": "npm run lint -- --fix"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.441.0",
     "@common/contracts": "*",
     "@fastify/cors": "^8.4.2",
     "@fastify/helmet": "^11.1.1",
