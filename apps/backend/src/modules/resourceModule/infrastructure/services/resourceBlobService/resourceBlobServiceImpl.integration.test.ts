@@ -3,8 +3,15 @@ import { expect, describe, it, beforeEach, afterEach } from 'vitest';
 
 import { Generator } from '@common/tests';
 
-describe('ResourcelobServiceImpl', () => {
+import { TestContainer } from '../../../../../../tests/container/testContainer.js';
+import { type DependencyInjectionContainer } from '../../../../../libs/dependencyInjection/dependencyInjectionContainer.js';
+import { type ResourceBlobService } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
+import { symbols } from '../../../symbols.js';
+
+describe('ResourceBlobServiceImpl', () => {
   let container: DependencyInjectionContainer;
+
+  let resourceBlobService: ResourceBlobService;
 
   const resourcesDirectory = path.resolve(__dirname, '../../../../../../../resources');
 
@@ -14,21 +21,27 @@ describe('ResourcelobServiceImpl', () => {
 
   const bucketName = 'resources1';
 
-  beforeEach(async () => {});
+  beforeEach(async () => {
+    container = TestContainer.create();
+
+    resourceBlobService = container.get<ResourceBlobService>(symbols.resourceBlobService);
+
+    await azuriteService.createContainer(containerName);
+  });
 
   afterEach(async () => {});
 
   describe('download', () => {
-    it('throws an error - when container does not exist', async () => {
-      const nonExistingContainerName = Generator.word();
+    it('throws an error - when bucket does not exist', async () => {
+      const nonExistingBucketName = Generator.word();
 
       try {
-        await azureBlobService.downloadBlob({
-          containerName: nonExistingContainerName,
-          blobName: sampleFileName1,
+        await resourceBlobService.downloadResource({
+          bucketName: nonExistingBucketName,
+          resourceName: sampleFileName1,
         });
       } catch (error) {
-        expect(error instanceof AzureBlobServiceError);
+        expect(error).toBeDefined();
 
         return;
       }
@@ -36,16 +49,16 @@ describe('ResourcelobServiceImpl', () => {
       expect.fail();
     });
 
-    it('throws an error - when blob does not exist', async () => {
-      const nonExistingBlobName = Generator.word();
+    it('throws an error - when resource does not exist', async () => {
+      const nonExistingResourceName = Generator.word();
 
       try {
-        await azureBlobService.downloadBlob({
-          containerName: bucketName,
-          blobName: nonExistingBlobName,
+        await resourceBlobService.downloadResource({
+          bucketName,
+          resourceName: nonExistingResourceName,
         });
       } catch (error) {
-        expect(error instanceof AzureBlobServiceError);
+        expect(error).toBeDefined();
 
         return;
       }
@@ -54,65 +67,65 @@ describe('ResourcelobServiceImpl', () => {
     });
 
     it('downloads a file', async () => {
-      const blob = await azureBlobService.downloadBlob({
-        containerName: bucketName,
-        blobName: sampleFileName1,
+      const resource = await resourceBlobService.downloadResource({
+        bucketName,
+        resourceName: sampleFileName1,
       });
 
-      expect(blob.name).toBe(sampleFileName1);
+      expect(resource.name).toBe(sampleFileName1);
 
-      expect(blob.contentSize).toEqual(17839845);
+      expect(resource.contentSize).toEqual(17839845);
 
-      expect(blob.contentType).toBe('application/octet-stream');
+      expect(resource.contentType).toBe('application/octet-stream');
 
-      expect(blob.data).toBeDefined();
+      expect(resource.data).toBeDefined();
     });
   });
 
-  describe('blobExists', () => {
-    it('returns false - when container does not exist', async () => {
-      const nonExistingContainerName = Generator.word();
+  describe('exists', () => {
+    it('returns false - when bucket does not exist', async () => {
+      const nonExistingBucketName = Generator.word();
 
-      const blobExists = await azureBlobService.blobExists({
-        containerName: nonExistingContainerName,
-        blobName: sampleFileName1,
+      const resourceExists = await resourceBlobService.resourceExists({
+        bucketName: nonExistingBucketName,
+        resourceName: sampleFileName1,
       });
 
-      expect(blobExists).toBe(false);
+      expect(resourceExists).toBe(false);
     });
 
-    it('returns false - when blob does not exist', async () => {
-      const nonExistingBlobName = Generator.word();
+    it('returns false - when resource does not exist', async () => {
+      const nonExistingResourceName = Generator.word();
 
-      const blobExists = await azureBlobService.blobExists({
-        containerName: bucketName,
-        blobName: nonExistingBlobName,
+      const resourceExists = await resourceBlobService.resourceExists({
+        bucketName,
+        resourceName: nonExistingResourceName,
       });
 
-      expect(blobExists).toBe(false);
+      expect(resourceExists).toBe(false);
     });
 
-    it('returns true - when blob exists', async () => {
-      const blobExists = await azureBlobService.blobExists({
-        containerName: bucketName,
-        blobName: sampleFileName1,
+    it('returns true - when resource exists', async () => {
+      const resourceExists = await resourceBlobService.resourceExists({
+        bucketName,
+        resourceName: sampleFileName1,
       });
 
-      expect(blobExists).toBe(true);
+      expect(resourceExists).toBe(true);
     });
   });
 
-  describe('deleteBlob', () => {
-    it('throws an error - when container does not exist', async () => {
-      const nonExistingContainerName = Generator.word();
+  describe('delete', () => {
+    it('throws an error - when bucket does not exist', async () => {
+      const nonExistingBucketName = Generator.word();
 
       try {
-        await azureBlobService.deleteBlob({
-          containerName: nonExistingContainerName,
-          blobName: sampleFileName1,
+        await resourceBlobService.deleteResource({
+          bucketName: nonExistingBucketName,
+          resourceName: sampleFileName1,
         });
       } catch (error) {
-        expect(error instanceof AzureBlobServiceError);
+        expect(error).toBeDefined();
 
         return;
       }
@@ -120,16 +133,16 @@ describe('ResourcelobServiceImpl', () => {
       expect.fail();
     });
 
-    it('throws an error - when blob does not exist', async () => {
-      const nonExistingBlobName = Generator.word();
+    it('throws an error - when resource does not exist', async () => {
+      const nonExistingResourceName = Generator.word();
 
       try {
-        await azureBlobService.deleteBlob({
-          containerName: bucketName,
-          blobName: nonExistingBlobName,
+        await resourceBlobService.deleteResource({
+          bucketName,
+          resourceName: nonExistingResourceName,
         });
       } catch (error) {
-        expect(error instanceof AzureBlobServiceError);
+        expect(error).toBeDefined();
 
         return;
       }
@@ -137,38 +150,38 @@ describe('ResourcelobServiceImpl', () => {
       expect.fail();
     });
 
-    it('deletes a blob', async () => {
-      const blobName = Generator.word();
+    it('deletes a resource', async () => {
+      const resourceName = Generator.word();
 
-      await azuriteService.uploadBlob(bucketName, blobName, path.join(resourcesDirectory, sampleFileName1));
+      await azuriteService.uploadBlob(bucketName, resourceName, path.join(resourcesDirectory, sampleFileName1));
 
-      const existsBefore = await azuriteService.blobExists(bucketName, blobName);
+      const existsBefore = await azuriteService.resourceExists(bucketName, resourceName);
 
       expect(existsBefore).toBe(true);
 
-      await azureBlobService.deleteBlob({
-        containerName: bucketName,
-        blobName,
+      await resourceBlobService.deleteBlob({
+        bucketName,
+        resourceName,
       });
 
-      const existsAfter = await azuriteService.blobExists(bucketName, blobName);
+      const existsAfter = await azuriteService.resourceExists(bucketName, resourceName);
 
       expect(existsAfter).toBe(false);
     });
   });
 
   describe('getBlobsMetadata', () => {
-    it('throws an error - when container does not exist', async () => {
-      const nonExistingContainerName = Generator.word();
+    it('throws an error - when bucket does not exist', async () => {
+      const nonExistingBucketName = Generator.word();
 
       try {
-        await azureBlobService.getBlobsMetadata({
-          containerName: nonExistingContainerName,
+        await resourceBlobService.getBlobsMetadata({
+          bucketName: nonExistingBucketName,
           page: 1,
           pageSize: 10,
         });
       } catch (error) {
-        expect(error instanceof AzureBlobServiceError);
+        expect(error).toBeDefined();
 
         return;
       }
@@ -176,9 +189,9 @@ describe('ResourcelobServiceImpl', () => {
       expect.fail();
     });
 
-    it('returns blobs metadata with single page', async () => {
-      const { items, totalPages } = await azureBlobService.getBlobsMetadata({
-        containerName: bucketName,
+    it('returns resources metadata with single page', async () => {
+      const { items, totalPages } = await resourceBlobService.getBlobsMetadata({
+        bucketName,
         page: 1,
         pageSize: 10,
       });
@@ -192,17 +205,17 @@ describe('ResourcelobServiceImpl', () => {
       expect(items[1]?.name).toBe(sampleFileName2);
     });
 
-    it('returns blobs metadata with many pages', async () => {
-      const blobName1 = Generator.word();
+    it('returns resources metadata with many pages', async () => {
+      const resourceName1 = Generator.word();
 
-      await azuriteService.uploadBlob(bucketName, blobName1, path.join(resourcesDirectory, sampleFileName1));
+      await azuriteService.uploadBlob(bucketName, resourceName1, path.join(resourcesDirectory, sampleFileName1));
 
-      const blobName2 = Generator.word();
+      const resourceName2 = Generator.word();
 
-      await azuriteService.uploadBlob(bucketName, blobName2, path.join(resourcesDirectory, sampleFileName1));
+      await azuriteService.uploadBlob(bucketName, resourceName2, path.join(resourcesDirectory, sampleFileName1));
 
-      const { items, totalPages } = await azureBlobService.getBlobsMetadata({
-        containerName: bucketName,
+      const { items, totalPages } = await resourceBlobService.getBlobsMetadata({
+        bucketName,
         page: 1,
         pageSize: 2,
       });
@@ -214,15 +227,15 @@ describe('ResourcelobServiceImpl', () => {
   });
 
   describe('getBlobsNames', () => {
-    it('throws an error - when container does not exist', async () => {
-      const nonExistingContainerName = Generator.word();
+    it('throws an error - when bucket does not exist', async () => {
+      const nonExistingBucketName = Generator.word();
 
       try {
-        await azureBlobService.getBlobsNames({
-          containerName: nonExistingContainerName,
+        await resourceBlobService.getBlobsNames({
+          bucketName: nonExistingBucketName,
         });
       } catch (error) {
-        expect(error instanceof AzureBlobServiceError);
+        expect(error).toBeDefined();
 
         return;
       }
@@ -230,16 +243,16 @@ describe('ResourcelobServiceImpl', () => {
       expect.fail();
     });
 
-    it('returns blobs names', async () => {
-      const blobsNames = await azureBlobService.getBlobsNames({
-        containerName: bucketName,
+    it('returns resources names', async () => {
+      const resourcesNames = await resourceBlobService.getBlobsNames({
+        bucketName,
       });
 
-      expect(blobsNames.length).toBe(2);
+      expect(resourcesNames.length).toBe(2);
 
-      expect(blobsNames[0]).toBe(sampleFileName1);
+      expect(resourcesNames[0]).toBe(sampleFileName1);
 
-      expect(blobsNames[1]).toBe(sampleFileName2);
+      expect(resourcesNames[1]).toBe(sampleFileName2);
     });
   });
 });

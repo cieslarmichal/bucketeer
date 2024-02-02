@@ -16,5 +16,3 @@ services:
       DATA_DIR: /tmp/localstack/data
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
-      - ./scripts/localstack-setup.sh:/etc/localstack/init/ready.d/localstack-setup.sh
-      - ./resources:/usr/share/app/resources
