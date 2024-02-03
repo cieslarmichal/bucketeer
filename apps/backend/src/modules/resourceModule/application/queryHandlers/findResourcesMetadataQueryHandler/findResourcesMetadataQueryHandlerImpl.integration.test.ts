@@ -103,19 +103,9 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
       },
     });
 
-    await s3TestUtils.uploadObject(
-      bucketName,
-      sampleFileName1,
-      path.join(resourcesDirectory, sampleFileName1),
-      'video/mp4',
-    );
+    await s3TestUtils.uploadObject(bucketName, sampleFileName1, path.join(resourcesDirectory, sampleFileName1));
 
-    await s3TestUtils.uploadObject(
-      bucketName,
-      sampleFileName2,
-      path.join(resourcesDirectory, sampleFileName2),
-      'image/jpeg',
-    );
+    await s3TestUtils.uploadObject(bucketName, sampleFileName2, path.join(resourcesDirectory, sampleFileName2));
 
     const { resourcesMetadata, totalPages } = await queryHandler.execute({
       userId: user.id,
@@ -133,16 +123,14 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
 
     expect(resourcesMetadata[file1Index]).toEqual({
       name: sampleFileName1,
-      updatedAt: expect.any(String),
+      updatedAt: expect.any(Date),
       contentSize: 17839845,
-      contentType: 'video/mp4',
     });
 
     expect(resourcesMetadata[file2Index]).toEqual({
       name: sampleFileName2,
-      updatedAt: expect.any(String),
+      updatedAt: expect.any(Date),
       contentSize: 7735619,
-      contentType: 'image/jpeg',
     });
   });
 });

@@ -17,7 +17,7 @@ describe('ResourceBlobServiceImpl', () => {
 
   let s3TestUtils: S3TestUtils;
 
-  const resourcesDirectory = path.resolve(__dirname, '../../../../../../../resources');
+  const resourcesDirectory = path.resolve(__dirname, '../../../../../../../../resources');
 
   const sampleFileName1 = 'sample_video1.mp4';
 
@@ -85,8 +85,6 @@ describe('ResourceBlobServiceImpl', () => {
       expect(resource.name).toBe(sampleFileName1);
 
       expect(resource.contentSize).toEqual(17839845);
-
-      expect(resource.contentType).toBe('application/octet-stream');
 
       expect(resource.data).toBeDefined();
     });

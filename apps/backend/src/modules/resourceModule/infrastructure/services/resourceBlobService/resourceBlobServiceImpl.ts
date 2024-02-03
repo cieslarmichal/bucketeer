@@ -9,6 +9,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { type Readable } from 'node:stream';
 
+import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type S3Client } from '../../../../../libs/s3/clients/s3Client/s3Client.js';
 import { type Resource } from '../../../domain/entities/resource/resource.js';
 import { type ResourceMetadata } from '../../../domain/entities/resource/resourceMetadata.js';
@@ -50,7 +51,7 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
 
     return {
       name: resourceName,
-      updatedAt: result.Metadata?.['LastModified'] as string,
+      updatedAt: result.LastModified as Date,
       contentSize: result.ContentLength as number,
       contentType: result.ContentType as string,
       data: result.Body as Readable,
@@ -89,7 +90,7 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
 
               return {
                 name: Key as string,
-                updatedAt: String(LastModified),
+                updatedAt: LastModified as Date,
                 contentSize: Size as number,
               };
             })
@@ -124,13 +125,30 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
   public async resourceExists(payload: ResourceExistsPayload): Promise<boolean> {
     const { resourceName, bucketName } = payload;
 
-    const resourcesNames = await this.getResourcesNames({ bucketName });
+    try {
+      const resourcesNames = await this.getResourcesNames({ bucketName });
 
-    return resourcesNames.includes(resourceName);
+      return resourcesNames.includes(resourceName);
+    } catch (error) {
+      return false;
+    }
   }
 
   public async deleteResource(payload: DeleteResourcePayload): Promise<void> {
     const { resourceName, bucketName } = payload;
+
+    const exists = await this.resourceExists({
+      resourceName,
+      bucketName,
+    });
+
+    if (!exists) {
+      throw new OperationNotValidError({
+        reason: 'Resource does not exist in bucket.',
+        resourceName,
+        bucketName,
+      });
+    }
 
     const command = new DeleteObjectCommand({
       Bucket: bucketName,
