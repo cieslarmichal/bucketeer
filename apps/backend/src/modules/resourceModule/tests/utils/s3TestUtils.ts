@@ -5,6 +5,7 @@ import {
   DeleteBucketCommand,
   DeleteObjectCommand,
   ListObjectsV2Command,
+  type ListObjectsV2CommandInput,
   PutObjectCommand,
 } from '@aws-sdk/client-s3';
 import { existsSync, readFileSync } from 'node:fs';
@@ -22,7 +23,40 @@ export class S3TestUtils {
     await this.s3Client.send(command);
   }
 
+  public async truncateBucket(bucketName: string): Promise<void> {
+    let continuationToken: string | undefined = undefined;
+
+    do {
+      const commandInput: ListObjectsV2CommandInput = {
+        Bucket: bucketName,
+      };
+
+      if (continuationToken) {
+        commandInput.ContinuationToken = continuationToken;
+      }
+
+      const command = new ListObjectsV2Command(commandInput);
+
+      const listResult = await this.s3Client.send(command);
+
+      if (listResult.Contents) {
+        for (const item of listResult.Contents) {
+          const deleteCommand = new DeleteObjectCommand({
+            Bucket: bucketName,
+            Key: item.Key as string,
+          });
+
+          await this.s3Client.send(deleteCommand);
+        }
+      }
+
+      continuationToken = listResult.NextContinuationToken;
+    } while (continuationToken);
+  }
+
   public async deleteBucket(bucketName: string): Promise<void> {
+    await this.truncateBucket(bucketName);
+
     const command = new DeleteBucketCommand({
       Bucket: bucketName,
     });
@@ -44,12 +78,7 @@ export class S3TestUtils {
     return result.Contents.some((metadata) => metadata.Key === objectKey);
   }
 
-  public async uploadObject(
-    bucketName: string,
-    objectKey: string,
-    filePath: string,
-    contentType?: string,
-  ): Promise<void> {
+  public async uploadObject(bucketName: string, objectKey: string, filePath: string): Promise<void> {
     if (await this.objectExists(bucketName, objectKey)) {
       return;
     }
@@ -61,7 +90,7 @@ export class S3TestUtils {
         Bucket: bucketName,
         Key: objectKey,
         Body: objectData,
-        ContentType: contentType ?? 'application/octet-stream',
+        ContentType: 'application/octet-stream',
       });
 
       await this.s3Client.send(command);

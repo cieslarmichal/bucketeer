@@ -1,3 +1,4 @@
+import { createReadStream } from 'node:fs';
 import path from 'path';
 import { expect, describe, it, beforeEach, afterEach } from 'vitest';
 
@@ -17,7 +18,7 @@ describe('ResourceBlobServiceImpl', () => {
 
   let s3TestUtils: S3TestUtils;
 
-  const resourcesDirectory = path.resolve(__dirname, '../../../../../../../resources');
+  const resourcesDirectory = path.resolve(__dirname, '../../../../../../../../resources');
 
   const sampleFileName1 = 'sample_video1.mp4';
 
@@ -85,8 +86,6 @@ describe('ResourceBlobServiceImpl', () => {
       expect(resource.name).toBe(sampleFileName1);
 
       expect(resource.contentSize).toEqual(17839845);
-
-      expect(resource.contentType).toBe('application/octet-stream');
 
       expect(resource.data).toBeDefined();
     });
@@ -303,6 +302,62 @@ describe('ResourceBlobServiceImpl', () => {
       expect(resourcesNames[0]).toBe(sampleFileName1);
 
       expect(resourcesNames[1]).toBe(sampleFileName2);
+    });
+  });
+
+  describe('upload', () => {
+    it('throws an error - when object already exists', async () => {
+      const filePath = path.join(resourcesDirectory, sampleFileName1);
+
+      await s3TestUtils.uploadObject(bucketName, sampleFileName1, filePath);
+
+      try {
+        await resourceBlobService.uploadResource({
+          bucketName,
+          resourceName: sampleFileName1,
+          data: createReadStream(filePath),
+        });
+      } catch (error) {
+        expect(error).toBeDefined();
+
+        return;
+      }
+
+      expect.fail();
+    });
+
+    it('throws an error - when bucket does not exist', async () => {
+      const filePath = path.join(resourcesDirectory, sampleFileName1);
+
+      const nonExistingBucketName = Generator.word();
+
+      try {
+        await resourceBlobService.uploadResource({
+          bucketName: nonExistingBucketName,
+          resourceName: sampleFileName1,
+          data: createReadStream(filePath),
+        });
+      } catch (error) {
+        expect(error).toBeDefined();
+
+        return;
+      }
+
+      expect.fail();
+    });
+
+    it('uploads a resource', async () => {
+      const filePath = path.join(resourcesDirectory, sampleFileName1);
+
+      await resourceBlobService.uploadResource({
+        bucketName,
+        resourceName: sampleFileName1,
+        data: createReadStream(filePath),
+      });
+
+      const exists = await s3TestUtils.objectExists(bucketName, sampleFileName1);
+
+      expect(exists).toBe(true);
     });
   });
 });

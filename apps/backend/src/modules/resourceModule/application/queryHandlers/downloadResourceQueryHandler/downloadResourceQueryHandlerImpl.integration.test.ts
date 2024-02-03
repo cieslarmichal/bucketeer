@@ -123,12 +123,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
       },
     });
 
-    await s3TestUtils.uploadObject(
-      bucketName,
-      sampleFileName1,
-      path.join(resourcesDirectory, sampleFileName1),
-      'video/mp4',
-    );
+    await s3TestUtils.uploadObject(bucketName, sampleFileName1, path.join(resourcesDirectory, sampleFileName1));
 
     const { resource } = await queryHandler.execute({
       userId: user.id,
@@ -139,9 +134,9 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
 
     expect(resource).toEqual({
       name: sampleFileName1,
-      updatedAt: expect.any(String),
+      updatedAt: expect.any(Date),
       contentSize: 17839845,
-      contentType: 'video/mp4',
+      contentType: 'application/octet-stream',
       data: expect.any(Object),
     });
   });
