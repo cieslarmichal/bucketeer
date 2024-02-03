@@ -6,7 +6,7 @@ export interface FindResourcesQueryParams {
 export interface FindResourcesResponseBody {
   readonly data: {
     readonly name: string;
-    readonly updatedAt: string;
+    readonly updatedAt: Date;
     readonly contentSize: number;
   }[];
   readonly metadata: {

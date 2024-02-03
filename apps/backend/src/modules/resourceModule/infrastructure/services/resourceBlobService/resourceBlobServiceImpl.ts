@@ -30,6 +30,19 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
   public async uploadResource(payload: UploadResourcePayload): Promise<void> {
     const { bucketName, resourceName, data } = payload;
 
+    const exists = await this.resourceExists({
+      resourceName,
+      bucketName,
+    });
+
+    if (exists) {
+      throw new OperationNotValidError({
+        reason: 'Resource already exists in bucket.',
+        resourceName,
+        bucketName,
+      });
+    }
+
     const command = new PutObjectCommand({
       Bucket: bucketName,
       Key: resourceName,
