@@ -1,26 +1,18 @@
 import {
-  type FindUserBucketQueryHandler,
-  type FindUserBucketQueryHandlerPayload,
-  type FindUserBucketQueryHandlerResult,
-} from './findUserBucketQueryHandler.js';
-import { ResourceNotFoundError } from '../../../../../common/errors/common/resourceNotFoundError.js';
+  type FindUserBucketsQueryHandler,
+  type FindUserBucketsQueryHandlerPayload,
+  type FindUserBucketsQueryHandlerResult,
+} from './findUserDirectoryQueryHandler.js';
 import { type UserRepository } from '../../../domain/repositories/userRepository/userRepository.js';
 
-export class FindUserBucketQueryHandlerImpl implements FindUserBucketQueryHandler {
+export class FindUserBucketQueryHandlerImpl implements FindUserBucketsQueryHandler {
   public constructor(private readonly userRepository: UserRepository) {}
 
-  public async execute(payload: FindUserBucketQueryHandlerPayload): Promise<FindUserBucketQueryHandlerResult> {
+  public async execute(payload: FindUserBucketsQueryHandlerPayload): Promise<FindUserBucketsQueryHandlerResult> {
     const { userId } = payload;
 
-    const directoryName = await this.userRepository.findUserBuckets({ userId });
+    const buckets = await this.userRepository.findUserBuckets({ userId });
 
-    if (!directoryName) {
-      throw new ResourceNotFoundError({
-        name: 'UserBucket',
-        userId,
-      });
-    }
-
-    return { directoryName };
+    return { buckets };
   }
 }

@@ -1,14 +1,14 @@
 import { type QueryHandler } from '../../../../../common/types/queryHandler.js';
 
-export interface FindUserBucketQueryHandlerPayload {
+export interface FindUserBucketsQueryHandlerPayload {
   readonly userId: string;
 }
 
-export interface FindUserBucketQueryHandlerResult {
-  readonly directoryName: string;
+export interface FindUserBucketsQueryHandlerResult {
+  readonly buckets: string[];
 }
 
-export type FindUserBucketQueryHandler = QueryHandler<
-  FindUserBucketQueryHandlerPayload,
-  FindUserBucketQueryHandlerResult
+export type FindUserBucketsQueryHandler = QueryHandler<
+  FindUserBucketsQueryHandlerPayload,
+  FindUserBucketsQueryHandlerResult
 >;

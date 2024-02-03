@@ -7,7 +7,7 @@ export const symbols = {
 
   createUserCommandHandler: Symbol('createUserCommandHandler'),
   findUserQueryHandler: Symbol('findUserQueryHandler'),
-  findUserBucketQueryHandler: Symbol('findUserBucketQueryHandler'),
+  findUserBucketsQueryHandler: Symbol('findUserBucketsQueryHandler'),
   loginUserCommandHandler: Symbol('loginUserCommandHandler'),
   refreshUserTokensCommandHandler: Symbol('refreshUserTokensCommandHandler'),
   logoutUserCommandHandler: Symbol('logoutUserCommandHandler'),
@@ -24,5 +24,5 @@ export const userSymbols = {
   userHttpController: symbols.userHttpController,
   adminUserHttpController: symbols.adminUserHttpController,
   hashService: symbols.hashService,
-  findUserBucketQueryHandler: symbols.findUserBucketQueryHandler,
+  findUserBucketQueryHandler: symbols.findUserBucketsQueryHandler,
 };

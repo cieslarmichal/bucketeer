@@ -7,7 +7,7 @@ import { UserBucketTable } from '../../../infrastructure/databases/userDatabase/
 import { type UserRawEntity } from '../../../infrastructure/databases/userDatabase/tables/userTable/userRawEntity.js';
 import { UserTable } from '../../../infrastructure/databases/userDatabase/tables/userTable/userTable.js';
 import { RefreshTokenTestFactory } from '../../factories/refreshTokenTestFactory/refreshTokenTestFactory.js';
-import { UserBucketTestFactory } from '../../factories/userBucketTestFactory/userTestFactory.js';
+import { UserBucketTestFactory } from '../../factories/userDirectoryTestFactory/userTestFactory.js';
 import { UserEntityTestFactory } from '../../factories/userEntityTestFactory/userEntityTestFactory.js';
 
 interface CreateAndPersistPayload {
@@ -83,7 +83,7 @@ export class UserTestUtils {
       {
         id: userBucket.getId(),
         userId: userBucket.getUserId(),
-        directoryName: userBucket.getDirectoryName(),
+        bucketName: userBucket.getBucketName(),
       },
       '*',
     );
