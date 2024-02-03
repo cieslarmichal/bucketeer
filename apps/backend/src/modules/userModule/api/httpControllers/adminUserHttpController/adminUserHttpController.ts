@@ -18,6 +18,21 @@ import {
   type FindUserPathParamsDTO,
   type FindUserResponseBodyDTO,
 } from './schemas/findUserSchema.js';
+import {
+  type GrantBucketAccessResponseBodyDTO,
+  type GrantBucketAccessBodyDTO,
+  type GrantBucketAccessPathParamsDTO,
+  grantBucketAccessResponseBodyDTOSchema,
+  grantBucketAccessBodyDTOSchema,
+  grantBucketAccessPathParamsDTOSchema,
+} from './schemas/grantBucketAccessSchema.js';
+import {
+  revokeBucketAccessResponseBodyDTOSchema,
+  type RevokeBucketAccessBodyDTO,
+  type RevokeBucketAccessPathParamsDTO,
+  type RevokeBucketAccessResponseBodyDTO,
+  revokeBucketAccessPathParamsDTOSchema,
+} from './schemas/revokeBucketAccessSchema.js';
 import { type HttpController } from '../../../../../common/types/http/httpController.js';
 import { HttpMethodName } from '../../../../../common/types/http/httpMethodName.js';
 import { type HttpRequest } from '../../../../../common/types/http/httpRequest.js';
@@ -65,6 +80,46 @@ export class AdminUserHttpController implements HttpController {
         securityMode: SecurityMode.bearer,
         tags: ['User'],
         description: 'Create user.',
+      }),
+      new HttpRoute({
+        method: HttpMethodName.post,
+        path: ':id/grant-bucket-access',
+        handler: this.grantBucketAccess.bind(this),
+        schema: {
+          request: {
+            body: grantBucketAccessBodyDTOSchema,
+            pathParams: grantBucketAccessPathParamsDTOSchema,
+          },
+          response: {
+            [HttpStatusCode.noContent]: {
+              schema: grantBucketAccessResponseBodyDTOSchema,
+              description: 'Bucket access granted.',
+            },
+          },
+        },
+        securityMode: SecurityMode.bearer,
+        tags: ['User', 'Bucket'],
+        description: 'Grant bucket access.',
+      }),
+      new HttpRoute({
+        method: HttpMethodName.post,
+        path: ':id/revoke-bucket-access',
+        handler: this.revokeBucketAccess.bind(this),
+        schema: {
+          request: {
+            body: grantBucketAccessBodyDTOSchema,
+            pathParams: revokeBucketAccessPathParamsDTOSchema,
+          },
+          response: {
+            [HttpStatusCode.noContent]: {
+              schema: revokeBucketAccessResponseBodyDTOSchema,
+              description: 'Bucket access revoked.',
+            },
+          },
+        },
+        securityMode: SecurityMode.bearer,
+        tags: ['User', 'Bucket'],
+        description: 'Revoke bucket access.',
       }),
       new HttpRoute({
         method: HttpMethodName.get,
@@ -125,6 +180,52 @@ export class AdminUserHttpController implements HttpController {
     return {
       statusCode: HttpStatusCode.created,
       body: this.mapUserToUserDTO(user),
+    };
+  }
+
+  private async grantBucketAccess(
+    request: HttpRequest<GrantBucketAccessBodyDTO, undefined, GrantBucketAccessPathParamsDTO>,
+  ): Promise<HttpNoContentResponse<GrantBucketAccessResponseBodyDTO>> {
+    const { bucketName } = request.body;
+
+    const { id } = request.pathParams;
+
+    await this.accessControlService.verifyBearerToken({
+      authorizationHeader: request.headers['authorization'],
+      expectedRole: UserRole.admin,
+    });
+
+    await this.createUserCommandHandler.execute({
+      email,
+      password,
+    });
+
+    return {
+      statusCode: HttpStatusCode.noContent,
+      body: null,
+    };
+  }
+
+  private async revokeBucketAccess(
+    request: HttpRequest<RevokeBucketAccessBodyDTO, undefined, RevokeBucketAccessPathParamsDTO>,
+  ): Promise<HttpNoContentResponse<RevokeBucketAccessResponseBodyDTO>> {
+    const { bucketName } = request.body;
+
+    const { id } = request.pathParams;
+
+    await this.accessControlService.verifyBearerToken({
+      authorizationHeader: request.headers['authorization'],
+      expectedRole: UserRole.admin,
+    });
+
+    await this.createUserCommandHandler.execute({
+      email,
+      password,
+    });
+
+    return {
+      statusCode: HttpStatusCode.noContent,
+      body: null,
     };
   }
 
