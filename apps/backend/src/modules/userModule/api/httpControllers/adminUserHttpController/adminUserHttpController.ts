@@ -37,7 +37,7 @@ import { type User } from '../../../domain/entities/user/user.js';
 import { type UserDTO } from '../common/userDTO.js';
 
 export class AdminUserHttpController implements HttpController {
-  public readonly basePath = 'api/admin/users';
+  public readonly basePath = 'admin/api/users';
 
   public constructor(
     private readonly createUserCommandHandler: CreateUserCommandHandler,
