@@ -11,7 +11,6 @@ export const createUserBodyDTOSchema = Type.Object({
     minLength: 1,
   }),
   password: Type.String({ minLength: 1 }),
-  directoryName: Type.String({ minLength: 1 }),
 });
 
 export type CreateUserBodyDTO = TypeExtends<Static<typeof createUserBodyDTOSchema>, contracts.CreateUserBody>;

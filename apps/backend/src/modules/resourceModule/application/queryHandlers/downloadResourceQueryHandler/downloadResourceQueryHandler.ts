@@ -4,6 +4,7 @@ import { type Resource } from '../../../domain/entities/resource/resource.js';
 export interface DownloadResourceQueryHandlerPayload {
   readonly userId: string;
   readonly resourceName: string;
+  readonly bucketName: string;
 }
 
 export interface DownloadResourceQueryHandlerResult {

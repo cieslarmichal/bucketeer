@@ -1,3 +1,4 @@
 export interface DownloadResourcePathParams {
-  readonly name: string;
+  readonly bucketName: string;
+  readonly resourceName: string;
 }

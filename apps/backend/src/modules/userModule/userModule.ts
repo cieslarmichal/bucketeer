@@ -10,8 +10,8 @@ import { type LogoutUserCommandHandler } from './application/commandHandlers/log
 import { LogoutUserCommandHandlerImpl } from './application/commandHandlers/logoutUserCommandHandler/logoutUserCommandHandlerImpl.js';
 import { type RefreshUserTokensCommandHandler } from './application/commandHandlers/refreshUserTokensCommandHandler/refreshUserTokensCommandHandler.js';
 import { RefreshUserTokensCommandHandlerImpl } from './application/commandHandlers/refreshUserTokensCommandHandler/refreshUserTokensCommandHandlerImpl.js';
-import { type FindUserBucketQueryHandler } from './application/queryHandlers/findUserBucketQueryHandler/findUserBucketQueryHandler.js';
-import { FindUserBucketQueryHandlerImpl } from './application/queryHandlers/findUserBucketQueryHandler/findUserBucketQueryHandlerImpl.js';
+import { type FindUserBucketsQueryHandler } from './application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
+import { FindUserBucketsQueryHandlerImpl } from './application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandlerImpl.js';
 import { type FindUserQueryHandler } from './application/queryHandlers/findUserQueryHandler/findUserQueryHandler.js';
 import { FindUserQueryHandlerImpl } from './application/queryHandlers/findUserQueryHandler/findUserQueryHandlerImpl.js';
 import { type HashService } from './application/services/hashService/hashService.js';
@@ -23,6 +23,8 @@ import { type UserRepository } from './domain/repositories/userRepository/userRe
 import { type BlacklistTokenMapper } from './infrastructure/repositories/blacklistTokenRepository/blacklistTokenMapper/blacklistTokenMapper.js';
 import { BlacklistTokenMapperImpl } from './infrastructure/repositories/blacklistTokenRepository/blacklistTokenMapper/blacklistTokenMapperImpl.js';
 import { BlacklistTokenRepositoryImpl } from './infrastructure/repositories/blacklistTokenRepository/blacklistTokenRepositoryImpl.js';
+import { type UserBucketMapper } from './infrastructure/repositories/userRepository/userBucketMapper/userBucketMapper.js';
+import { UserBucketMapperImpl } from './infrastructure/repositories/userRepository/userBucketMapper/userBucketMapperImpl.js';
 import { type UserMapper } from './infrastructure/repositories/userRepository/userMapper/userMapper.js';
 import { UserMapperImpl } from './infrastructure/repositories/userRepository/userMapper/userMapperImpl.js';
 import { UserRepositoryImpl } from './infrastructure/repositories/userRepository/userRepositoryImpl.js';
@@ -47,12 +49,15 @@ export class UserModule implements DependencyInjectionModule {
 
     container.bind<UserMapper>(symbols.userMapper, () => new UserMapperImpl());
 
+    container.bind<UserBucketMapper>(symbols.userBucketMapper, () => new UserBucketMapperImpl());
+
     container.bind<UserRepository>(
       symbols.userRepository,
       () =>
         new UserRepositoryImpl(
           container.get<SqliteDatabaseClient>(coreSymbols.sqliteDatabaseClient),
           container.get<UserMapper>(symbols.userMapper),
+          container.get<UserBucketMapper>(symbols.userBucketMapper),
           container.get<UuidService>(coreSymbols.uuidService),
           container.get<LoggerService>(coreSymbols.loggerService),
         ),
@@ -141,9 +146,9 @@ export class UserModule implements DependencyInjectionModule {
       () => new FindUserQueryHandlerImpl(container.get<UserRepository>(symbols.userRepository)),
     );
 
-    container.bind<FindUserBucketQueryHandler>(
-      symbols.findUserBucketQueryHandler,
-      () => new FindUserBucketQueryHandlerImpl(container.get<UserRepository>(symbols.userRepository)),
+    container.bind<FindUserBucketsQueryHandler>(
+      symbols.findUserBucketsQueryHandler,
+      () => new FindUserBucketsQueryHandlerImpl(container.get<UserRepository>(symbols.userRepository)),
     );
 
     container.bind<UserHttpController>(

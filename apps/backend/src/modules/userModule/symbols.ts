@@ -1,6 +1,7 @@
 export const symbols = {
   userModuleConfigProvider: Symbol('userModuleConfigProvider'),
   userMapper: Symbol('userMapper'),
+  userBucketMapper: Symbol('userBucketMapper'),
   userRepository: Symbol('userRepository'),
   blacklistTokenMapper: Symbol('blacklistTokenMapper'),
   blacklistTokenRepository: Symbol('blacklistTokenRepository'),

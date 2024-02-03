@@ -58,27 +58,6 @@ describe('UserRepositoryImpl', () => {
       expect(foundUser.email).toEqual(email);
     });
 
-    it('creates a User with directory', async () => {
-      const createdUser = userTestFactory.create();
-
-      const { email, password, role } = createdUser.getState();
-
-      const directoryName = Generator.word();
-
-      const user = await userRepository.createUser({
-        email,
-        password,
-        role,
-        directoryName,
-      });
-
-      const foundUser = await userTestUtils.findByEmail({ email });
-
-      expect(user.getEmail()).toEqual(email);
-
-      expect(foundUser.email).toEqual(email);
-    });
-
     it('throws an error when a User with the same email already exists', async () => {
       const existingUser = await userTestUtils.createAndPersist();
 
@@ -160,25 +139,44 @@ describe('UserRepositoryImpl', () => {
       expect(updatedUserTokens.refreshTokens.includes(refreshToken2)).toBe(true);
     });
 
-    it(`updates User's directory`, async () => {
+    it(`add User's bucket`, async () => {
       const user = await userTestUtils.createAndPersist();
-
-      await userTestUtils.createAndPersistUserBucket({ input: { userId: user.id } });
 
       const createdUser = userTestFactory.create();
 
-      const updatedDirectoryName = Generator.word();
+      const bucketName = Generator.word();
 
-      createdUser.addUpdateDirectoryAction({ directoryName: updatedDirectoryName });
+      createdUser.addGrantBucketAccessAction({ bucketName });
 
       await userRepository.updateUser({
         id: user.id,
         domainActions: createdUser.getDomainActions(),
       });
 
-      const updatedUserBucket = await userTestUtils.findDirectoryByUserId({ userId: user.id });
+      const buckets = await userTestUtils.findBucketsByUserId({ userId: user.id });
 
-      expect(updatedUserBucket.directoryName).toEqual(updatedDirectoryName);
+      expect(buckets.length).toEqual(1);
+
+      expect(buckets[0]?.bucketName).toEqual(bucketName);
+    });
+
+    it(`removes User's bucket`, async () => {
+      const user = await userTestUtils.createAndPersist();
+
+      const { bucketName } = await userTestUtils.createAndPersistUserBucket({ input: { userId: user.id } });
+
+      const createdUser = userTestFactory.create();
+
+      createdUser.addRevokeBucketAccessAction({ bucketName });
+
+      await userRepository.updateUser({
+        id: user.id,
+        domainActions: createdUser.getDomainActions(),
+      });
+
+      const buckets = await userTestUtils.findBucketsByUserId({ userId: user.id });
+
+      expect(buckets.length).toEqual(0);
     });
 
     it('throws an error if a User with given id does not exist', async () => {
@@ -271,22 +269,35 @@ describe('UserRepositoryImpl', () => {
     });
   });
 
-  describe('Find directory', () => {
-    it('finds User directory by userId', async () => {
+  describe('Find buckets', () => {
+    it('finds User buckets', async () => {
       const user = await userTestUtils.createAndPersist();
 
-      const directoryName = Generator.word();
+      const bucketName1 = Generator.word();
+
+      const bucketName2 = Generator.word();
 
       await userTestUtils.createAndPersistUserBucket({
         input: {
           userId: user.id,
-          directoryName,
+          bucketName: bucketName1,
         },
       });
 
-      const foundDirectoryName = await userRepository.findUserBuckets({ userId: user.id });
+      await userTestUtils.createAndPersistUserBucket({
+        input: {
+          userId: user.id,
+          bucketName: bucketName2,
+        },
+      });
 
-      expect(foundDirectoryName).toEqual(directoryName);
+      const buckets = await userRepository.findUserBuckets({ userId: user.id });
+
+      expect(buckets.length).toEqual(2);
+
+      expect(buckets.find((bucket) => bucket.getBucketName() === bucketName1)).not.toBeNull();
+
+      expect(buckets.find((bucket) => bucket.getBucketName() === bucketName2)).not.toBeNull();
     });
 
     it('returns null if a User with given id does not exist', async () => {

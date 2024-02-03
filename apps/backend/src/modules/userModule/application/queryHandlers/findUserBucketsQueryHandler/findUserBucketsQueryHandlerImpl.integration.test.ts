@@ -2,7 +2,7 @@ import { beforeEach, afterEach, expect, it, describe } from 'vitest';
 
 import { Generator } from '@common/tests';
 
-import { type FindUserBucketsQueryHandler } from './findUserDirectoryQueryHandler.js';
+import { type FindUserBucketsQueryHandler } from './findUserBucketsQueryHandler.js';
 import { Application } from '../../../../../core/application.js';
 import { type SqliteDatabaseClient } from '../../../../../core/database/sqliteDatabaseClient/sqliteDatabaseClient.js';
 import { coreSymbols } from '../../../../../core/symbols.js';

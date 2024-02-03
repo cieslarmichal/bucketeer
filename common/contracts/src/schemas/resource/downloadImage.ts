@@ -1,5 +1,6 @@
 export interface DownloadImagePathParams {
-  readonly name: string;
+  readonly bucketName: string;
+  readonly resourceName: string;
   readonly width: number;
   readonly height: number;
 }

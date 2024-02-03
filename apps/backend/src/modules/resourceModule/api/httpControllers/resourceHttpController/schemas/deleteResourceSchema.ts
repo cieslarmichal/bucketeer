@@ -5,7 +5,8 @@ import type * as contracts from '@common/contracts';
 import { type TypeExtends } from '../../../../../../common/types/schemaExtends.js';
 
 export const deleteResourcePathParamsDTOSchema = Type.Object({
-  name: Type.String({ minLength: 1 }),
+  bucketName: Type.String({ minLength: 1 }),
+  resourceName: Type.String({ minLength: 1 }),
 });
 
 export type DeleteResourcePathParamsDTO = TypeExtends<

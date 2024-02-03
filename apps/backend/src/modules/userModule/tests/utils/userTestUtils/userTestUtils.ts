@@ -7,7 +7,7 @@ import { UserBucketTable } from '../../../infrastructure/databases/userDatabase/
 import { type UserRawEntity } from '../../../infrastructure/databases/userDatabase/tables/userTable/userRawEntity.js';
 import { UserTable } from '../../../infrastructure/databases/userDatabase/tables/userTable/userTable.js';
 import { RefreshTokenTestFactory } from '../../factories/refreshTokenTestFactory/refreshTokenTestFactory.js';
-import { UserBucketTestFactory } from '../../factories/userDirectoryTestFactory/userTestFactory.js';
+import { UserBucketTestFactory } from '../../factories/userBucketTestFactory/userBucketTestFactory.js';
 import { UserEntityTestFactory } from '../../factories/userEntityTestFactory/userEntityTestFactory.js';
 
 interface CreateAndPersistPayload {
@@ -38,7 +38,7 @@ interface FindTokensByUserIdPayload {
   userId: string;
 }
 
-interface FindDirectoryByUserIdPayload {
+interface FindBucketsByUserIdPayload {
   userId: string;
 }
 
@@ -125,15 +125,14 @@ export class UserTestUtils {
     };
   }
 
-  public async findDirectoryByUserId(payload: FindDirectoryByUserIdPayload): Promise<UserBucketRawEntity> {
+  public async findBucketsByUserId(payload: FindBucketsByUserIdPayload): Promise<UserBucketRawEntity[]> {
     const { userId } = payload;
 
-    const userBucket = await this.sqliteDatabaseClient<UserBucketRawEntity>(this.userBucketTable.name)
+    const userBuckets = await this.sqliteDatabaseClient<UserBucketRawEntity>(this.userBucketTable.name)
       .select('*')
-      .where({ userId })
-      .first();
+      .where({ userId });
 
-    return userBucket as UserBucketRawEntity;
+    return userBuckets;
   }
 
   public async persist(payload: PersistPayload): Promise<void> {

@@ -1,3 +1,4 @@
+import { type UserBucketMapper } from './userBucketMapper/userBucketMapper.js';
 import { type UserMapper } from './userMapper/userMapper.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { RepositoryError } from '../../../../../common/errors/common/repositoryError.js';
@@ -8,6 +9,7 @@ import { type UuidService } from '../../../../../libs/uuid/services/uuidService/
 import { type UserDomainAction } from '../../../domain/entities/user/domainActions/userDomainAction.js';
 import { UserDomainActionType } from '../../../domain/entities/user/domainActions/userDomainActionType.js';
 import { type User } from '../../../domain/entities/user/user.js';
+import { type UserBucket } from '../../../domain/entities/userBucket/userBucket.js';
 import { type UserTokens } from '../../../domain/entities/userTokens/userTokens.js';
 import {
   type UserRepository,
@@ -48,6 +50,7 @@ export class UserRepositoryImpl implements UserRepository {
   public constructor(
     private readonly sqliteDatabaseClient: SqliteDatabaseClient,
     private readonly userMapper: UserMapper,
+    private readonly userBucketMapper: UserBucketMapper,
     private readonly uuidService: UuidService,
     private readonly loggerService: LoggerService,
   ) {}
@@ -139,7 +142,7 @@ export class UserRepositoryImpl implements UserRepository {
     return this.userMapper.mapToDomain(rawEntity);
   }
 
-  public async findUserBuckets(payload: FindUserBucketsPayload): Promise<string[]> {
+  public async findUserBuckets(payload: FindUserBucketsPayload): Promise<UserBucket[]> {
     const { userId } = payload;
 
     let rawEntities: UserBucketRawEntity[];
@@ -160,7 +163,7 @@ export class UserRepositoryImpl implements UserRepository {
       });
     }
 
-    return rawEntities.map((rawEntity) => rawEntity.bucketName);
+    return rawEntities.map((rawEntity) => this.userBucketMapper.mapToDomain(rawEntity));
   }
 
   public async findUserTokens(payload: FindUserTokensPayload): Promise<UserTokens | null> {

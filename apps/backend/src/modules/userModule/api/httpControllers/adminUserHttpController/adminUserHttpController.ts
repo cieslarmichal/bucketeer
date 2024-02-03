@@ -110,7 +110,7 @@ export class AdminUserHttpController implements HttpController {
   private async createUser(
     request: HttpRequest<CreateUserBodyDTO>,
   ): Promise<HttpCreatedResponse<CreateUserResponseBodyDTO>> {
-    const { email, password, directoryName } = request.body;
+    const { email, password } = request.body;
 
     await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
@@ -120,7 +120,6 @@ export class AdminUserHttpController implements HttpController {
     const { user } = await this.createUserCommandHandler.execute({
       email,
       password,
-      directoryName,
     });
 
     return {

@@ -1,6 +1,6 @@
 import { Generator } from '@common/tests';
 
-import { type UserBucketDraft, UserBucket } from '../../../domain/entities/userDirectory/userDirectory.js';
+import { type UserBucketDraft, UserBucket } from '../../../domain/entities/userBucket/userBucket.js';
 
 export class UserBucketTestFactory {
   public create(input: Partial<UserBucketDraft> = {}): UserBucket {
