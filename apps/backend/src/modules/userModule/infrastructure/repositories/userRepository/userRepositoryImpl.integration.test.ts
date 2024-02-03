@@ -273,9 +273,9 @@ describe('UserRepositoryImpl', () => {
     it('finds User buckets', async () => {
       const user = await userTestUtils.createAndPersist();
 
-      const bucketName1 = Generator.word();
+      const bucketName1 = 'bucket1';
 
-      const bucketName2 = Generator.word();
+      const bucketName2 = 'bucket2';
 
       await userTestUtils.createAndPersistUserBucket({
         input: {
@@ -300,12 +300,12 @@ describe('UserRepositoryImpl', () => {
       expect(buckets.find((bucket) => bucket.getBucketName() === bucketName2)).not.toBeNull();
     });
 
-    it('returns null if a User with given id does not exist', async () => {
+    it('returns empty array if a User with given id does not exist', async () => {
       const nonExistentUser = userTestFactory.create();
 
-      const foundDirectoryName = await userRepository.findUserBuckets({ userId: nonExistentUser.getId() });
+      const buckets = await userRepository.findUserBuckets({ userId: nonExistentUser.getId() });
 
-      expect(foundDirectoryName).toBeNull();
+      expect(buckets.length).toEqual(0);
     });
   });
 });

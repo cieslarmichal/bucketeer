@@ -25,5 +25,5 @@ export const userSymbols = {
   userHttpController: symbols.userHttpController,
   adminUserHttpController: symbols.adminUserHttpController,
   hashService: symbols.hashService,
-  findUserBucketQueryHandler: symbols.findUserBucketsQueryHandler,
+  findUserBucketsQueryHandler: symbols.findUserBucketsQueryHandler,
 };
