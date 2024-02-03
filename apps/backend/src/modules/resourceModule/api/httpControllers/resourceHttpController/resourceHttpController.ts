@@ -215,6 +215,7 @@ export class ResourceHttpController implements HttpController {
       userId,
       page,
       pageSize,
+      bucketName,
     });
 
     return {
@@ -246,6 +247,7 @@ export class ResourceHttpController implements HttpController {
     const { resourcesData } = await this.downloadResourcesQueryHandler.execute({
       userId,
       names,
+      bucketName,
     });
 
     return {
@@ -270,6 +272,7 @@ export class ResourceHttpController implements HttpController {
     const { resource } = await this.downloadResourceQueryHandler.execute({
       userId,
       resourceName,
+      bucketName,
     });
 
     return {
@@ -296,6 +299,7 @@ export class ResourceHttpController implements HttpController {
       resourceName,
       width,
       height,
+      bucketName,
     });
 
     return {
@@ -320,6 +324,7 @@ export class ResourceHttpController implements HttpController {
     await this.deleteResourceCommandHandler.execute({
       userId,
       resourceName,
+      bucketName,
     });
 
     return {

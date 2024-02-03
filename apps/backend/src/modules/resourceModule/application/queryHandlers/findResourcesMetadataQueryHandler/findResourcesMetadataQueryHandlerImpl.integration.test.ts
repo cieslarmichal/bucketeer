@@ -65,6 +65,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
         userId,
         page: 1,
         pageSize: 10,
+        bucketName,
       });
     } catch (error) {
       expect(error instanceof ResourceNotFoundError);
@@ -75,7 +76,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     expect.fail();
   });
 
-  it('throws an error - when user does not have any directory', async () => {
+  it('throws an error - when user does not have access to the bucket', async () => {
     const user = await userTestUtils.createAndPersist();
 
     try {
@@ -83,6 +84,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
         userId: user.id,
         page: 1,
         pageSize: 10,
+        bucketName,
       });
     } catch (error) {
       expect(error instanceof ResourceNotFoundError);
@@ -99,7 +101,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     await userTestUtils.createAndPersistUserBucket({
       input: {
         userId: user.id,
-        directoryName: bucketName,
+        bucketName,
       },
     });
 
@@ -111,6 +113,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
       userId: user.id,
       page: 1,
       pageSize: 10,
+      bucketName,
     });
 
     expect(totalPages).toEqual(1);
