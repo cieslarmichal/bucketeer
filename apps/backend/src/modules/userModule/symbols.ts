@@ -7,6 +7,8 @@ export const symbols = {
   blacklistTokenRepository: Symbol('blacklistTokenRepository'),
 
   createUserCommandHandler: Symbol('createUserCommandHandler'),
+  grantBucketAccessCommandHandler: Symbol('grantBucketAccessCommandHandler'),
+  revokeBucketAccessCommandHandler: Symbol('revokeBucketAccessCommandHandler'),
   findUserQueryHandler: Symbol('findUserQueryHandler'),
   findUserBucketsQueryHandler: Symbol('findUserBucketsQueryHandler'),
   loginUserCommandHandler: Symbol('loginUserCommandHandler'),

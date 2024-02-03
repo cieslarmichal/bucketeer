@@ -47,6 +47,8 @@ import { SecurityMode } from '../../../../../common/types/http/securityMode.js';
 import { type AccessControlService } from '../../../../authModule/application/services/accessControlService/accessControlService.js';
 import { type CreateUserCommandHandler } from '../../../application/commandHandlers/createUserCommandHandler/createUserCommandHandler.js';
 import { type DeleteUserCommandHandler } from '../../../application/commandHandlers/deleteUserCommandHandler/deleteUserCommandHandler.js';
+import { type GrantBucketAccessCommandHandler } from '../../../application/commandHandlers/grantBucketAccessCommandHandler/grantBucketAccessCommandHandler.js';
+import { type RevokeBucketAccessCommandHandler } from '../../../application/commandHandlers/revokeBucketAccessCommandHandler/revokeBucketAccessCommandHandler.js';
 import { type FindUserQueryHandler } from '../../../application/queryHandlers/findUserQueryHandler/findUserQueryHandler.js';
 import { type User } from '../../../domain/entities/user/user.js';
 import { type UserDTO } from '../common/userDTO.js';
@@ -58,6 +60,8 @@ export class AdminUserHttpController implements HttpController {
     private readonly createUserCommandHandler: CreateUserCommandHandler,
     private readonly deleteUserCommandHandler: DeleteUserCommandHandler,
     private readonly findUserQueryHandler: FindUserQueryHandler,
+    private readonly grantBucketAccessCommandHandler: GrantBucketAccessCommandHandler,
+    private readonly revokeBucketAccessCommandHandler: RevokeBucketAccessCommandHandler,
     private readonly accessControlService: AccessControlService,
   ) {}
 
@@ -195,9 +199,9 @@ export class AdminUserHttpController implements HttpController {
       expectedRole: UserRole.admin,
     });
 
-    await this.createUserCommandHandler.execute({
-      email,
-      password,
+    await this.grantBucketAccessCommandHandler.execute({
+      userId: id,
+      bucketName,
     });
 
     return {
@@ -218,9 +222,9 @@ export class AdminUserHttpController implements HttpController {
       expectedRole: UserRole.admin,
     });
 
-    await this.createUserCommandHandler.execute({
-      email,
-      password,
+    await this.revokeBucketAccessCommandHandler.execute({
+      userId: id,
+      bucketName,
     });
 
     return {
