@@ -1,3 +1,7 @@
+export interface FindResourcesPathParams {
+  readonly bucketName: string;
+}
+
 export interface FindResourcesQueryParams {
   readonly page?: number;
   readonly pageSize?: number;

@@ -14,6 +14,10 @@ export * from './schemas/user/userRole.js';
 
 export * from './schemas/user/refreshUserTokens.js';
 
+export * from './schemas/user/grantBucketAccess.js';
+
+export * from './schemas/user/revokeBucketAccess.js';
+
 export * from './schemas/resource/findResources.js';
 
 export * from './schemas/resource/deleteResource.js';
@@ -23,3 +27,5 @@ export * from './schemas/resource/downloadResource.js';
 export * from './schemas/resource/downloadImage.js';
 
 export * from './schemas/resource/exportResources.js';
+
+export * from './schemas/resource/findUserBuckets.js';

@@ -4,14 +4,18 @@ import { type CreateUserCommandHandler } from './application/commandHandlers/cre
 import { CrateUserCommandHandlerImpl } from './application/commandHandlers/createUserCommandHandler/createUserCommandHandlerImpl.js';
 import { type DeleteUserCommandHandler } from './application/commandHandlers/deleteUserCommandHandler/deleteUserCommandHandler.js';
 import { DeleteUserCommandHandlerImpl } from './application/commandHandlers/deleteUserCommandHandler/deleteUserCommandHandlerImpl.js';
+import { type GrantBucketAccessCommandHandler } from './application/commandHandlers/grantBucketAccessCommandHandler/grantBucketAccessCommandHandler.js';
+import { GrantBucketAccessCommandHandlerImpl } from './application/commandHandlers/grantBucketAccessCommandHandler/grantBucketAccessCommandHandlerImpl.js';
 import { type LoginUserCommandHandler } from './application/commandHandlers/loginUserCommandHandler/loginUserCommandHandler.js';
 import { LoginUserCommandHandlerImpl } from './application/commandHandlers/loginUserCommandHandler/loginUserCommandHandlerImpl.js';
 import { type LogoutUserCommandHandler } from './application/commandHandlers/logoutUserCommandHandler/logoutUserCommandHandler.js';
 import { LogoutUserCommandHandlerImpl } from './application/commandHandlers/logoutUserCommandHandler/logoutUserCommandHandlerImpl.js';
 import { type RefreshUserTokensCommandHandler } from './application/commandHandlers/refreshUserTokensCommandHandler/refreshUserTokensCommandHandler.js';
 import { RefreshUserTokensCommandHandlerImpl } from './application/commandHandlers/refreshUserTokensCommandHandler/refreshUserTokensCommandHandlerImpl.js';
-import { type FindUserDirectoryQueryHandler } from './application/queryHandlers/findUserDirectoryQueryHandler/findUserDirectoryQueryHandler.js';
-import { FindUserDirectoryQueryHandlerImpl } from './application/queryHandlers/findUserDirectoryQueryHandler/findUserDirectoryQueryHandlerImpl.js';
+import { type RevokeBucketAccessCommandHandler } from './application/commandHandlers/revokeBucketAccessCommandHandler/revokeBucketAccessCommandHandler.js';
+import { RevokeBucketAccessCommandHandlerImpl } from './application/commandHandlers/revokeBucketAccessCommandHandler/revokeBucketAccessCommandHandlerImpl.js';
+import { type FindUserBucketsQueryHandler } from './application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
+import { FindUserBucketsQueryHandlerImpl } from './application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandlerImpl.js';
 import { type FindUserQueryHandler } from './application/queryHandlers/findUserQueryHandler/findUserQueryHandler.js';
 import { FindUserQueryHandlerImpl } from './application/queryHandlers/findUserQueryHandler/findUserQueryHandlerImpl.js';
 import { type HashService } from './application/services/hashService/hashService.js';
@@ -23,6 +27,8 @@ import { type UserRepository } from './domain/repositories/userRepository/userRe
 import { type BlacklistTokenMapper } from './infrastructure/repositories/blacklistTokenRepository/blacklistTokenMapper/blacklistTokenMapper.js';
 import { BlacklistTokenMapperImpl } from './infrastructure/repositories/blacklistTokenRepository/blacklistTokenMapper/blacklistTokenMapperImpl.js';
 import { BlacklistTokenRepositoryImpl } from './infrastructure/repositories/blacklistTokenRepository/blacklistTokenRepositoryImpl.js';
+import { type UserBucketMapper } from './infrastructure/repositories/userRepository/userBucketMapper/userBucketMapper.js';
+import { UserBucketMapperImpl } from './infrastructure/repositories/userRepository/userBucketMapper/userBucketMapperImpl.js';
 import { type UserMapper } from './infrastructure/repositories/userRepository/userMapper/userMapper.js';
 import { UserMapperImpl } from './infrastructure/repositories/userRepository/userMapper/userMapperImpl.js';
 import { UserRepositoryImpl } from './infrastructure/repositories/userRepository/userRepositoryImpl.js';
@@ -47,12 +53,15 @@ export class UserModule implements DependencyInjectionModule {
 
     container.bind<UserMapper>(symbols.userMapper, () => new UserMapperImpl());
 
+    container.bind<UserBucketMapper>(symbols.userBucketMapper, () => new UserBucketMapperImpl());
+
     container.bind<UserRepository>(
       symbols.userRepository,
       () =>
         new UserRepositoryImpl(
           container.get<SqliteDatabaseClient>(coreSymbols.sqliteDatabaseClient),
           container.get<UserMapper>(symbols.userMapper),
+          container.get<UserBucketMapper>(symbols.userBucketMapper),
           container.get<UuidService>(coreSymbols.uuidService),
           container.get<LoggerService>(coreSymbols.loggerService),
         ),
@@ -89,6 +98,24 @@ export class UserModule implements DependencyInjectionModule {
           container.get<HashService>(symbols.hashService),
           container.get<LoggerService>(coreSymbols.loggerService),
           container.get<PasswordValidationService>(symbols.passwordValidationService),
+        ),
+    );
+
+    container.bind<GrantBucketAccessCommandHandler>(
+      symbols.grantBucketAccessCommandHandler,
+      () =>
+        new GrantBucketAccessCommandHandlerImpl(
+          container.get<UserRepository>(symbols.userRepository),
+          container.get<LoggerService>(coreSymbols.loggerService),
+        ),
+    );
+
+    container.bind<RevokeBucketAccessCommandHandler>(
+      symbols.revokeBucketAccessCommandHandler,
+      () =>
+        new RevokeBucketAccessCommandHandlerImpl(
+          container.get<UserRepository>(symbols.userRepository),
+          container.get<LoggerService>(coreSymbols.loggerService),
         ),
     );
 
@@ -141,9 +168,9 @@ export class UserModule implements DependencyInjectionModule {
       () => new FindUserQueryHandlerImpl(container.get<UserRepository>(symbols.userRepository)),
     );
 
-    container.bind<FindUserDirectoryQueryHandler>(
-      symbols.findUserDirectoryQueryHandler,
-      () => new FindUserDirectoryQueryHandlerImpl(container.get<UserRepository>(symbols.userRepository)),
+    container.bind<FindUserBucketsQueryHandler>(
+      symbols.findUserBucketsQueryHandler,
+      () => new FindUserBucketsQueryHandlerImpl(container.get<UserRepository>(symbols.userRepository)),
     );
 
     container.bind<UserHttpController>(
@@ -165,6 +192,8 @@ export class UserModule implements DependencyInjectionModule {
           container.get<CreateUserCommandHandler>(symbols.createUserCommandHandler),
           container.get<DeleteUserCommandHandler>(symbols.deleteUserCommandHandler),
           container.get<FindUserQueryHandler>(symbols.findUserQueryHandler),
+          container.get<GrantBucketAccessCommandHandler>(symbols.grantBucketAccessCommandHandler),
+          container.get<RevokeBucketAccessCommandHandler>(symbols.revokeBucketAccessCommandHandler),
           container.get<AccessControlService>(authSymbols.accessControlService),
         ),
     );

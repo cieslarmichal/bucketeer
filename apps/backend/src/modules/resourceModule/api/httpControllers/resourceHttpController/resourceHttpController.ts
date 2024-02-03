@@ -19,15 +19,19 @@ import {
   exportResourcesResponseBodyDTOSchema,
   exportResourcesBodyDTOSchema,
   type ExportResourcesBodyDTO,
+  exportResourcesPathParamsDTOSchema,
+  type ExportResourcesPathParamsDTO,
 } from './schemas/exportResourcesSchema.js';
+import { findBucketsResponseBodyDTOSchema, type FindBucketsResponseBodyDTO } from './schemas/findBucketsSchema.js';
 import {
   findResourcesQueryParamsDTOSchema,
   findResourcesResponseBodyDTOSchema,
   type FindResourcesQueryParamsDTO,
   type FindResourcesResponseBodyDTO,
+  findResourcesPathParamsDTOSchema,
+  type FindResourcesPathParamsDTO,
 } from './schemas/findResourcesSchema.js';
 import { type ResourceMetadataDTO } from './schemas/resourceMetadataDTO.js';
-import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type HttpController } from '../../../../../common/types/http/httpController.js';
 import { HttpMethodName } from '../../../../../common/types/http/httpMethodName.js';
 import { type HttpRequest } from '../../../../../common/types/http/httpRequest.js';
@@ -36,6 +40,7 @@ import { HttpRoute } from '../../../../../common/types/http/httpRoute.js';
 import { HttpStatusCode } from '../../../../../common/types/http/httpStatusCode.js';
 import { SecurityMode } from '../../../../../common/types/http/securityMode.js';
 import { type AccessControlService } from '../../../../authModule/application/services/accessControlService/accessControlService.js';
+import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
 import { type DeleteResourceCommandHandler } from '../../../application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandler.js';
 import { type DownloadImageQueryHandler } from '../../../application/queryHandlers/downloadImageQueryHandler/downloadImageQueryHandler.js';
 import { type DownloadResourceQueryHandler } from '../../../application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandler.js';
@@ -44,7 +49,7 @@ import { type FindResourcesMetadataQueryHandler } from '../../../application/que
 import { type ResourceMetadata } from '../../../domain/entities/resource/resourceMetadata.js';
 
 export class ResourceHttpController implements HttpController {
-  public readonly basePath = '/api/resources';
+  public readonly basePath = '/api/buckets';
 
   public constructor(
     private readonly deleteResourceCommandHandler: DeleteResourceCommandHandler,
@@ -52,6 +57,7 @@ export class ResourceHttpController implements HttpController {
     private readonly downloadResourceQueryHandler: DownloadResourceQueryHandler,
     private readonly downloadResourcesQueryHandler: DownloadResourcesQueryHandler,
     private readonly downloadImageQueryHandler: DownloadImageQueryHandler,
+    private readonly findBucketsQueryHandler: FindUserBucketsQueryHandler,
     private readonly accessControlService: AccessControlService,
   ) {}
 
@@ -59,44 +65,63 @@ export class ResourceHttpController implements HttpController {
     return [
       new HttpRoute({
         method: HttpMethodName.get,
+        handler: this.findBuckets.bind(this),
+        schema: {
+          request: {},
+          response: {
+            [HttpStatusCode.ok]: {
+              schema: findBucketsResponseBodyDTOSchema,
+              description: 'Buckets found.',
+            },
+          },
+        },
+        securityMode: SecurityMode.bearer,
+        tags: ['Bucket'],
+        description: 'Find buckets.',
+      }),
+      new HttpRoute({
+        method: HttpMethodName.get,
+        path: ':bucketName/resources',
         handler: this.findResources.bind(this),
         schema: {
           request: {
             queryParams: findResourcesQueryParamsDTOSchema,
+            pathParams: findResourcesPathParamsDTOSchema,
           },
           response: {
             [HttpStatusCode.ok]: {
               schema: findResourcesResponseBodyDTOSchema,
-              description: 'Resources metadata found.',
+              description: `Bucket's resources metadata found.`,
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
-        description: 'Find resources metadata.',
+        description: `Find bucket's resources metadata.`,
       }),
       new HttpRoute({
         method: HttpMethodName.post,
-        path: 'export',
+        path: ':bucketName/resources/export',
         handler: this.exportResources.bind(this),
         schema: {
           request: {
             body: exportResourcesBodyDTOSchema,
+            pathParams: exportResourcesPathParamsDTOSchema,
           },
           response: {
             [HttpStatusCode.ok]: {
               schema: exportResourcesResponseBodyDTOSchema,
-              description: 'Resources exported.',
+              description: `Bucket's resources exported.`,
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
-        description: 'Export Resources.',
+        description: `Export bucket's resources.`,
       }),
       new HttpRoute({
         method: HttpMethodName.get,
-        path: ':name',
+        path: ':bucketName/resources/:resourceName',
         handler: this.downloadResource.bind(this),
         schema: {
           request: {
@@ -115,7 +140,7 @@ export class ResourceHttpController implements HttpController {
       }),
       new HttpRoute({
         method: HttpMethodName.get,
-        path: 'images/:width/:height/:name',
+        path: ':bucketName/resources/images/:width/:height/:resourceName',
         handler: this.downloadImage.bind(this),
         schema: {
           request: {
@@ -134,7 +159,7 @@ export class ResourceHttpController implements HttpController {
       }),
       new HttpRoute({
         method: HttpMethodName.delete,
-        path: ':name',
+        path: ':bucketName/resources/:resourceName',
         handler: this.deleteResource.bind(this),
         schema: {
           request: {
@@ -154,12 +179,33 @@ export class ResourceHttpController implements HttpController {
     ];
   }
 
+  private async findBuckets(
+    request: HttpRequest<undefined, undefined, undefined>,
+  ): Promise<HttpOkResponse<FindBucketsResponseBodyDTO>> {
+    const { userId } = await this.accessControlService.verifyBearerToken({
+      authorizationHeader: request.headers['authorization'],
+    });
+
+    const { buckets } = await this.findBucketsQueryHandler.execute({
+      userId,
+    });
+
+    return {
+      statusCode: HttpStatusCode.ok,
+      body: {
+        data: buckets,
+      },
+    };
+  }
+
   private async findResources(
-    request: HttpRequest<undefined, FindResourcesQueryParamsDTO, undefined>,
+    request: HttpRequest<undefined, FindResourcesQueryParamsDTO, FindResourcesPathParamsDTO>,
   ): Promise<HttpOkResponse<FindResourcesResponseBodyDTO>> {
     const { userId } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
     });
+
+    const { bucketName } = request.pathParams;
 
     const page = request.queryParams.page ?? 1;
 
@@ -169,6 +215,7 @@ export class ResourceHttpController implements HttpController {
       userId,
       page,
       pageSize,
+      bucketName,
     });
 
     return {
@@ -187,9 +234,11 @@ export class ResourceHttpController implements HttpController {
   }
 
   private async exportResources(
-    request: HttpRequest<ExportResourcesBodyDTO, undefined, undefined>,
+    request: HttpRequest<ExportResourcesBodyDTO, undefined, ExportResourcesPathParamsDTO>,
   ): Promise<HttpOkResponse<ExportResourcesResponseBodyDTO>> {
     const names = request.body.names || [];
+
+    const { bucketName } = request.pathParams;
 
     const { userId } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
@@ -198,13 +247,14 @@ export class ResourceHttpController implements HttpController {
     const { resourcesData } = await this.downloadResourcesQueryHandler.execute({
       userId,
       names,
+      bucketName,
     });
 
     return {
       statusCode: HttpStatusCode.ok,
       body: resourcesData,
       file: {
-        name: 'photos.zip',
+        name: 'resources.zip',
         contentType: 'application/zip',
       },
     };
@@ -213,13 +263,7 @@ export class ResourceHttpController implements HttpController {
   private async downloadResource(
     request: HttpRequest<undefined, undefined, DownloadResourcePathParamsDTO>,
   ): Promise<HttpOkResponse<unknown>> {
-    const { name } = request.pathParams;
-
-    if (name === '') {
-      throw new OperationNotValidError({
-        reason: 'Resource name cannot be empty.',
-      });
-    }
+    const { resourceName, bucketName } = request.pathParams;
 
     const { userId } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
@@ -227,7 +271,8 @@ export class ResourceHttpController implements HttpController {
 
     const { resource } = await this.downloadResourceQueryHandler.execute({
       userId,
-      resourceName: name,
+      resourceName,
+      bucketName,
     });
 
     return {
@@ -243,7 +288,7 @@ export class ResourceHttpController implements HttpController {
   private async downloadImage(
     request: HttpRequest<undefined, undefined, DownloadImagePathParamsDTO>,
   ): Promise<HttpOkResponse<unknown>> {
-    const { name, width, height } = request.pathParams;
+    const { resourceName, bucketName, width, height } = request.pathParams;
 
     const { userId } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
@@ -251,9 +296,10 @@ export class ResourceHttpController implements HttpController {
 
     const { resource } = await this.downloadImageQueryHandler.execute({
       userId,
-      resourceName: name,
+      resourceName,
       width,
       height,
+      bucketName,
     });
 
     return {
@@ -269,7 +315,7 @@ export class ResourceHttpController implements HttpController {
   private async deleteResource(
     request: HttpRequest<undefined, undefined, DeleteResourcePathParamsDTO>,
   ): Promise<HttpNoContentResponse<DeleteResourceResponseBodyDTO>> {
-    const { name } = request.pathParams;
+    const { resourceName, bucketName } = request.pathParams;
 
     const { userId } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
@@ -277,7 +323,8 @@ export class ResourceHttpController implements HttpController {
 
     await this.deleteResourceCommandHandler.execute({
       userId,
-      resourceName: name,
+      resourceName,
+      bucketName,
     });
 
     return {

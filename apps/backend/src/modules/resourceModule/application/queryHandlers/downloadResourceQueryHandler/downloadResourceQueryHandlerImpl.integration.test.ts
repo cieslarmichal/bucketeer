@@ -62,6 +62,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
       await queryHandler.execute({
         userId,
         resourceName: sampleFileName1,
+        bucketName,
       });
     } catch (error) {
       expect(error instanceof ResourceNotFoundError);
@@ -72,13 +73,14 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     expect.fail();
   });
 
-  it('throws an error - when user does not have any directory', async () => {
+  it('throws an error - when user does not have access to the bucket', async () => {
     const user = await userTestUtils.createAndPersist();
 
     try {
       await queryHandler.execute({
         userId: user.id,
         resourceName: sampleFileName1,
+        bucketName,
       });
     } catch (error) {
       expect(error instanceof ResourceNotFoundError);
@@ -92,10 +94,10 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
   it('throws an error - when Resource does not exist', async () => {
     const user = await userTestUtils.createAndPersist();
 
-    await userTestUtils.createAndPersistUserDirectory({
+    await userTestUtils.createAndPersistUserBucket({
       input: {
         userId: user.id,
-        directoryName: bucketName,
+        bucketName,
       },
     });
 
@@ -103,6 +105,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
       await queryHandler.execute({
         userId: user.id,
         resourceName: sampleFileName1,
+        bucketName,
       });
     } catch (error) {
       expect(error instanceof ResourceNotFoundError);
@@ -116,10 +119,10 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
   it('downloads a Resource', async () => {
     const user = await userTestUtils.createAndPersist();
 
-    await userTestUtils.createAndPersistUserDirectory({
+    await userTestUtils.createAndPersistUserBucket({
       input: {
         userId: user.id,
-        directoryName: bucketName,
+        bucketName,
       },
     });
 
@@ -128,6 +131,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     const { resource } = await queryHandler.execute({
       userId: user.id,
       resourceName: sampleFileName1,
+      bucketName,
     });
 
     // TODO: validate data

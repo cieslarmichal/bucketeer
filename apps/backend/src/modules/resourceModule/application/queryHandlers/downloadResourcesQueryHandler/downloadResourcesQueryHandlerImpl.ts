@@ -7,40 +7,48 @@ import {
 } from './downloadResourcesQueryHandler.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type LoggerService } from '../../../../../libs/logger/services/loggerService/loggerService.js';
-import { type FindUserDirectoryQueryHandler } from '../../../../userModule/application/queryHandlers/findUserDirectoryQueryHandler/findUserDirectoryQueryHandler.js';
+import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
 import { type ResourceBlobService } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
 
 export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQueryHandler {
   public constructor(
     private readonly resourceBlobSerice: ResourceBlobService,
     private readonly loggerService: LoggerService,
-    private readonly findUserDirectoryQueryHandler: FindUserDirectoryQueryHandler,
+    private readonly findUserBucketsQueryHandler: FindUserBucketsQueryHandler,
   ) {}
 
   public async execute(payload: DownloadResourcesQueryHandlerPayload): Promise<DownloadResourcesQueryHandlerResult> {
-    const { userId, names } = payload;
+    const { userId, names, bucketName } = payload;
 
-    const { directoryName } = await this.findUserDirectoryQueryHandler.execute({ userId });
+    const { buckets } = await this.findUserBucketsQueryHandler.execute({ userId });
+
+    if (!buckets.includes(bucketName)) {
+      throw new OperationNotValidError({
+        reason: 'Bucket does not exist.',
+        userId,
+        bucketName,
+      });
+    }
 
     this.loggerService.debug({
       message: 'Downloading Resources...',
       userId,
-      directoryName,
+      bucketName,
     });
 
-    const blobsNames = await this.resourceBlobSerice.getResourcesNames({ bucketName: directoryName });
+    const blobsNames = await this.resourceBlobSerice.getResourcesNames({ bucketName });
 
     if (!blobsNames.length) {
       this.loggerService.error({
         message: 'Resources not found.',
         userId,
-        directoryName,
+        bucketName,
         names,
       });
 
       throw new OperationNotValidError({
         reason: 'Resources not found.',
-        directoryName,
+        bucketName,
         names,
       });
     }
@@ -48,7 +56,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
     if (names.length && !names.every((name) => blobsNames.includes(name))) {
       throw new OperationNotValidError({
         reason: 'Provided Resource names do not exist.',
-        directoryName,
+        bucketName,
         names,
       });
     }
@@ -60,7 +68,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
     for (const blobName of blobsNames) {
       if (!names.length || names.includes(blobName)) {
         const { data: blobData } = await this.resourceBlobSerice.downloadResource({
-          bucketName: directoryName,
+          bucketName,
           resourceName: blobName,
         });
 
@@ -75,7 +83,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
     this.loggerService.info({
       message: 'Resources downloaded.',
       userId,
-      directoryName,
+      bucketName,
       count: archivedResourcesCount,
     });
 

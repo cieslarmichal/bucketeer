@@ -63,6 +63,7 @@ describe('DeleteResourceCommandHandlerImpl', () => {
       await commandHandler.execute({
         userId,
         resourceName: sampleFileName,
+        bucketName,
       });
     } catch (error) {
       expect(error instanceof ResourceNotFoundError);
@@ -73,16 +74,17 @@ describe('DeleteResourceCommandHandlerImpl', () => {
     expect.fail();
   });
 
-  it('throws an error - when user does not have any directory', async () => {
+  it('throws an error - when user does not have access to the bucket', async () => {
     const user = await userTestUtils.createAndPersist();
 
     try {
       await commandHandler.execute({
         userId: user.id,
         resourceName: sampleFileName,
+        bucketName,
       });
     } catch (error) {
-      expect(error instanceof ResourceNotFoundError);
+      expect(error instanceof OperationNotValidError);
 
       return;
     }
@@ -95,9 +97,10 @@ describe('DeleteResourceCommandHandlerImpl', () => {
 
     const user = await userTestUtils.createAndPersist();
 
-    await userTestUtils.createAndPersistUserDirectory({
+    await userTestUtils.createAndPersistUserBucket({
       input: {
         userId: user.id,
+        bucketName,
       },
     });
 
@@ -105,6 +108,7 @@ describe('DeleteResourceCommandHandlerImpl', () => {
       await commandHandler.execute({
         userId: user.id,
         resourceName: nonExistingResourceName,
+        bucketName,
       });
     } catch (error) {
       expect(error instanceof OperationNotValidError);
@@ -118,10 +122,10 @@ describe('DeleteResourceCommandHandlerImpl', () => {
   it('deletes a resource', async () => {
     const user = await userTestUtils.createAndPersist();
 
-    await userTestUtils.createAndPersistUserDirectory({
+    await userTestUtils.createAndPersistUserBucket({
       input: {
         userId: user.id,
-        directoryName: bucketName,
+        bucketName,
       },
     });
 
@@ -134,6 +138,7 @@ describe('DeleteResourceCommandHandlerImpl', () => {
     await commandHandler.execute({
       userId: user.id,
       resourceName: sampleFileName,
+      bucketName,
     });
 
     const existsAfter = await s3TestUtils.objectExists(bucketName, sampleFileName);

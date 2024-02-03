@@ -5,6 +5,7 @@ import { type QueryHandler } from '../../../../../common/types/queryHandler.js';
 export interface DownloadResourcesQueryHandlerPayload {
   readonly userId: string;
   readonly names: string[];
+  readonly bucketName: string;
 }
 
 export interface DownloadResourcesQueryHandlerResult {

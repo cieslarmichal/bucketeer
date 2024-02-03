@@ -1,3 +1,4 @@
 export interface DeleteResourcePathParams {
-  readonly name: string;
+  readonly bucketName: string;
+  readonly resourceName: string;
 }

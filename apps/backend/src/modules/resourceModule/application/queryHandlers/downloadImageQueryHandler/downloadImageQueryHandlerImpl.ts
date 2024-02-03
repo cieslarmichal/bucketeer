@@ -7,32 +7,40 @@ import {
 } from './downloadImageQueryHandler.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type LoggerService } from '../../../../../libs/logger/services/loggerService/loggerService.js';
-import { type FindUserDirectoryQueryHandler } from '../../../../userModule/application/queryHandlers/findUserDirectoryQueryHandler/findUserDirectoryQueryHandler.js';
+import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
 import { type ResourceBlobService } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
 
 export class DownloadImageQueryHandlerImpl implements DownloadImageQueryHandler {
   public constructor(
     private readonly resourceBlobSerice: ResourceBlobService,
     private readonly loggerService: LoggerService,
-    private readonly findUserDirectoryQueryHandler: FindUserDirectoryQueryHandler,
+    private readonly findUserBucketsQueryHandler: FindUserBucketsQueryHandler,
   ) {}
 
   public async execute(payload: DownloadImageQueryHandlerPayload): Promise<DownloadImageQueryHandlerResult> {
-    const { userId, resourceName, width, height } = payload;
+    const { userId, resourceName, bucketName, width, height } = payload;
 
-    const { directoryName } = await this.findUserDirectoryQueryHandler.execute({ userId });
+    const { buckets } = await this.findUserBucketsQueryHandler.execute({ userId });
+
+    if (!buckets.includes(bucketName)) {
+      throw new OperationNotValidError({
+        reason: 'Bucket does not exist.',
+        userId,
+        bucketName,
+      });
+    }
 
     this.loggerService.debug({
       message: 'Downloading Image Resource...',
       userId,
-      directoryName,
+      bucketName,
       resourceName,
       width,
       height,
     });
 
     const resource = await this.resourceBlobSerice.downloadResource({
-      bucketName: directoryName,
+      bucketName,
       resourceName,
     });
 
@@ -42,7 +50,7 @@ export class DownloadImageQueryHandlerImpl implements DownloadImageQueryHandler 
       throw new OperationNotValidError({
         reason: 'Resource is not an image.',
         userId,
-        directoryName,
+        bucketName,
         resourceName,
       });
     }
@@ -58,7 +66,7 @@ export class DownloadImageQueryHandlerImpl implements DownloadImageQueryHandler 
     this.loggerService.info({
       message: 'Image Resource downloaded.',
       userId,
-      directoryName,
+      bucketName,
       resourceName,
       width,
       height,

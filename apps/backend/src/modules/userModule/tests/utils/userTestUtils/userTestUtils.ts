@@ -2,20 +2,20 @@ import { type SqliteDatabaseClient } from '../../../../../core/database/sqliteDa
 import { type UserTokens } from '../../../domain/entities/userTokens/userTokens.js';
 import { type RefreshTokenRawEntity } from '../../../infrastructure/databases/userDatabase/tables/refreshTokenTable/refreshTokenRawEntity.js';
 import { RefreshTokenTable } from '../../../infrastructure/databases/userDatabase/tables/refreshTokenTable/refreshTokenTable.js';
-import { type UserDirectoryRawEntity } from '../../../infrastructure/databases/userDatabase/tables/userDirectoryTable/userDirectoryRawEntity.js';
-import { UserDirectoryTable } from '../../../infrastructure/databases/userDatabase/tables/userDirectoryTable/userDirectoryTable.js';
+import { type UserBucketRawEntity } from '../../../infrastructure/databases/userDatabase/tables/userBucketTable/userBucketRawEntity.js';
+import { UserBucketTable } from '../../../infrastructure/databases/userDatabase/tables/userBucketTable/userBucketTable.js';
 import { type UserRawEntity } from '../../../infrastructure/databases/userDatabase/tables/userTable/userRawEntity.js';
 import { UserTable } from '../../../infrastructure/databases/userDatabase/tables/userTable/userTable.js';
 import { RefreshTokenTestFactory } from '../../factories/refreshTokenTestFactory/refreshTokenTestFactory.js';
-import { UserDirectoryTestFactory } from '../../factories/userDirectoryTestFactory/userTestFactory.js';
+import { UserBucketTestFactory } from '../../factories/userBucketTestFactory/userBucketTestFactory.js';
 import { UserEntityTestFactory } from '../../factories/userEntityTestFactory/userEntityTestFactory.js';
 
 interface CreateAndPersistPayload {
   input?: Partial<UserRawEntity>;
 }
 
-interface CreateAndPersistUserDirectoryPayload {
-  input?: Partial<UserDirectoryRawEntity>;
+interface CreateAndPersistUserBucketPayload {
+  input?: Partial<UserBucketRawEntity>;
 }
 
 interface CreateAndPersistRefreshTokenPayload {
@@ -38,16 +38,16 @@ interface FindTokensByUserIdPayload {
   userId: string;
 }
 
-interface FindDirectoryByUserIdPayload {
+interface FindBucketsByUserIdPayload {
   userId: string;
 }
 
 export class UserTestUtils {
   private readonly userTable = new UserTable();
-  private readonly userDirectoryTable = new UserDirectoryTable();
+  private readonly userBucketTable = new UserBucketTable();
   private readonly refreshTokenTable = new RefreshTokenTable();
   private readonly userTestFactory = new UserEntityTestFactory();
-  private readonly userDirectoryTestFactory = new UserDirectoryTestFactory();
+  private readonly userBucketTestFactory = new UserBucketTestFactory();
   private readonly refreshTokenTestFactory = new RefreshTokenTestFactory();
 
   public constructor(private readonly sqliteDatabaseClient: SqliteDatabaseClient) {}
@@ -70,25 +70,25 @@ export class UserTestUtils {
     return rawEntities[0] as UserRawEntity;
   }
 
-  public async createAndPersistUserDirectory(
-    payload: CreateAndPersistUserDirectoryPayload = {},
-  ): Promise<UserDirectoryRawEntity> {
+  public async createAndPersistUserBucket(
+    payload: CreateAndPersistUserBucketPayload = {},
+  ): Promise<UserBucketRawEntity> {
     const { input = {} } = payload;
 
-    const userDirectory = this.userDirectoryTestFactory.create(input);
+    const userBucket = this.userBucketTestFactory.create(input);
 
-    const queryBuilder = this.sqliteDatabaseClient<UserDirectoryRawEntity>(this.userDirectoryTable.name);
+    const queryBuilder = this.sqliteDatabaseClient<UserBucketRawEntity>(this.userBucketTable.name);
 
     const rawEntities = await queryBuilder.insert(
       {
-        id: userDirectory.getId(),
-        userId: userDirectory.getUserId(),
-        directoryName: userDirectory.getDirectoryName(),
+        id: userBucket.getId(),
+        userId: userBucket.getUserId(),
+        bucketName: userBucket.getBucketName(),
       },
       '*',
     );
 
-    return rawEntities[0] as UserDirectoryRawEntity;
+    return rawEntities[0] as UserBucketRawEntity;
   }
 
   public async createAndPersistRefreshToken(
@@ -125,15 +125,14 @@ export class UserTestUtils {
     };
   }
 
-  public async findDirectoryByUserId(payload: FindDirectoryByUserIdPayload): Promise<UserDirectoryRawEntity> {
+  public async findBucketsByUserId(payload: FindBucketsByUserIdPayload): Promise<UserBucketRawEntity[]> {
     const { userId } = payload;
 
-    const userDirectory = await this.sqliteDatabaseClient<UserDirectoryRawEntity>(this.userDirectoryTable.name)
+    const userBuckets = await this.sqliteDatabaseClient<UserBucketRawEntity>(this.userBucketTable.name)
       .select('*')
-      .where({ userId })
-      .first();
+      .where({ userId });
 
-    return userDirectory as UserDirectoryRawEntity;
+    return userBuckets;
   }
 
   public async persist(payload: PersistPayload): Promise<void> {
@@ -167,7 +166,7 @@ export class UserTestUtils {
   }
 
   public async truncate(): Promise<void> {
-    await this.sqliteDatabaseClient<UserDirectoryRawEntity>(this.userDirectoryTable.name).truncate();
+    await this.sqliteDatabaseClient<UserBucketRawEntity>(this.userBucketTable.name).truncate();
 
     await this.sqliteDatabaseClient<RefreshTokenRawEntity>(this.refreshTokenTable.name).truncate();
 

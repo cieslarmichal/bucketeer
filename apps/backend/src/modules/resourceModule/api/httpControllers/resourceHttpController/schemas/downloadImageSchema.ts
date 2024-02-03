@@ -5,7 +5,8 @@ import type * as contracts from '@common/contracts';
 import { type TypeExtends } from '../../../../../../common/types/schemaExtends.js';
 
 export const downloadImagePathParamsDTOSchema = Type.Object({
-  name: Type.String({ minLength: 1 }),
+  bucketName: Type.String({ minLength: 1 }),
+  resourceName: Type.String({ minLength: 1 }),
   width: Type.Integer({ minimum: 1 }),
   height: Type.Integer({ minimum: 1 }),
 });

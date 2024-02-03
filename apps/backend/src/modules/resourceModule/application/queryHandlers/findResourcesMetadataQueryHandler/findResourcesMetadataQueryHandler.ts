@@ -5,6 +5,7 @@ export interface FindResourcesMetadataQueryHandlerPayload {
   readonly userId: string;
   readonly page: number;
   readonly pageSize: number;
+  readonly bucketName: string;
 }
 
 export interface FindResourcesMetadataQueryHandlerResult {

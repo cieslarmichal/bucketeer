@@ -4,7 +4,6 @@ import { type User } from '../../../domain/entities/user/user.js';
 export interface CreateUserCommandHandlerPayload {
   readonly email: string;
   readonly password: string;
-  readonly directoryName: string;
 }
 
 export interface CreateUserCommandHandlerResult {

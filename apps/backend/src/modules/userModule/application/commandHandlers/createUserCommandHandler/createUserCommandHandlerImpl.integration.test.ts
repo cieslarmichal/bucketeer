@@ -1,7 +1,6 @@
 import { beforeEach, afterEach, expect, it, describe } from 'vitest';
 
 import { UserRole } from '@common/contracts';
-import { Generator } from '@common/tests';
 
 import { type CreateUserCommandHandler } from './createUserCommandHandler.js';
 import { testSymbols } from '../../../../../../tests/container/symbols.js';
@@ -49,12 +48,9 @@ describe('CrateUserCommandHandler', () => {
   it('creates a User', async () => {
     const user = userTestFactory.create();
 
-    const directoryName = Generator.word();
-
     const { user: createdUser } = await createUserCommandHandler.execute({
       email: user.getEmail(),
       password: user.getPassword(),
-      directoryName,
     });
 
     const foundUser = await userTestUtils.findByEmail({ email: user.getEmail() });
@@ -76,22 +72,15 @@ describe('CrateUserCommandHandler', () => {
     });
 
     expect(passwordMatches).toBe(true);
-
-    const foundUserDirectory = await userTestUtils.findDirectoryByUserId({ userId: createdUser.getId() });
-
-    expect(foundUserDirectory.directoryName).toEqual(directoryName);
   });
 
   it('throws an error when a User with the same email already exists', async () => {
     const existingUser = await userTestUtils.createAndPersist();
 
-    const directoryName = Generator.word();
-
     expect(async () => {
       await createUserCommandHandler.execute({
         email: existingUser.email,
         password: existingUser.password,
-        directoryName,
       });
     }).toThrowErrorInstance({
       instance: ResourceAlreadyExistsError,
@@ -105,13 +94,10 @@ describe('CrateUserCommandHandler', () => {
   it('throws an error when password does not meet requirements', async () => {
     const user = userTestFactory.create();
 
-    const directoryName = Generator.word();
-
     expect(async () => {
       await createUserCommandHandler.execute({
         email: user.getEmail(),
         password: '123',
-        directoryName,
       });
     }).toThrowErrorInstance({
       instance: OperationNotValidError,

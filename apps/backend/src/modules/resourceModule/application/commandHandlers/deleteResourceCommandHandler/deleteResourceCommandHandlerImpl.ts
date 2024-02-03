@@ -4,30 +4,38 @@ import {
 } from './deleteResourceCommandHandler.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type LoggerService } from '../../../../../libs/logger/services/loggerService/loggerService.js';
-import { type FindUserDirectoryQueryHandler } from '../../../../userModule/application/queryHandlers/findUserDirectoryQueryHandler/findUserDirectoryQueryHandler.js';
+import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
 import { type ResourceBlobService } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
 
 export class DeleteResourceCommandHandlerImpl implements DeleteResourceCommandHandler {
   public constructor(
     private readonly resourceBlobSerice: ResourceBlobService,
     private readonly loggerService: LoggerService,
-    private readonly findUserDirectoryQueryHandler: FindUserDirectoryQueryHandler,
+    private readonly findUserBucketsQueryHandler: FindUserBucketsQueryHandler,
   ) {}
 
   public async execute(payload: DeleteResourceCommandHandlerPayload): Promise<void> {
-    const { userId, resourceName } = payload;
+    const { userId, resourceName, bucketName } = payload;
 
-    const { directoryName } = await this.findUserDirectoryQueryHandler.execute({ userId });
+    const { buckets } = await this.findUserBucketsQueryHandler.execute({ userId });
+
+    if (!buckets.includes(bucketName)) {
+      throw new OperationNotValidError({
+        reason: 'Bucket does not exist.',
+        userId,
+        bucketName,
+      });
+    }
 
     this.loggerService.debug({
       message: 'Deleting Resource...',
       userId,
-      directoryName,
+      bucketName,
       resourceName,
     });
 
     const existingResource = await this.resourceBlobSerice.resourceExists({
-      bucketName: directoryName,
+      bucketName,
       resourceName,
     });
 
@@ -35,19 +43,19 @@ export class DeleteResourceCommandHandlerImpl implements DeleteResourceCommandHa
       throw new OperationNotValidError({
         reason: 'Cannot delete resource because it does not exist.',
         resourceName,
-        directoryName,
+        bucketName,
       });
     }
 
     await this.resourceBlobSerice.deleteResource({
-      bucketName: directoryName,
+      bucketName,
       resourceName,
     });
 
     this.loggerService.info({
       message: 'Resource deleted.',
       userId,
-      directoryName,
+      bucketName,
       resourceName,
     });
   }

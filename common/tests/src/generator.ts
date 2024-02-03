@@ -129,4 +129,8 @@ export class Generator {
       height,
     });
   }
+
+  public static bucketName(): string {
+    return `${faker.lorem.word()}${Generator.number(0, 1000)}`;
+  }
 }

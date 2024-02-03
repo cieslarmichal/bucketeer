@@ -20,14 +20,13 @@ export class CrateUserCommandHandlerImpl implements CreateUserCommandHandler {
   ) {}
 
   public async execute(payload: CreateUserCommandHandlerPayload): Promise<CreateUserCommandHandlerResult> {
-    const { email: emailInput, password, directoryName } = payload;
+    const { email: emailInput, password } = payload;
 
     const email = emailInput.toLowerCase();
 
     this.loggerService.debug({
       message: 'Creating User...',
       email,
-      directoryName,
     });
 
     const existingUser = await this.userRepository.findUser({ email });
@@ -47,14 +46,12 @@ export class CrateUserCommandHandlerImpl implements CreateUserCommandHandler {
       email,
       password: hashedPassword,
       role: UserRole.user,
-      directoryName,
     });
 
     this.loggerService.info({
       message: 'User created.',
       userId: user.getId(),
       email,
-      directoryName,
     });
 
     return { user };
