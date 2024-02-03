@@ -16,12 +16,12 @@ import {
   type UpdateUserPayload,
   type DeleteUserPayload,
   type FindUserTokensPayload,
-  type FindUserDirectoryPayload,
+  type FindUserBucketsPayload,
 } from '../../../domain/repositories/userRepository/userRepository.js';
 import { type RefreshTokenRawEntity } from '../../databases/userDatabase/tables/refreshTokenTable/refreshTokenRawEntity.js';
 import { RefreshTokenTable } from '../../databases/userDatabase/tables/refreshTokenTable/refreshTokenTable.js';
-import { type UserDirectoryRawEntity } from '../../databases/userDatabase/tables/userDirectoryTable/userDirectoryRawEntity.js';
-import { UserDirectoryTable } from '../../databases/userDatabase/tables/userDirectoryTable/userDirectoryTable.js';
+import { type UserBucketRawEntity } from '../../databases/userDatabase/tables/userBucketTable/userBucketRawEntity.js';
+import { UserBucketTable } from '../../databases/userDatabase/tables/userBucketTable/userBucketTable.js';
 import { type UserRawEntity } from '../../databases/userDatabase/tables/userTable/userRawEntity.js';
 import { UserTable } from '../../databases/userDatabase/tables/userTable/userTable.js';
 
@@ -30,13 +30,10 @@ interface TokenValue {
   readonly expiresAt: Date;
 }
 
-interface DirectoryValue {
-  readonly directoryName: string;
-}
-
 export interface MappedUserUpdate {
   readonly refreshTokenCreatePayloads: TokenValue[];
-  readonly directoryUpdatePayload?: DirectoryValue | undefined;
+  readonly bucketsToGrantAccess: string[];
+  readonly bucketsToRevokeAccess: string[];
 }
 
 export interface FindRefreshTokensPayload {
@@ -45,7 +42,7 @@ export interface FindRefreshTokensPayload {
 
 export class UserRepositoryImpl implements UserRepository {
   private readonly userTable = new UserTable();
-  private readonly userDirectoryTable = new UserDirectoryTable();
+  private readonly userBucketTable = new UserBucketTable();
   private readonly refreshTokenTable = new RefreshTokenTable();
 
   public constructor(
@@ -56,7 +53,7 @@ export class UserRepositoryImpl implements UserRepository {
   ) {}
 
   public async createUser(payload: CreateUserPayload): Promise<User> {
-    const { email, password, role, directoryName } = payload;
+    const { email, password, role } = payload;
 
     let rawEntities: UserRawEntity[] = [];
 
@@ -73,16 +70,6 @@ export class UserRepositoryImpl implements UserRepository {
           },
           '*',
         );
-
-        if (directoryName) {
-          const userDirectoryId = this.uuidService.generateUuid();
-
-          await transaction<UserDirectoryRawEntity>(this.userDirectoryTable.name).insert({
-            id: userDirectoryId,
-            userId: id,
-            directoryName,
-          });
-        }
       });
     } catch (error) {
       this.loggerService.error({
@@ -152,33 +139,28 @@ export class UserRepositoryImpl implements UserRepository {
     return this.userMapper.mapToDomain(rawEntity);
   }
 
-  public async findUserDirectory(payload: FindUserDirectoryPayload): Promise<string | null> {
+  public async findUserBuckets(payload: FindUserBucketsPayload): Promise<string[]> {
     const { userId } = payload;
 
-    let rawEntity: UserDirectoryRawEntity | undefined;
+    let rawEntities: UserBucketRawEntity[];
 
     try {
-      rawEntity = await this.sqliteDatabaseClient<UserDirectoryRawEntity>(this.userDirectoryTable.name)
+      rawEntities = await this.sqliteDatabaseClient<UserBucketRawEntity>(this.userBucketTable.name)
         .select('*')
-        .where({ userId })
-        .first();
+        .where({ userId });
     } catch (error) {
       this.loggerService.error({
-        message: 'Error while finding UserDirectory.',
+        message: 'Error while finding UserBucket.',
         error,
       });
 
       throw new RepositoryError({
-        entity: 'UserDirectory',
+        entity: 'UserBuckets',
         operation: 'find',
       });
     }
 
-    if (!rawEntity) {
-      return null;
-    }
-
-    return rawEntity.directoryName;
+    return rawEntities.map((rawEntity) => rawEntity.bucketName);
   }
 
   public async findUserTokens(payload: FindUserTokensPayload): Promise<UserTokens | null> {
@@ -231,7 +213,8 @@ export class UserRepositoryImpl implements UserRepository {
       });
     }
 
-    const { refreshTokenCreatePayloads, directoryUpdatePayload } = this.mapDomainActionsToUpdatePayload(domainActions);
+    const { refreshTokenCreatePayloads, bucketsToGrantAccess, bucketsToRevokeAccess } =
+      this.mapDomainActionsToUpdatePayload(domainActions);
 
     try {
       await this.sqliteDatabaseClient.transaction(async (transaction) => {
@@ -245,11 +228,20 @@ export class UserRepositoryImpl implements UserRepository {
           );
         }
 
-        if (directoryUpdatePayload) {
-          await transaction<UserDirectoryRawEntity>(this.userDirectoryTable.name).update({
+        if (bucketsToGrantAccess.length > 0) {
+          const drafts = bucketsToGrantAccess.map((bucketName) => ({
+            id: this.uuidService.generateUuid(),
             userId: id,
-            directoryName: directoryUpdatePayload.directoryName,
-          });
+            bucketName,
+          }));
+
+          await transaction<UserBucketRawEntity>(this.userBucketTable.name).insert(drafts);
+        }
+
+        if (bucketsToRevokeAccess.length > 0) {
+          await transaction<UserBucketRawEntity>(this.userBucketTable.name)
+            .delete()
+            .whereIn(this.userBucketTable.columns.bucketName, bucketsToRevokeAccess);
         }
       });
     } catch (error) {
@@ -276,7 +268,9 @@ export class UserRepositoryImpl implements UserRepository {
   private mapDomainActionsToUpdatePayload(domainActions: UserDomainAction[]): MappedUserUpdate {
     const refreshTokenCreatePayloads: TokenValue[] = [];
 
-    let directoryUpdatePayload: DirectoryValue | undefined = undefined;
+    const bucketsToGrantAccess: string[] = [];
+
+    const bucketsToRevokeAccess: string[] = [];
 
     domainActions.forEach((domainAction) => {
       switch (domainAction.actionName) {
@@ -288,10 +282,13 @@ export class UserRepositoryImpl implements UserRepository {
 
           break;
 
-        case UserDomainActionType.updateDirectory:
-          directoryUpdatePayload = {
-            directoryName: domainAction.payload.directoryName,
-          };
+        case UserDomainActionType.grantBucketAccess:
+          bucketsToGrantAccess.push(domainAction.payload.bucketName);
+
+          break;
+
+        case UserDomainActionType.revokeBucketAccess:
+          bucketsToRevokeAccess.push(domainAction.payload.bucketName);
 
           break;
 
@@ -309,7 +306,8 @@ export class UserRepositoryImpl implements UserRepository {
 
     return {
       refreshTokenCreatePayloads,
-      directoryUpdatePayload,
+      bucketsToGrantAccess,
+      bucketsToRevokeAccess,
     };
   }
 

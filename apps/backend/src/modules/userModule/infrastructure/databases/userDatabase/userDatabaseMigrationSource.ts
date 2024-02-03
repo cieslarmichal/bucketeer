@@ -1,7 +1,7 @@
 import { M1CreateUserTableMigration } from './migrations/m1CreateUserTableMigration.js';
 import { M2CreateBlacklistTokenTableMigration } from './migrations/m2CreateBlacklistTokenTableMigration.js';
 import { M3CreateRefreshTokenTableMigration } from './migrations/m3CreateRefreshTokenTableMigration.js';
-import { M4CreateUserDirectoryTableMigration } from './migrations/m4CreateUserDirectoryTableMigration.js';
+import { M4CreateUserBucketTableMigration } from './migrations/m4CreateUserBucketTableMigration.js';
 import { type Migration } from '../../../../../libs/database/types/migration.js';
 import { type MigrationSource } from '../../../../../libs/database/types/migrationSource.js';
 
@@ -11,7 +11,7 @@ export class UserDatabaseMigrationSource implements MigrationSource {
       new M1CreateUserTableMigration(),
       new M2CreateBlacklistTokenTableMigration(),
       new M3CreateRefreshTokenTableMigration(),
-      new M4CreateUserDirectoryTableMigration(),
+      new M4CreateUserBucketTableMigration(),
     ];
   }
 

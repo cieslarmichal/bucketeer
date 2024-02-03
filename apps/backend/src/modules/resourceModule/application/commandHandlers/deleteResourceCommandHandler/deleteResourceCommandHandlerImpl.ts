@@ -4,20 +4,20 @@ import {
 } from './deleteResourceCommandHandler.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type LoggerService } from '../../../../../libs/logger/services/loggerService/loggerService.js';
-import { type FindUserDirectoryQueryHandler } from '../../../../userModule/application/queryHandlers/findUserDirectoryQueryHandler/findUserDirectoryQueryHandler.js';
+import { type FindUserBucketQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketQueryHandler/findUserBucketQueryHandler.js';
 import { type ResourceBlobService } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
 
 export class DeleteResourceCommandHandlerImpl implements DeleteResourceCommandHandler {
   public constructor(
     private readonly resourceBlobSerice: ResourceBlobService,
     private readonly loggerService: LoggerService,
-    private readonly findUserDirectoryQueryHandler: FindUserDirectoryQueryHandler,
+    private readonly findUserBucketQueryHandler: FindUserBucketQueryHandler,
   ) {}
 
   public async execute(payload: DeleteResourceCommandHandlerPayload): Promise<void> {
     const { userId, resourceName } = payload;
 
-    const { directoryName } = await this.findUserDirectoryQueryHandler.execute({ userId });
+    const { directoryName } = await this.findUserBucketQueryHandler.execute({ userId });
 
     this.loggerService.debug({
       message: 'Deleting Resource...',

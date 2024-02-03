@@ -19,7 +19,7 @@ import { type LoggerService } from '../../libs/logger/services/loggerService/log
 import { type S3Client } from '../../libs/s3/clients/s3Client/s3Client.js';
 import { type AccessControlService } from '../authModule/application/services/accessControlService/accessControlService.js';
 import { authSymbols } from '../authModule/symbols.js';
-import { type FindUserDirectoryQueryHandler } from '../userModule/application/queryHandlers/findUserDirectoryQueryHandler/findUserDirectoryQueryHandler.js';
+import { type FindUserBucketQueryHandler } from '../userModule/application/queryHandlers/findUserBucketQueryHandler/findUserBucketQueryHandler.js';
 import { userSymbols } from '../userModule/symbols.js';
 
 export class ResourceModule implements DependencyInjectionModule {
@@ -35,7 +35,7 @@ export class ResourceModule implements DependencyInjectionModule {
         new DeleteResourceCommandHandlerImpl(
           container.get<ResourceBlobService>(symbols.resourceBlobService),
           container.get<LoggerService>(coreSymbols.loggerService),
-          container.get<FindUserDirectoryQueryHandler>(userSymbols.findUserDirectoryQueryHandler),
+          container.get<FindUserBucketQueryHandler>(userSymbols.findUserBucketQueryHandler),
         ),
     );
 
@@ -45,7 +45,7 @@ export class ResourceModule implements DependencyInjectionModule {
         new FindResourcesMetadataQueryHandlerImpl(
           container.get<ResourceBlobService>(symbols.resourceBlobService),
           container.get<LoggerService>(coreSymbols.loggerService),
-          container.get<FindUserDirectoryQueryHandler>(userSymbols.findUserDirectoryQueryHandler),
+          container.get<FindUserBucketQueryHandler>(userSymbols.findUserBucketQueryHandler),
         ),
     );
 
@@ -55,7 +55,7 @@ export class ResourceModule implements DependencyInjectionModule {
         new DownloadResourceQueryHandlerImpl(
           container.get<ResourceBlobService>(symbols.resourceBlobService),
           container.get<LoggerService>(coreSymbols.loggerService),
-          container.get<FindUserDirectoryQueryHandler>(userSymbols.findUserDirectoryQueryHandler),
+          container.get<FindUserBucketQueryHandler>(userSymbols.findUserBucketQueryHandler),
         ),
     );
 
@@ -65,7 +65,7 @@ export class ResourceModule implements DependencyInjectionModule {
         new DownloadResourcesQueryHandlerImpl(
           container.get<ResourceBlobService>(symbols.resourceBlobService),
           container.get<LoggerService>(coreSymbols.loggerService),
-          container.get<FindUserDirectoryQueryHandler>(userSymbols.findUserDirectoryQueryHandler),
+          container.get<FindUserBucketQueryHandler>(userSymbols.findUserBucketQueryHandler),
         ),
     );
 
@@ -75,7 +75,7 @@ export class ResourceModule implements DependencyInjectionModule {
         new DownloadImageQueryHandlerImpl(
           container.get<ResourceBlobService>(symbols.resourceBlobService),
           container.get<LoggerService>(coreSymbols.loggerService),
-          container.get<FindUserDirectoryQueryHandler>(userSymbols.findUserDirectoryQueryHandler),
+          container.get<FindUserBucketQueryHandler>(userSymbols.findUserBucketQueryHandler),
         ),
     );
 

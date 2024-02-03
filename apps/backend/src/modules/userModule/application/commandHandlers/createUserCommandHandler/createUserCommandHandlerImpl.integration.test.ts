@@ -77,9 +77,9 @@ describe('CrateUserCommandHandler', () => {
 
     expect(passwordMatches).toBe(true);
 
-    const foundUserDirectory = await userTestUtils.findDirectoryByUserId({ userId: createdUser.getId() });
+    const foundUserBucket = await userTestUtils.findDirectoryByUserId({ userId: createdUser.getId() });
 
-    expect(foundUserDirectory.directoryName).toEqual(directoryName);
+    expect(foundUserBucket.directoryName).toEqual(directoryName);
   });
 
   it('throws an error when a User with the same email already exists', async () => {

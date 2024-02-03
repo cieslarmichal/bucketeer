@@ -2,7 +2,7 @@ import { beforeEach, afterEach, expect, it, describe } from 'vitest';
 
 import { Generator } from '@common/tests';
 
-import { type FindUserDirectoryQueryHandler } from './findUserDirectoryQueryHandler.js';
+import { type FindUserBucketQueryHandler } from './findUserBucketQueryHandler.js';
 import { ResourceNotFoundError } from '../../../../../common/errors/common/resourceNotFoundError.js';
 import { Application } from '../../../../../core/application.js';
 import { type SqliteDatabaseClient } from '../../../../../core/database/sqliteDatabaseClient/sqliteDatabaseClient.js';
@@ -10,8 +10,8 @@ import { coreSymbols } from '../../../../../core/symbols.js';
 import { symbols } from '../../../symbols.js';
 import { UserTestUtils } from '../../../tests/utils/userTestUtils/userTestUtils.js';
 
-describe('FindUserDirectoryQueryHandler', () => {
-  let findUserDirectoryQueryHandler: FindUserDirectoryQueryHandler;
+describe('FindUserBucketQueryHandler', () => {
+  let findUserBucketQueryHandler: FindUserBucketQueryHandler;
 
   let sqliteDatabaseClient: SqliteDatabaseClient;
 
@@ -20,7 +20,7 @@ describe('FindUserDirectoryQueryHandler', () => {
   beforeEach(async () => {
     const container = Application.createContainer();
 
-    findUserDirectoryQueryHandler = container.get<FindUserDirectoryQueryHandler>(symbols.findUserDirectoryQueryHandler);
+    findUserBucketQueryHandler = container.get<FindUserBucketQueryHandler>(symbols.findUserBucketQueryHandler);
 
     sqliteDatabaseClient = container.get<SqliteDatabaseClient>(coreSymbols.sqliteDatabaseClient);
 
@@ -40,14 +40,14 @@ describe('FindUserDirectoryQueryHandler', () => {
 
     const directoryName = Generator.word();
 
-    await userTestUtils.createAndPersistUserDirectory({
+    await userTestUtils.createAndPersistUserBucket({
       input: {
         userId: user.id,
         directoryName,
       },
     });
 
-    const { directoryName: actualDirectoryName } = await findUserDirectoryQueryHandler.execute({ userId: user.id });
+    const { directoryName: actualDirectoryName } = await findUserBucketQueryHandler.execute({ userId: user.id });
 
     expect(actualDirectoryName).toEqual(directoryName);
   });
@@ -56,11 +56,11 @@ describe('FindUserDirectoryQueryHandler', () => {
     const user = await userTestUtils.createAndPersist();
 
     expect(async () => {
-      await findUserDirectoryQueryHandler.execute({ userId: user.id });
+      await findUserBucketQueryHandler.execute({ userId: user.id });
     }).toThrowErrorInstance({
       instance: ResourceNotFoundError,
       context: {
-        name: 'UserDirectory',
+        name: 'UserBucket',
         userId: user.id,
       },
     });

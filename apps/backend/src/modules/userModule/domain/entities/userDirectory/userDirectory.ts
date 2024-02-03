@@ -1,20 +1,20 @@
-export interface UserDirectoryDraft {
+export interface UserBucketDraft {
   readonly id: string;
   readonly userId: string;
-  readonly directoryName: string;
+  readonly bucketName: string;
 }
 
-export class UserDirectory {
+export class UserBucket {
   private readonly id: string;
   private readonly userId: string;
-  private readonly directoryName: string;
+  private readonly bucketName: string;
 
-  public constructor(draft: UserDirectoryDraft) {
-    const { id, userId, directoryName } = draft;
+  public constructor(draft: UserBucketDraft) {
+    const { id, userId, bucketName } = draft;
 
     this.id = id;
 
-    this.directoryName = directoryName;
+    this.bucketName = bucketName;
 
     this.userId = userId;
   }
@@ -27,7 +27,7 @@ export class UserDirectory {
     return this.userId;
   }
 
-  public getDirectoryName(): string {
-    return this.directoryName;
+  public getBucketName(): string {
+    return this.bucketName;
   }
 }

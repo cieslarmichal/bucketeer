@@ -1,4 +1,5 @@
 export enum UserDomainActionType {
   createRefreshToken = 'createRefreshToken',
-  updateDirectory = 'updateDirectory',
+  grantBucketAccess = 'grantBucketAccess',
+  revokeBucketAccess = 'revokeBucketAccess',
 }

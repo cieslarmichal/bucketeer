@@ -92,7 +92,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
   it('throws an error - when Resource does not exist', async () => {
     const user = await userTestUtils.createAndPersist();
 
-    await userTestUtils.createAndPersistUserDirectory({
+    await userTestUtils.createAndPersistUserBucket({
       input: {
         userId: user.id,
         directoryName: bucketName,
@@ -116,7 +116,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
   it('downloads a Resource', async () => {
     const user = await userTestUtils.createAndPersist();
 
-    await userTestUtils.createAndPersistUserDirectory({
+    await userTestUtils.createAndPersistUserBucket({
       input: {
         userId: user.id,
         directoryName: bucketName,

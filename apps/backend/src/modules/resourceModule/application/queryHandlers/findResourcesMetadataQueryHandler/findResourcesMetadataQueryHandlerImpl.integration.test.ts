@@ -96,7 +96,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
   it('finds resources metadata', async () => {
     const user = await userTestUtils.createAndPersist();
 
-    await userTestUtils.createAndPersistUserDirectory({
+    await userTestUtils.createAndPersistUserBucket({
       input: {
         userId: user.id,
         directoryName: bucketName,

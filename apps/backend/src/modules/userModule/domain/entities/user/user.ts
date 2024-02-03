@@ -15,8 +15,12 @@ export interface CreateRefreshTokenPayload {
   readonly expiresAt: Date;
 }
 
-export interface UpdateDirectoryPayload {
-  readonly directoryName: string;
+export interface GrantBucketAccessPayload {
+  readonly bucketName: string;
+}
+
+export interface RevokeBucketAccessPayload {
+  readonly bucketName: string;
 }
 
 export class User {
@@ -80,13 +84,24 @@ export class User {
     });
   }
 
-  public addUpdateDirectoryAction(payload: UpdateDirectoryPayload): void {
-    const { directoryName } = payload;
+  public addGrantBucketAccessAction(payload: GrantBucketAccessPayload): void {
+    const { bucketName } = payload;
 
     this.domainActions.push({
-      actionName: UserDomainActionType.updateDirectory,
+      actionName: UserDomainActionType.grantBucketAccess,
       payload: {
-        directoryName,
+        bucketName,
+      },
+    });
+  }
+
+  public addRevokeBucketAccessAction(payload: RevokeBucketAccessPayload): void {
+    const { bucketName } = payload;
+
+    this.domainActions.push({
+      actionName: UserDomainActionType.revokeBucketAccess,
+      payload: {
+        bucketName,
       },
     });
   }

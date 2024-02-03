@@ -10,8 +10,8 @@ import { type LogoutUserCommandHandler } from './application/commandHandlers/log
 import { LogoutUserCommandHandlerImpl } from './application/commandHandlers/logoutUserCommandHandler/logoutUserCommandHandlerImpl.js';
 import { type RefreshUserTokensCommandHandler } from './application/commandHandlers/refreshUserTokensCommandHandler/refreshUserTokensCommandHandler.js';
 import { RefreshUserTokensCommandHandlerImpl } from './application/commandHandlers/refreshUserTokensCommandHandler/refreshUserTokensCommandHandlerImpl.js';
-import { type FindUserDirectoryQueryHandler } from './application/queryHandlers/findUserDirectoryQueryHandler/findUserDirectoryQueryHandler.js';
-import { FindUserDirectoryQueryHandlerImpl } from './application/queryHandlers/findUserDirectoryQueryHandler/findUserDirectoryQueryHandlerImpl.js';
+import { type FindUserBucketQueryHandler } from './application/queryHandlers/findUserBucketQueryHandler/findUserBucketQueryHandler.js';
+import { FindUserBucketQueryHandlerImpl } from './application/queryHandlers/findUserBucketQueryHandler/findUserBucketQueryHandlerImpl.js';
 import { type FindUserQueryHandler } from './application/queryHandlers/findUserQueryHandler/findUserQueryHandler.js';
 import { FindUserQueryHandlerImpl } from './application/queryHandlers/findUserQueryHandler/findUserQueryHandlerImpl.js';
 import { type HashService } from './application/services/hashService/hashService.js';
@@ -141,9 +141,9 @@ export class UserModule implements DependencyInjectionModule {
       () => new FindUserQueryHandlerImpl(container.get<UserRepository>(symbols.userRepository)),
     );
 
-    container.bind<FindUserDirectoryQueryHandler>(
-      symbols.findUserDirectoryQueryHandler,
-      () => new FindUserDirectoryQueryHandlerImpl(container.get<UserRepository>(symbols.userRepository)),
+    container.bind<FindUserBucketQueryHandler>(
+      symbols.findUserBucketQueryHandler,
+      () => new FindUserBucketQueryHandlerImpl(container.get<UserRepository>(symbols.userRepository)),
     );
 
     container.bind<UserHttpController>(

@@ -95,7 +95,7 @@ describe('DeleteResourceCommandHandlerImpl', () => {
 
     const user = await userTestUtils.createAndPersist();
 
-    await userTestUtils.createAndPersistUserDirectory({
+    await userTestUtils.createAndPersistUserBucket({
       input: {
         userId: user.id,
       },
@@ -118,7 +118,7 @@ describe('DeleteResourceCommandHandlerImpl', () => {
   it('deletes a resource', async () => {
     const user = await userTestUtils.createAndPersist();
 
-    await userTestUtils.createAndPersistUserDirectory({
+    await userTestUtils.createAndPersistUserBucket({
       input: {
         userId: user.id,
         directoryName: bucketName,

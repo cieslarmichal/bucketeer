@@ -6,7 +6,6 @@ export interface CreateUserPayload {
   readonly email: string;
   readonly password: string;
   readonly role: string;
-  readonly directoryName?: string;
 }
 
 export interface FindUserPayload {
@@ -18,11 +17,10 @@ export interface FindUserTokensPayload {
   readonly userId: string;
 }
 
-export interface FindUserDirectoryPayload {
+export interface FindUserBucketsPayload {
   readonly userId: string;
 }
 
-// TODO: change to have user as a property
 export interface UpdateUserPayload {
   readonly id: string;
   readonly domainActions: UserDomainAction[];
@@ -36,7 +34,7 @@ export interface UserRepository {
   createUser(input: CreateUserPayload): Promise<User>;
   findUser(input: FindUserPayload): Promise<User | null>;
   findUserTokens(input: FindUserTokensPayload): Promise<UserTokens | null>;
-  findUserDirectory(input: FindUserDirectoryPayload): Promise<string | null>;
+  findUserBuckets(input: FindUserBucketsPayload): Promise<string[]>;
   updateUser(input: UpdateUserPayload): Promise<void>;
   deleteUser(input: DeleteUserPayload): Promise<void>;
 }

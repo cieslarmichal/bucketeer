@@ -1,10 +1,10 @@
 import { Generator } from '@common/tests';
 
-import { UserDirectory, type UserDirectoryDraft } from '../../../domain/entities/userDirectory/userDirectory.js';
+import { UserBucket, type UserBucketDraft } from '../../../domain/entities/userBucket/userBucket.js';
 
-export class UserDirectoryTestFactory {
-  public create(input: Partial<UserDirectoryDraft> = {}): UserDirectory {
-    return new UserDirectory({
+export class UserBucketTestFactory {
+  public create(input: Partial<UserBucketDraft> = {}): UserBucket {
+    return new UserBucket({
       id: Generator.uuid(),
       userId: Generator.uuid(),
       directoryName: Generator.word(),
