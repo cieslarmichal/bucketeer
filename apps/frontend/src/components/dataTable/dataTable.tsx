@@ -52,50 +52,56 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
   });
 
   return (
-    <div className="lg:min-w-[50rem] p-4">
-      <div className="flex items-center pb-4">
-        <Input
-          placeholder="Filter file names..."
-          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-          onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
-          className="max-w-sm"
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              className="ml-auto"
+    <div className="w-full max-w-[40rem] md:max-w-screen-xl md:min-w-[50rem]">
+      <div className="p-4 w-full">
+        <div className="flex items-center pb-4">
+          <Input
+            placeholder="Filter file names..."
+            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+            onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
+            className="max-w-sm"
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="ml-auto"
+              >
+                Columns
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              className="bg-primary-foreground"
+              align="end"
             >
-              Columns
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <div className="rounded-md border p-2">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      className="p-4 m-0 h-14"
+                      key={header.id}
+                    >
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                     </TableHead>
                   );
@@ -111,7 +117,12 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                    <TableCell
+                      className="h-20"
+                      key={cell.id}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
                   ))}
                 </TableRow>
               ))
@@ -128,10 +139,11 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="flex items-center justify-end space-x-2 py-4 mr-4">
         <Button
           variant="outline"
           size="sm"
+          className="py-4 px-2"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
@@ -140,6 +152,7 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
         <Button
           variant="outline"
           size="sm"
+          className="py-4 px-2"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >

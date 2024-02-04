@@ -22,7 +22,7 @@ export function ModeToggle(): React.JSX.Element {
           size="icon"
           onClick={() => setTheme('light')}
         >
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <Moon className="h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         </Button>
       )}
     </>
