@@ -44,7 +44,7 @@ export class FindResourcesMetadataQueryHandlerImpl implements FindResourcesMetad
       pageSize,
     });
 
-    this.loggerService.info({
+    this.loggerService.debug({
       message: 'Resources fetched.',
       userId,
       bucketName,

@@ -52,7 +52,7 @@ export class DeleteResourceCommandHandlerImpl implements DeleteResourceCommandHa
       resourceName,
     });
 
-    this.loggerService.info({
+    this.loggerService.debug({
       message: 'Resource deleted.',
       userId,
       bucketName,

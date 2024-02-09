@@ -48,7 +48,7 @@ export class CrateUserCommandHandlerImpl implements CreateUserCommandHandler {
       role: UserRole.user,
     });
 
-    this.loggerService.info({
+    this.loggerService.debug({
       message: 'User created.',
       userId: user.getId(),
       email,

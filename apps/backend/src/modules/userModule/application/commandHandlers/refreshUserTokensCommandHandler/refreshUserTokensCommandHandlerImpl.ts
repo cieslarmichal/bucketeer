@@ -81,7 +81,7 @@ export class RefreshUserTokensCommandHandlerImpl implements RefreshUserTokensCom
       expiresIn: accessTokenExpiresIn,
     });
 
-    this.loggerService.info({
+    this.loggerService.debug({
       message: 'User tokens refreshed.',
       userId,
     });

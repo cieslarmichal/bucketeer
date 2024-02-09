@@ -63,7 +63,7 @@ export class DownloadImageQueryHandlerImpl implements DownloadImageQueryHandler 
 
     const resizedImageData = resource.data.pipe(resizing);
 
-    this.loggerService.info({
+    this.loggerService.debug({
       message: 'Image Resource downloaded.',
       userId,
       bucketName,
