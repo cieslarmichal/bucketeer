@@ -82,7 +82,7 @@ export class LoginUserCommandHandlerImpl implements LoginUserCommandHandler {
       domainActions: user.getDomainActions(),
     });
 
-    this.loggerService.info({
+    this.loggerService.debug({
       message: 'User logged in.',
       email,
       userId: user.getId(),

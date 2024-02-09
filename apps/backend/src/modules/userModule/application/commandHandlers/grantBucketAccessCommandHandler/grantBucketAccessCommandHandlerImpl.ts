@@ -33,7 +33,7 @@ export class GrantBucketAccessCommandHandlerImpl implements GrantBucketAccessCom
     const existingBuckets = await this.userRepository.findUserBuckets({ userId });
 
     if (existingBuckets.find((userBucket) => userBucket.getBucketName() === bucketName)) {
-      this.loggerService.info({
+      this.loggerService.debug({
         message: 'Bucket access already granted.',
         userId,
         bucketName,
@@ -51,7 +51,7 @@ export class GrantBucketAccessCommandHandlerImpl implements GrantBucketAccessCom
       domainActions: existingUser.getDomainActions(),
     });
 
-    this.loggerService.info({
+    this.loggerService.debug({
       message: 'Bucket access granted.',
       userId,
       bucketName,

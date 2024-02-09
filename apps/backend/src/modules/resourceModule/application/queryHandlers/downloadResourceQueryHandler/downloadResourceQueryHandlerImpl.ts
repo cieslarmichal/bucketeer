@@ -40,7 +40,7 @@ export class DownloadResourceQueryHandlerImpl implements DownloadResourceQueryHa
       resourceName,
     });
 
-    this.loggerService.info({
+    this.loggerService.debug({
       message: 'Resource downloaded.',
       userId,
       bucketName,

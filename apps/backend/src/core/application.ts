@@ -35,12 +35,12 @@ export class Application {
         await databaseManager.bootstrapDatabase(container);
       }
 
-      loggerService.info({
+      loggerService.debug({
         message: 'Migrations run success.',
         source: Application.name,
       });
     } catch (error) {
-      loggerService.info({
+      loggerService.error({
         message: 'Migrations run error.',
         source: Application.name,
       });
@@ -69,7 +69,7 @@ export class Application {
     const userExists = await sqliteDatabaseClient<UserRawEntity>(userTable.name).where({ email }).first();
 
     if (userExists) {
-      loggerService.info({
+      loggerService.debug({
         message: 'Admin user already exists.',
         email,
         source: Application.name,
@@ -91,7 +91,7 @@ export class Application {
       role: UserRole.admin,
     });
 
-    loggerService.info({
+    loggerService.debug({
       message: 'Admin user created.',
       email,
       source: Application.name,
@@ -139,8 +139,6 @@ export class Application {
   public static async start(): Promise<void> {
     const container = Application.createContainer();
 
-    const loggerService = container.get<LoggerService>(coreSymbols.loggerService);
-
     await this.setupDatabase(container);
 
     await this.createAdminUser(container);
@@ -148,10 +146,5 @@ export class Application {
     const server = new HttpServer(container);
 
     await server.start();
-
-    loggerService.log({
-      message: `Application started.`,
-      source: Application.name,
-    });
   }
 }

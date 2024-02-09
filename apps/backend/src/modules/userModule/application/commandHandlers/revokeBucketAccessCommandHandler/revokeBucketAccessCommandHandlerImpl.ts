@@ -33,7 +33,7 @@ export class RevokeBucketAccessCommandHandlerImpl implements RevokeBucketAccessC
     const existingBuckets = await this.userRepository.findUserBuckets({ userId });
 
     if (!existingBuckets.find((userBucket) => userBucket.getBucketName() === bucketName)) {
-      this.loggerService.info({
+      this.loggerService.debug({
         message: 'User does not have access to the bucket.',
         userId,
         bucketName,
@@ -51,7 +51,7 @@ export class RevokeBucketAccessCommandHandlerImpl implements RevokeBucketAccessC
       domainActions: existingUser.getDomainActions(),
     });
 
-    this.loggerService.info({
+    this.loggerService.debug({
       message: 'Bucket access revoked.',
       userId,
       bucketName,

@@ -80,7 +80,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
 
     archive.finalize();
 
-    this.loggerService.info({
+    this.loggerService.debug({
       message: 'Resources downloaded.',
       userId,
       bucketName,

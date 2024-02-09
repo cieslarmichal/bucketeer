@@ -18,7 +18,7 @@ export class DeleteUserCommandHandlerImpl implements DeleteUserCommandHandler {
 
     await this.userRepository.deleteUser({ id: userId });
 
-    this.loggerService.info({
+    this.loggerService.debug({
       message: 'User deleted.',
       userId,
     });

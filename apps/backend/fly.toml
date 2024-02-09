@@ -29,3 +29,8 @@ primary_region = "waw"
   cpu_kind = "shared"
   cpus = 1
   memory_mb = 512
+
+[services.concurrency]
+  hard_limit = 200
+  soft_limit = 200
+  type = "connections"
