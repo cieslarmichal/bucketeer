@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type UserBucketMapper } from './userBucketMapper/userBucketMapper.js';
 import { type UserMapper } from './userMapper/userMapper.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
@@ -19,6 +20,7 @@ import {
   type DeleteUserPayload,
   type FindUserTokensPayload,
   type FindUserBucketsPayload,
+  type FindUsersPayload,
 } from '../../../domain/repositories/userRepository/userRepository.js';
 import { type RefreshTokenRawEntity } from '../../databases/userDatabase/tables/refreshTokenTable/refreshTokenRawEntity.js';
 import { RefreshTokenTable } from '../../databases/userDatabase/tables/refreshTokenTable/refreshTokenTable.js';
@@ -140,6 +142,56 @@ export class UserRepositoryImpl implements UserRepository {
     }
 
     return this.userMapper.mapToDomain(rawEntity);
+  }
+
+  public async findUsers(payload: FindUsersPayload): Promise<User[]> {
+    const { page, pageSize } = payload;
+
+    let rawEntities: UserRawEntity[];
+
+    try {
+      rawEntities = await this.sqliteDatabaseClient<UserRawEntity>(this.userTable.name)
+        .select('*')
+        .offset((page - 1) * pageSize)
+        .limit(pageSize);
+    } catch (error) {
+      this.loggerService.error({
+        message: 'Error while finding Users.',
+        error,
+      });
+
+      throw new RepositoryError({
+        entity: 'Users',
+        operation: 'find',
+      });
+    }
+
+    return rawEntities.map((rawEntity) => this.userMapper.mapToDomain(rawEntity));
+  }
+
+  public async countUsers(): Promise<number> {
+    try {
+      const result = await this.sqliteDatabaseClient<UserRawEntity>(this.userTable.name).count('* as count').first();
+
+      if (!result) {
+        throw new RepositoryError({
+          entity: 'Users',
+          operation: 'count',
+        });
+      }
+
+      return Number((result as any).count);
+    } catch (error) {
+      this.loggerService.error({
+        message: 'Error while counting Users.',
+        error,
+      });
+
+      throw new RepositoryError({
+        entity: 'Users',
+        operation: 'count',
+      });
+    }
   }
 
   public async findUserBuckets(payload: FindUserBucketsPayload): Promise<UserBucket[]> {
