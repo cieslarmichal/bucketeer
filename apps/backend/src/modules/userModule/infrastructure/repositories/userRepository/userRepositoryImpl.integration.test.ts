@@ -103,6 +103,63 @@ describe('UserRepositoryImpl', () => {
     });
   });
 
+  describe('Find all', () => {
+    it('finds all Users', async () => {
+      const user1 = await userTestUtils.createAndPersist();
+
+      const user2 = await userTestUtils.createAndPersist();
+
+      const users = await userRepository.findUsers({
+        page: 1,
+        pageSize: 10,
+      });
+
+      expect(users.length).toEqual(2);
+
+      expect(users.find((user) => user.getId() === user1.id)).not.toBeNull();
+
+      expect(users.find((user) => user.getId() === user2.id)).not.toBeNull();
+    });
+
+    it('returns empty array if there are no Users', async () => {
+      const users = await userRepository.findUsers({
+        page: 1,
+        pageSize: 10,
+      });
+
+      expect(users.length).toEqual(0);
+    });
+
+    it('returns empty array if there are no Users on the given page', async () => {
+      await userTestUtils.createAndPersist();
+
+      const users = await userRepository.findUsers({
+        page: 2,
+        pageSize: 10,
+      });
+
+      expect(users.length).toEqual(0);
+    });
+  });
+
+  describe('Count', () => {
+    it('counts Users', async () => {
+      await userTestUtils.createAndPersist();
+
+      await userTestUtils.createAndPersist();
+
+      const count = await userRepository.countUsers();
+
+      expect(count).toEqual(2);
+    });
+
+    it('returns 0 if there are no Users', async () => {
+      const count = await userRepository.countUsers();
+
+      expect(count).toEqual(0);
+    });
+  });
+
   describe('Update', () => {
     it(`creates User's refresh tokens`, async () => {
       const user = await userTestUtils.createAndPersist();

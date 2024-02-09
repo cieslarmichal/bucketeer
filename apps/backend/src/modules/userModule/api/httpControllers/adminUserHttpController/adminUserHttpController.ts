@@ -19,6 +19,12 @@ import {
   type FindUserResponseBodyDTO,
 } from './schemas/findUserSchema.js';
 import {
+  type FindUsersQueryParamsDTO,
+  findUsersQueryParamsDTOSchema,
+  findUsersResponseBodyDTOSchema,
+  type FindUsersResponseBodyDTO,
+} from './schemas/findUsersSchema.js';
+import {
   type GrantBucketAccessResponseBodyDTO,
   type GrantBucketAccessBodyDTO,
   type GrantBucketAccessPathParamsDTO,
@@ -50,6 +56,7 @@ import { type DeleteUserCommandHandler } from '../../../application/commandHandl
 import { type GrantBucketAccessCommandHandler } from '../../../application/commandHandlers/grantBucketAccessCommandHandler/grantBucketAccessCommandHandler.js';
 import { type RevokeBucketAccessCommandHandler } from '../../../application/commandHandlers/revokeBucketAccessCommandHandler/revokeBucketAccessCommandHandler.js';
 import { type FindUserQueryHandler } from '../../../application/queryHandlers/findUserQueryHandler/findUserQueryHandler.js';
+import { type FindUsersQueryHandler } from '../../../application/queryHandlers/findUsersQueryHandler/findUsersQueryHandler.js';
 import { type User } from '../../../domain/entities/user/user.js';
 import { type UserDTO } from '../common/userDTO.js';
 
@@ -60,6 +67,7 @@ export class AdminUserHttpController implements HttpController {
     private readonly createUserCommandHandler: CreateUserCommandHandler,
     private readonly deleteUserCommandHandler: DeleteUserCommandHandler,
     private readonly findUserQueryHandler: FindUserQueryHandler,
+    private readonly findUsersQueryHandler: FindUsersQueryHandler,
     private readonly grantBucketAccessCommandHandler: GrantBucketAccessCommandHandler,
     private readonly revokeBucketAccessCommandHandler: RevokeBucketAccessCommandHandler,
     private readonly accessControlService: AccessControlService,
@@ -143,6 +151,24 @@ export class AdminUserHttpController implements HttpController {
         securityMode: SecurityMode.bearer,
         tags: ['User'],
         description: 'Find user by id.',
+      }),
+      new HttpRoute({
+        method: HttpMethodName.get,
+        handler: this.findUsers.bind(this),
+        schema: {
+          request: {
+            queryParams: findUsersQueryParamsDTOSchema,
+          },
+          response: {
+            [HttpStatusCode.ok]: {
+              schema: findUsersResponseBodyDTOSchema,
+              description: 'Users found.',
+            },
+          },
+        },
+        securityMode: SecurityMode.bearer,
+        tags: ['User'],
+        description: 'Find users.',
       }),
       new HttpRoute({
         method: HttpMethodName.delete,
@@ -248,6 +274,36 @@ export class AdminUserHttpController implements HttpController {
     return {
       statusCode: HttpStatusCode.ok,
       body: this.mapUserToUserDTO(user),
+    };
+  }
+
+  private async findUsers(
+    request: HttpRequest<undefined, FindUsersQueryParamsDTO, undefined>,
+  ): Promise<HttpOkResponse<FindUsersResponseBodyDTO>> {
+    await this.accessControlService.verifyBearerToken({
+      authorizationHeader: request.headers['authorization'],
+      expectedRole: UserRole.admin,
+    });
+
+    const page = request.queryParams.page ?? 1;
+
+    const pageSize = request.queryParams.pageSize ?? 10;
+
+    const { users, totalUsers } = await this.findUsersQueryHandler.execute({
+      page,
+      pageSize,
+    });
+
+    return {
+      statusCode: HttpStatusCode.ok,
+      body: {
+        data: users.map((user) => this.mapUserToUserDTO(user)),
+        metadata: {
+          page,
+          pageSize,
+          totalPages: Math.ceil(totalUsers / pageSize),
+        },
+      },
     };
   }
 

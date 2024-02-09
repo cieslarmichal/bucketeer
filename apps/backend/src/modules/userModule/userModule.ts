@@ -18,6 +18,8 @@ import { type FindUserBucketsQueryHandler } from './application/queryHandlers/fi
 import { FindUserBucketsQueryHandlerImpl } from './application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandlerImpl.js';
 import { type FindUserQueryHandler } from './application/queryHandlers/findUserQueryHandler/findUserQueryHandler.js';
 import { FindUserQueryHandlerImpl } from './application/queryHandlers/findUserQueryHandler/findUserQueryHandlerImpl.js';
+import { type FindUsersQueryHandler } from './application/queryHandlers/findUsersQueryHandler/findUsersQueryHandler.js';
+import { FindUsersQueryHandlerImpl } from './application/queryHandlers/findUsersQueryHandler/findUsersQueryHandlerImpl.js';
 import { type HashService } from './application/services/hashService/hashService.js';
 import { HashServiceImpl } from './application/services/hashService/hashServiceImpl.js';
 import { type PasswordValidationService } from './application/services/passwordValidationService/passwordValidationService.js';
@@ -168,6 +170,11 @@ export class UserModule implements DependencyInjectionModule {
       () => new FindUserQueryHandlerImpl(container.get<UserRepository>(symbols.userRepository)),
     );
 
+    container.bind<FindUsersQueryHandler>(
+      symbols.findUsersQueryHandler,
+      () => new FindUsersQueryHandlerImpl(container.get<UserRepository>(symbols.userRepository)),
+    );
+
     container.bind<FindUserBucketsQueryHandler>(
       symbols.findUserBucketsQueryHandler,
       () => new FindUserBucketsQueryHandlerImpl(container.get<UserRepository>(symbols.userRepository)),
@@ -192,6 +199,7 @@ export class UserModule implements DependencyInjectionModule {
           container.get<CreateUserCommandHandler>(symbols.createUserCommandHandler),
           container.get<DeleteUserCommandHandler>(symbols.deleteUserCommandHandler),
           container.get<FindUserQueryHandler>(symbols.findUserQueryHandler),
+          container.get<FindUsersQueryHandler>(symbols.findUsersQueryHandler),
           container.get<GrantBucketAccessCommandHandler>(symbols.grantBucketAccessCommandHandler),
           container.get<RevokeBucketAccessCommandHandler>(symbols.revokeBucketAccessCommandHandler),
           container.get<AccessControlService>(authSymbols.accessControlService),

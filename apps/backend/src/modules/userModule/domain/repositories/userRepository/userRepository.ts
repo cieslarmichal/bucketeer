@@ -14,6 +14,15 @@ export interface FindUserPayload {
   readonly email?: string;
 }
 
+export interface FindUsersPayload {
+  readonly page: number;
+  readonly pageSize: number;
+}
+
+export interface FindUsersResult {
+  readonly users: User[];
+}
+
 export interface FindUserTokensPayload {
   readonly userId: string;
 }
@@ -34,6 +43,8 @@ export interface DeleteUserPayload {
 export interface UserRepository {
   createUser(input: CreateUserPayload): Promise<User>;
   findUser(input: FindUserPayload): Promise<User | null>;
+  findUsers(input: FindUsersPayload): Promise<User[]>;
+  countUsers(): Promise<number>;
   findUserTokens(input: FindUserTokensPayload): Promise<UserTokens | null>;
   findUserBuckets(input: FindUserBucketsPayload): Promise<UserBucket[]>;
   updateUser(input: UpdateUserPayload): Promise<void>;

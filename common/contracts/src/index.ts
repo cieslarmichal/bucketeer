@@ -18,6 +18,8 @@ export * from './schemas/user/grantBucketAccess.js';
 
 export * from './schemas/user/revokeBucketAccess.js';
 
+export * from './schemas/user/findUsers.js';
+
 export * from './schemas/resource/findResources.js';
 
 export * from './schemas/resource/deleteResource.js';
