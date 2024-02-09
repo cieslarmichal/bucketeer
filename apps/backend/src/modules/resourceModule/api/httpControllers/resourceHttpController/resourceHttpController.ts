@@ -33,6 +33,7 @@ import {
 } from './schemas/findResourcesSchema.js';
 import { type ResourceMetadataDTO } from './schemas/resourceMetadataDTO.js';
 import { type HttpController } from '../../../../../common/types/http/httpController.js';
+import { HttpHeader } from '../../../../../common/types/http/httpHeader.js';
 import { HttpMethodName } from '../../../../../common/types/http/httpMethodName.js';
 import { type HttpRequest } from '../../../../../common/types/http/httpRequest.js';
 import { type HttpOkResponse, type HttpNoContentResponse } from '../../../../../common/types/http/httpResponse.js';
@@ -253,9 +254,9 @@ export class ResourceHttpController implements HttpController {
     return {
       statusCode: HttpStatusCode.ok,
       body: resourcesData,
-      file: {
-        name: 'resources.zip',
-        contentType: 'application/zip',
+      headers: {
+        [HttpHeader.contentDisposition]: 'attachment; filename=resources.zip',
+        [HttpHeader.contentType]: 'application/zip',
       },
     };
   }
@@ -278,9 +279,10 @@ export class ResourceHttpController implements HttpController {
     return {
       statusCode: HttpStatusCode.ok,
       body: resource.data,
-      file: {
-        name: resource.name,
-        contentType: resource.contentType,
+      headers: {
+        [HttpHeader.cacheControl]: 'max-age=2592000',
+        [HttpHeader.contentDisposition]: `attachment; filename=${resource.name}`,
+        [HttpHeader.contentType]: resource.contentType,
       },
     };
   }
@@ -305,9 +307,10 @@ export class ResourceHttpController implements HttpController {
     return {
       statusCode: HttpStatusCode.ok,
       body: resource.data,
-      file: {
-        name: resource.name,
-        contentType: resource.contentType,
+      headers: {
+        [HttpHeader.cacheControl]: 'max-age=2592000',
+        [HttpHeader.contentDisposition]: `attachment; filename=${resource.name}`,
+        [HttpHeader.contentType]: resource.contentType,
       },
     };
   }

@@ -70,7 +70,7 @@ export class HttpRouter {
         const requestDate = new Date();
 
         try {
-          this.loggerService.info({
+          this.loggerService.debug({
             message: 'Received an HTTP request.',
             source: HttpRouter.name,
             path: fastifyRequest.url,
@@ -84,7 +84,7 @@ export class HttpRouter {
           const {
             statusCode,
             body: responseBody,
-            file,
+            headers,
           } = await httpRoute.handler({
             body: fastifyRequest.body,
             pathParams: fastifyRequest.params,
@@ -94,12 +94,12 @@ export class HttpRouter {
 
           fastifyReply.status(statusCode);
 
-          if (file) {
-            fastifyReply.header(HttpHeader.contentType, `${file.contentType}`);
+          fastifyReply.header(HttpHeader.contentType, 'application/json');
 
-            fastifyReply.header('Content-Disposition', `attachment; filename=${file.name}`);
-          } else {
-            fastifyReply.header(HttpHeader.contentType, 'application/json');
+          if (headers) {
+            Object.entries(headers).forEach(([headerName, headerValue]) => {
+              fastifyReply.header(headerName, headerValue);
+            });
           }
 
           if (responseBody) {
@@ -114,8 +114,6 @@ export class HttpRouter {
             path: fastifyRequest.url,
             method,
             statusCode,
-            file,
-            time: new Date().getTime() - requestDate.getTime(),
           });
 
           return;

@@ -3,10 +3,7 @@ import { type HttpStatusCode } from './httpStatusCode.js';
 export interface HttpResponse<Body = unknown> {
   readonly statusCode: HttpStatusCode;
   readonly body: Body;
-  readonly file?: {
-    readonly name: string;
-    readonly contentType: string;
-  };
+  readonly headers?: Record<string, string>;
 }
 
 export interface HttpOkResponse<Body = unknown> extends HttpResponse<Body> {
