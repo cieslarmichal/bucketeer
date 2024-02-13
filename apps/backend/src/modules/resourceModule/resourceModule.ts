@@ -1,3 +1,4 @@
+import { AdminResourceHttpController } from './api/httpControllers/adminResourceHttpController/adminResourceHttpController.js';
 import { ResourceHttpController } from './api/httpControllers/resourceHttpController/resourceHttpController.js';
 import { type DeleteResourceCommandHandler } from './application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandler.js';
 import { DeleteResourceCommandHandlerImpl } from './application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandlerImpl.js';
@@ -7,6 +8,8 @@ import { type DownloadResourceQueryHandler } from './application/queryHandlers/d
 import { DownloadResourceQueryHandlerImpl } from './application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandlerImpl.js';
 import { type DownloadResourcesQueryHandler } from './application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandler.js';
 import { DownloadResourcesQueryHandlerImpl } from './application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandlerImpl.js';
+import { type FindBucketsQueryHandler } from './application/queryHandlers/findBucketsQueryHandler/findBucketsQueryHandler.js';
+import { FindBucketsQueryHandlerImpl } from './application/queryHandlers/findBucketsQueryHandler/findBucketsQueryHandlerImpl.js';
 import { type FindResourcesMetadataQueryHandler } from './application/queryHandlers/findResourcesMetadataQueryHandler/findResourcesMetadataQueryHandler.js';
 import { FindResourcesMetadataQueryHandlerImpl } from './application/queryHandlers/findResourcesMetadataQueryHandler/findResourcesMetadataQueryHandlerImpl.js';
 import { type ResourceBlobService } from './domain/services/resourceBlobService/resourceBlobService.js';
@@ -79,6 +82,11 @@ export class ResourceModule implements DependencyInjectionModule {
         ),
     );
 
+    container.bind<FindBucketsQueryHandler>(
+      symbols.findBucketsQueryHandler,
+      () => new FindBucketsQueryHandlerImpl(container.get<S3Client>(coreSymbols.s3Client)),
+    );
+
     container.bind<ResourceHttpController>(
       symbols.resourceHttpController,
       () =>
@@ -89,6 +97,15 @@ export class ResourceModule implements DependencyInjectionModule {
           container.get<DownloadResourcesQueryHandler>(symbols.downloadResourcesQueryHandler),
           container.get<DownloadImageQueryHandler>(symbols.downloadImageQueryHandler),
           container.get<FindUserBucketsQueryHandler>(userSymbols.findUserBucketsQueryHandler),
+          container.get<AccessControlService>(authSymbols.accessControlService),
+        ),
+    );
+
+    container.bind<AdminResourceHttpController>(
+      symbols.adminResourceHttpController,
+      () =>
+        new AdminResourceHttpController(
+          container.get<FindBucketsQueryHandler>(symbols.findBucketsQueryHandler),
           container.get<AccessControlService>(authSymbols.accessControlService),
         ),
     );

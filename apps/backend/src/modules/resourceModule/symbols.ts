@@ -7,9 +7,13 @@ export const symbols = {
   downloadImageQueryHandler: Symbol('downloadImageQueryHandler'),
   deleteResourceCommandHandler: Symbol('deleteResourceCommandHandler'),
 
+  findBucketsQueryHandler: Symbol('findBucketsQueryHandler'),
+
   resourceHttpController: Symbol('resourceHttpController'),
+  adminResourceHttpController: Symbol('adminResourceHttpController'),
 };
 
 export const resourceSymbols = {
   resourceHttpController: symbols.resourceHttpController,
+  adminResourceHttpController: symbols.adminResourceHttpController,
 };

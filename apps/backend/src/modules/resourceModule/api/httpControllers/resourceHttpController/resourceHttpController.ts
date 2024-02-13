@@ -22,7 +22,6 @@ import {
   exportResourcesPathParamsDTOSchema,
   type ExportResourcesPathParamsDTO,
 } from './schemas/exportResourcesSchema.js';
-import { findBucketsResponseBodyDTOSchema, type FindBucketsResponseBodyDTO } from './schemas/findBucketsSchema.js';
 import {
   findResourcesQueryParamsDTOSchema,
   findResourcesResponseBodyDTOSchema,
@@ -31,6 +30,10 @@ import {
   findResourcesPathParamsDTOSchema,
   type FindResourcesPathParamsDTO,
 } from './schemas/findResourcesSchema.js';
+import {
+  findUserBucketsResponseBodyDTOSchema,
+  type FindUserBucketsResponseBodyDTO,
+} from './schemas/findUserBucketsSchema.js';
 import { type ResourceMetadataDTO } from './schemas/resourceMetadataDTO.js';
 import { type HttpController } from '../../../../../common/types/http/httpController.js';
 import { HttpHeader } from '../../../../../common/types/http/httpHeader.js';
@@ -58,7 +61,7 @@ export class ResourceHttpController implements HttpController {
     private readonly downloadResourceQueryHandler: DownloadResourceQueryHandler,
     private readonly downloadResourcesQueryHandler: DownloadResourcesQueryHandler,
     private readonly downloadImageQueryHandler: DownloadImageQueryHandler,
-    private readonly findBucketsQueryHandler: FindUserBucketsQueryHandler,
+    private readonly findUserBucketsQueryHandler: FindUserBucketsQueryHandler,
     private readonly accessControlService: AccessControlService,
   ) {}
 
@@ -71,7 +74,7 @@ export class ResourceHttpController implements HttpController {
           request: {},
           response: {
             [HttpStatusCode.ok]: {
-              schema: findBucketsResponseBodyDTOSchema,
+              schema: findUserBucketsResponseBodyDTOSchema,
               description: 'Buckets found.',
             },
           },
@@ -182,12 +185,12 @@ export class ResourceHttpController implements HttpController {
 
   private async findBuckets(
     request: HttpRequest<undefined, undefined, undefined>,
-  ): Promise<HttpOkResponse<FindBucketsResponseBodyDTO>> {
+  ): Promise<HttpOkResponse<FindUserBucketsResponseBodyDTO>> {
     const { userId } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
     });
 
-    const { buckets } = await this.findBucketsQueryHandler.execute({
+    const { buckets } = await this.findUserBucketsQueryHandler.execute({
       userId,
     });
 
