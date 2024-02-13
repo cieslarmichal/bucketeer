@@ -31,3 +31,5 @@ export * from './schemas/resource/downloadImage.js';
 export * from './schemas/resource/exportResources.js';
 
 export * from './schemas/resource/findUserBuckets.js';
+
+export * from './schemas/resource/findBuckets.js';
