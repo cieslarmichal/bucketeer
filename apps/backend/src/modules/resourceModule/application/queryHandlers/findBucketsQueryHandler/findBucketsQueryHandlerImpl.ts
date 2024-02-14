@@ -7,9 +7,7 @@ export class FindBucketsQueryHandlerImpl implements FindBucketsQueryHandler {
   public constructor(private readonly s3Client: S3Client) {}
 
   public async execute(): Promise<FindBucketsQueryHandlerResult> {
-    const command = new ListBucketsCommand({});
-
-    const result = await this.s3Client.send(command);
+    const result = await this.s3Client.send(new ListBucketsCommand({}));
 
     if (!result.Buckets) {
       return {

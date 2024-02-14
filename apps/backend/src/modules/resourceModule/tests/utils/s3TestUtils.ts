@@ -7,6 +7,7 @@ import {
   ListObjectsV2Command,
   type ListObjectsV2CommandInput,
   PutObjectCommand,
+  ListBucketsCommand,
 } from '@aws-sdk/client-s3';
 import { existsSync, readFileSync } from 'node:fs';
 
@@ -55,6 +56,12 @@ export class S3TestUtils {
   }
 
   public async deleteBucket(bucketName: string): Promise<void> {
+    const existingBuckets = await this.getBuckets();
+
+    if (!existingBuckets.includes(bucketName)) {
+      return;
+    }
+
     await this.truncateBucket(bucketName);
 
     const command = new DeleteBucketCommand({
@@ -108,5 +115,17 @@ export class S3TestUtils {
     });
 
     await this.s3Client.send(command);
+  }
+
+  public async getBuckets(): Promise<string[]> {
+    const result = await this.s3Client.send(new ListBucketsCommand({}));
+
+    if (!result.Buckets) {
+      return [];
+    }
+
+    const buckets = result.Buckets.map((bucket) => bucket.Name as string);
+
+    return buckets;
   }
 }

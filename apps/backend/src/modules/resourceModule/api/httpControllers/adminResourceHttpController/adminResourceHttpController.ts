@@ -1,14 +1,21 @@
 import { UserRole } from '@common/contracts';
 
+import {
+  type CreateBucketBodyDTO,
+  type CreateBucketResponseBodyDTO,
+  createBucketBodyDTOSchema,
+  createBucketResponseBodyDTOSchema,
+} from './schemas/createBucketSchema.js';
 import { findBucketsResponseBodyDTOSchema, type FindBucketsResponseBodyDTO } from './schemas/findBucketsSchema.js';
 import { type HttpController } from '../../../../../common/types/http/httpController.js';
 import { HttpMethodName } from '../../../../../common/types/http/httpMethodName.js';
 import { type HttpRequest } from '../../../../../common/types/http/httpRequest.js';
-import { type HttpOkResponse } from '../../../../../common/types/http/httpResponse.js';
+import { type HttpNoContentResponse, type HttpOkResponse } from '../../../../../common/types/http/httpResponse.js';
 import { HttpRoute } from '../../../../../common/types/http/httpRoute.js';
 import { HttpStatusCode } from '../../../../../common/types/http/httpStatusCode.js';
 import { SecurityMode } from '../../../../../common/types/http/securityMode.js';
 import { type AccessControlService } from '../../../../authModule/application/services/accessControlService/accessControlService.js';
+import { type CreateBucketCommandHandler } from '../../../application/commandHandlers/createBucketCommandHandler/createBucketCommandHandler.js';
 import { type FindBucketsQueryHandler } from '../../../application/queryHandlers/findBucketsQueryHandler/findBucketsQueryHandler.js';
 
 export class AdminResourceHttpController implements HttpController {
@@ -16,11 +23,30 @@ export class AdminResourceHttpController implements HttpController {
 
   public constructor(
     private readonly findBucketsQueryHandler: FindBucketsQueryHandler,
+    private readonly createBucketCommandHandler: CreateBucketCommandHandler,
     private readonly accessControlService: AccessControlService,
   ) {}
 
   public getHttpRoutes(): HttpRoute[] {
     return [
+      new HttpRoute({
+        method: HttpMethodName.post,
+        handler: this.createBucket.bind(this),
+        schema: {
+          request: {
+            body: createBucketBodyDTOSchema,
+          },
+          response: {
+            [HttpStatusCode.noContent]: {
+              schema: createBucketResponseBodyDTOSchema,
+              description: 'Bucket created.',
+            },
+          },
+        },
+        securityMode: SecurityMode.bearer,
+        tags: ['Bucket'],
+        description: 'Create bucket.',
+      }),
       new HttpRoute({
         method: HttpMethodName.get,
         handler: this.findBuckets.bind(this),
@@ -38,6 +64,24 @@ export class AdminResourceHttpController implements HttpController {
         description: 'Find buckets.',
       }),
     ];
+  }
+
+  private async createBucket(
+    request: HttpRequest<CreateBucketBodyDTO, undefined, undefined>,
+  ): Promise<HttpNoContentResponse<CreateBucketResponseBodyDTO>> {
+    await this.accessControlService.verifyBearerToken({
+      authorizationHeader: request.headers['authorization'],
+      expectedRole: UserRole.admin,
+    });
+
+    await this.createBucketCommandHandler.execute({
+      bucketName: request.body.bucketName,
+    });
+
+    return {
+      statusCode: HttpStatusCode.noContent,
+      body: null,
+    };
   }
 
   private async findBuckets(
