@@ -1,5 +1,7 @@
 import { AdminResourceHttpController } from './api/httpControllers/adminResourceHttpController/adminResourceHttpController.js';
 import { ResourceHttpController } from './api/httpControllers/resourceHttpController/resourceHttpController.js';
+import { type CreateBucketCommandHandler } from './application/commandHandlers/createBucketCommandHandler/createBucketCommandHandler.js';
+import { CreateBucketCommandHandlerImpl } from './application/commandHandlers/createBucketCommandHandler/createBucketCommandHandlerImpl.js';
 import { type DeleteResourceCommandHandler } from './application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandler.js';
 import { DeleteResourceCommandHandlerImpl } from './application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandlerImpl.js';
 import { type DownloadImageQueryHandler } from './application/queryHandlers/downloadImageQueryHandler/downloadImageQueryHandler.js';
@@ -87,6 +89,15 @@ export class ResourceModule implements DependencyInjectionModule {
       () => new FindBucketsQueryHandlerImpl(container.get<S3Client>(coreSymbols.s3Client)),
     );
 
+    container.bind<CreateBucketCommandHandler>(
+      symbols.createBucketCommandHandler,
+      () =>
+        new CreateBucketCommandHandlerImpl(
+          container.get<S3Client>(coreSymbols.s3Client),
+          container.get<LoggerService>(coreSymbols.loggerService),
+        ),
+    );
+
     container.bind<ResourceHttpController>(
       symbols.resourceHttpController,
       () =>
@@ -106,6 +117,7 @@ export class ResourceModule implements DependencyInjectionModule {
       () =>
         new AdminResourceHttpController(
           container.get<FindBucketsQueryHandler>(symbols.findBucketsQueryHandler),
+          container.get<CreateBucketCommandHandler>(symbols.createBucketCommandHandler),
           container.get<AccessControlService>(authSymbols.accessControlService),
         ),
     );

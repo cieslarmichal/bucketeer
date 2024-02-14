@@ -6,7 +6,7 @@ import { TestContainer } from '../../../../../../tests/container/testContainer.j
 import { symbols } from '../../../symbols.js';
 import { type S3TestUtils } from '../../../tests/utils/s3TestUtils.js';
 
-describe('FindUserBucketsQueryHandler', () => {
+describe('FindBucketsQueryHandler', () => {
   let queryHandler: FindBucketsQueryHandler;
 
   let s3TestUtils: S3TestUtils;
