@@ -2,6 +2,8 @@ import { AdminResourceHttpController } from './api/httpControllers/adminResource
 import { ResourceHttpController } from './api/httpControllers/resourceHttpController/resourceHttpController.js';
 import { type CreateBucketCommandHandler } from './application/commandHandlers/createBucketCommandHandler/createBucketCommandHandler.js';
 import { CreateBucketCommandHandlerImpl } from './application/commandHandlers/createBucketCommandHandler/createBucketCommandHandlerImpl.js';
+import { type DeleteBucketCommandHandler } from './application/commandHandlers/deleteBucketCommandHandler/deleteBucketCommandHandler.js';
+import { DeleteBucketCommandHandlerImpl } from './application/commandHandlers/deleteBucketCommandHandler/deleteBucketCommandHandlerImpl.js';
 import { type DeleteResourceCommandHandler } from './application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandler.js';
 import { DeleteResourceCommandHandlerImpl } from './application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandlerImpl.js';
 import { type DownloadImageQueryHandler } from './application/queryHandlers/downloadImageQueryHandler/downloadImageQueryHandler.js';
@@ -98,6 +100,15 @@ export class ResourceModule implements DependencyInjectionModule {
         ),
     );
 
+    container.bind<DeleteBucketCommandHandler>(
+      symbols.deleteBucketCommandHandler,
+      () =>
+        new DeleteBucketCommandHandlerImpl(
+          container.get<S3Client>(coreSymbols.s3Client),
+          container.get<LoggerService>(coreSymbols.loggerService),
+        ),
+    );
+
     container.bind<ResourceHttpController>(
       symbols.resourceHttpController,
       () =>
@@ -118,6 +129,7 @@ export class ResourceModule implements DependencyInjectionModule {
         new AdminResourceHttpController(
           container.get<FindBucketsQueryHandler>(symbols.findBucketsQueryHandler),
           container.get<CreateBucketCommandHandler>(symbols.createBucketCommandHandler),
+          container.get<DeleteBucketCommandHandler>(symbols.deleteBucketCommandHandler),
           container.get<AccessControlService>(authSymbols.accessControlService),
         ),
     );

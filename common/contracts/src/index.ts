@@ -35,3 +35,5 @@ export * from './schemas/resource/findUserBuckets.js';
 export * from './schemas/resource/findBuckets.js';
 
 export * from './schemas/resource/createBucket.js';
+
+export * from './schemas/resource/deleteBucket.js';
