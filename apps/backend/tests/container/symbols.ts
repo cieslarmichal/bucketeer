@@ -1,6 +1,6 @@
 export const testSymbols = {
-  applicationService: Symbol('applicationService'),
   userTestUtils: Symbol('userTestUtils'),
+  userBucketTestUtils: Symbol('userBucketTestUtils'),
   blacklistTokenTestUtils: Symbol('blacklistTokenTestUtils'),
   s3TestUtils: Symbol('s3TestService'),
 };

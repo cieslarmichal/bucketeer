@@ -1,8 +1,5 @@
 import { type UserRole } from '@common/contracts';
 
-import { type UserDomainAction } from './domainActions/userDomainAction.js';
-import { UserDomainActionType } from './domainActions/userDomainActionType.js';
-
 export interface UserDraft {
   readonly id: string;
   readonly email: string;
@@ -10,9 +7,10 @@ export interface UserDraft {
   readonly role: UserRole;
 }
 
-export interface CreateRefreshTokenPayload {
-  readonly token: string;
-  readonly expiresAt: Date;
+export interface UserState {
+  email: string;
+  password: string;
+  role: UserRole;
 }
 
 export interface GrantBucketAccessPayload {
@@ -25,22 +23,16 @@ export interface RevokeBucketAccessPayload {
 
 export class User {
   private id: string;
-  private email: string;
-  private password: string;
-  private role: UserRole;
-
-  private domainActions: UserDomainAction[] = [];
+  private state: UserState;
 
   public constructor(draft: UserDraft) {
-    const { id, email, password } = draft;
+    this.id = draft.id;
 
-    this.id = id;
-
-    this.password = password;
-
-    this.email = email;
-
-    this.role = draft.role;
+    this.state = {
+      email: draft.email,
+      password: draft.password,
+      role: draft.role,
+    };
   }
 
   public getId(): string {
@@ -48,61 +40,18 @@ export class User {
   }
 
   public getEmail(): string {
-    return this.email;
+    return this.state.email;
   }
 
   public getPassword(): string {
-    return this.password;
+    return this.state.password;
   }
 
   public getRole(): UserRole {
-    return this.role;
+    return this.state.role;
   }
 
-  public getState(): UserDraft {
-    return {
-      id: this.id,
-      email: this.email,
-      password: this.password,
-      role: this.role,
-    };
-  }
-
-  public getDomainActions(): UserDomainAction[] {
-    return this.domainActions;
-  }
-
-  public addCreateRefreshTokenAction(payload: CreateRefreshTokenPayload): void {
-    const { token, expiresAt } = payload;
-
-    this.domainActions.push({
-      actionName: UserDomainActionType.createRefreshToken,
-      payload: {
-        token,
-        expiresAt,
-      },
-    });
-  }
-
-  public addGrantBucketAccessAction(payload: GrantBucketAccessPayload): void {
-    const { bucketName } = payload;
-
-    this.domainActions.push({
-      actionName: UserDomainActionType.grantBucketAccess,
-      payload: {
-        bucketName,
-      },
-    });
-  }
-
-  public addRevokeBucketAccessAction(payload: RevokeBucketAccessPayload): void {
-    const { bucketName } = payload;
-
-    this.domainActions.push({
-      actionName: UserDomainActionType.revokeBucketAccess,
-      payload: {
-        bucketName,
-      },
-    });
+  public getState(): UserState {
+    return this.state;
   }
 }

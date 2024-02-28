@@ -4,11 +4,13 @@ import {
 } from './grantBucketAccessCommandHandler.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type LoggerService } from '../../../../../libs/logger/services/loggerService/loggerService.js';
+import { type UserBucketRepository } from '../../../domain/repositories/userBucketRepository/userBucketRepository.js';
 import { type UserRepository } from '../../../domain/repositories/userRepository/userRepository.js';
 
 export class GrantBucketAccessCommandHandlerImpl implements GrantBucketAccessCommandHandler {
   public constructor(
     private readonly userRepository: UserRepository,
+    private readonly userBucketRepository: UserBucketRepository,
     private readonly loggerService: LoggerService,
   ) {}
 
@@ -30,7 +32,7 @@ export class GrantBucketAccessCommandHandlerImpl implements GrantBucketAccessCom
       });
     }
 
-    const existingBuckets = await this.userRepository.findUserBuckets({ userId });
+    const existingBuckets = await this.userBucketRepository.findUserBuckets({ userId });
 
     if (existingBuckets.find((userBucket) => userBucket.getBucketName() === bucketName)) {
       this.loggerService.debug({
@@ -42,13 +44,9 @@ export class GrantBucketAccessCommandHandlerImpl implements GrantBucketAccessCom
       return;
     }
 
-    existingUser.addGrantBucketAccessAction({
+    await this.userBucketRepository.createUserBucket({
       bucketName,
-    });
-
-    await this.userRepository.updateUser({
-      id: userId,
-      domainActions: existingUser.getDomainActions(),
+      userId,
     });
 
     this.loggerService.debug({

@@ -9,6 +9,7 @@ import { OperationNotValidError } from '../../../../../common/errors/common/oper
 import { type SqliteDatabaseClient } from '../../../../../core/database/sqliteDatabaseClient/sqliteDatabaseClient.js';
 import { coreSymbols } from '../../../../../core/symbols.js';
 import { symbols } from '../../../symbols.js';
+import { type UserBucketTestUtils } from '../../../tests/utils/userBucketTestUtils/userBucketTestUtils.js';
 import { type UserTestUtils } from '../../../tests/utils/userTestUtils/userTestUtils.js';
 
 describe('RevokeBucketAccessCommandHandlerImpl', () => {
@@ -18,20 +19,28 @@ describe('RevokeBucketAccessCommandHandlerImpl', () => {
 
   let userTestUtils: UserTestUtils;
 
+  let userBucketTestUtils: UserBucketTestUtils;
+
   beforeEach(async () => {
     const container = TestContainer.create();
 
-    commandHandler = container.get<RevokeBucketAccessCommandHandler>(symbols.grantBucketAccessCommandHandler);
+    commandHandler = container.get<RevokeBucketAccessCommandHandler>(symbols.revokeBucketAccessCommandHandler);
 
     sqliteDatabaseClient = container.get<SqliteDatabaseClient>(coreSymbols.sqliteDatabaseClient);
 
     userTestUtils = container.get<UserTestUtils>(testSymbols.userTestUtils);
 
+    userBucketTestUtils = container.get<UserBucketTestUtils>(testSymbols.userBucketTestUtils);
+
     await userTestUtils.truncate();
+
+    await userBucketTestUtils.truncate();
   });
 
   afterEach(async () => {
     await userTestUtils.truncate();
+
+    await userBucketTestUtils.truncate();
 
     await sqliteDatabaseClient.destroy();
   });
@@ -39,23 +48,16 @@ describe('RevokeBucketAccessCommandHandlerImpl', () => {
   it('revokes bucket access', async () => {
     const user = await userTestUtils.createAndPersist();
 
-    const bucketName = Generator.bucketName();
-
-    await userTestUtils.createAndPersistUserBucket({
-      input: {
-        userId: user.id,
-        bucketName,
-      },
-    });
+    const userBucket = await userBucketTestUtils.createAndPersist({ input: { userId: user.id } });
 
     await commandHandler.execute({
       userId: user.id,
-      bucketName,
+      bucketName: userBucket.bucketName,
     });
 
-    const userBuckets = await userTestUtils.findBucketsByUserId({ userId: user.id });
+    const userBuckets = await userBucketTestUtils.findUserBuckets({ userId: user.id });
 
-    expect(userBuckets).not.toContain(bucketName);
+    expect(userBuckets.length).toBe(0);
   });
 
   it('throws an error when User does not exist', async () => {

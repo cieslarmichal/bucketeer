@@ -8,6 +8,7 @@ import { ResourceNotFoundError } from '../../../../../common/errors/common/resou
 import { type LoggerService } from '../../../../../libs/logger/services/loggerService/loggerService.js';
 import { type TokenService } from '../../../../authModule/application/services/tokenService/tokenService.js';
 import { type BlacklistTokenRepository } from '../../../domain/repositories/blacklistTokenRepository/blacklistTokenRepository.js';
+import { type UserBucketRepository } from '../../../domain/repositories/userBucketRepository/userBucketRepository.js';
 import { type UserRepository } from '../../../domain/repositories/userRepository/userRepository.js';
 import { type UserModuleConfigProvider } from '../../../userModuleConfigProvider.js';
 
@@ -17,6 +18,7 @@ export class RefreshUserTokensCommandHandlerImpl implements RefreshUserTokensCom
     private readonly tokenService: TokenService,
     private readonly configProvider: UserModuleConfigProvider,
     private readonly userRepository: UserRepository,
+    private readonly userBucketRepository: UserBucketRepository,
     private readonly blacklistTokenRepository: BlacklistTokenRepository,
   ) {}
 
@@ -59,18 +61,12 @@ export class RefreshUserTokensCommandHandlerImpl implements RefreshUserTokensCom
       });
     }
 
-    const userTokens = await this.userRepository.findUserTokens({ userId });
+    const userTokens = await this.userBucketRepository.findUserBuckets({ userId });
 
     if (!userTokens) {
       throw new ResourceNotFoundError({
         name: 'UserTokens',
         userId,
-      });
-    }
-
-    if (!userTokens.refreshTokens.includes(refreshToken)) {
-      throw new OperationNotValidError({
-        reason: 'Refresh token does not match the one from User tokens.',
       });
     }
 

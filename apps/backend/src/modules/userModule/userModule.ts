@@ -25,12 +25,14 @@ import { HashServiceImpl } from './application/services/hashService/hashServiceI
 import { type PasswordValidationService } from './application/services/passwordValidationService/passwordValidationService.js';
 import { PasswordValidationServiceImpl } from './application/services/passwordValidationService/passwordValidationServiceImpl.js';
 import { type BlacklistTokenRepository } from './domain/repositories/blacklistTokenRepository/blacklistTokenRepository.js';
+import { type UserBucketRepository } from './domain/repositories/userBucketRepository/userBucketRepository.js';
 import { type UserRepository } from './domain/repositories/userRepository/userRepository.js';
 import { type BlacklistTokenMapper } from './infrastructure/repositories/blacklistTokenRepository/blacklistTokenMapper/blacklistTokenMapper.js';
 import { BlacklistTokenMapperImpl } from './infrastructure/repositories/blacklistTokenRepository/blacklistTokenMapper/blacklistTokenMapperImpl.js';
 import { BlacklistTokenRepositoryImpl } from './infrastructure/repositories/blacklistTokenRepository/blacklistTokenRepositoryImpl.js';
-import { type UserBucketMapper } from './infrastructure/repositories/userRepository/userBucketMapper/userBucketMapper.js';
-import { UserBucketMapperImpl } from './infrastructure/repositories/userRepository/userBucketMapper/userBucketMapperImpl.js';
+import { type UserBucketMapper } from './infrastructure/repositories/userBucketRepository/userBucketMapper/userBucketMapper.js';
+import { UserBucketMapperImpl } from './infrastructure/repositories/userBucketRepository/userBucketMapper/userBucketMapperImpl.js';
+import { UserBucketRepositoryImpl } from './infrastructure/repositories/userBucketRepository/userBucketRepositoryImpl.js';
 import { type UserMapper } from './infrastructure/repositories/userRepository/userMapper/userMapper.js';
 import { UserMapperImpl } from './infrastructure/repositories/userRepository/userMapper/userMapperImpl.js';
 import { UserRepositoryImpl } from './infrastructure/repositories/userRepository/userRepositoryImpl.js';
@@ -63,9 +65,17 @@ export class UserModule implements DependencyInjectionModule {
         new UserRepositoryImpl(
           container.get<SqliteDatabaseClient>(coreSymbols.sqliteDatabaseClient),
           container.get<UserMapper>(symbols.userMapper),
+          container.get<UuidService>(coreSymbols.uuidService),
+        ),
+    );
+
+    container.bind<UserBucketRepository>(
+      symbols.userBucketRepository,
+      () =>
+        new UserBucketRepositoryImpl(
+          container.get<SqliteDatabaseClient>(coreSymbols.sqliteDatabaseClient),
           container.get<UserBucketMapper>(symbols.userBucketMapper),
           container.get<UuidService>(coreSymbols.uuidService),
-          container.get<LoggerService>(coreSymbols.loggerService),
         ),
     );
 
@@ -108,6 +118,7 @@ export class UserModule implements DependencyInjectionModule {
       () =>
         new GrantBucketAccessCommandHandlerImpl(
           container.get<UserRepository>(symbols.userRepository),
+          container.get<UserBucketRepository>(symbols.userBucketRepository),
           container.get<LoggerService>(coreSymbols.loggerService),
         ),
     );
@@ -117,6 +128,7 @@ export class UserModule implements DependencyInjectionModule {
       () =>
         new RevokeBucketAccessCommandHandlerImpl(
           container.get<UserRepository>(symbols.userRepository),
+          container.get<UserBucketRepository>(symbols.userBucketRepository),
           container.get<LoggerService>(coreSymbols.loggerService),
         ),
     );
@@ -152,6 +164,7 @@ export class UserModule implements DependencyInjectionModule {
           container.get<TokenService>(authSymbols.tokenService),
           container.get<UserModuleConfigProvider>(symbols.userModuleConfigProvider),
           container.get<UserRepository>(symbols.userRepository),
+          container.get<UserBucketRepository>(symbols.userBucketRepository),
           container.get<BlacklistTokenRepository>(symbols.blacklistTokenRepository),
         ),
     );
@@ -177,7 +190,7 @@ export class UserModule implements DependencyInjectionModule {
 
     container.bind<FindUserBucketsQueryHandler>(
       symbols.findUserBucketsQueryHandler,
-      () => new FindUserBucketsQueryHandlerImpl(container.get<UserRepository>(symbols.userRepository)),
+      () => new FindUserBucketsQueryHandlerImpl(container.get<UserBucketRepository>(symbols.userBucketRepository)),
     );
 
     container.bind<UserHttpController>(

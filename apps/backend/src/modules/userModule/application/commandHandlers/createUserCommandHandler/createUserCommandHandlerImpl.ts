@@ -42,10 +42,12 @@ export class CrateUserCommandHandlerImpl implements CreateUserCommandHandler {
 
     const hashedPassword = await this.hashService.hash({ plainData: password });
 
-    const user = await this.userRepository.createUser({
-      email,
-      password: hashedPassword,
-      role: UserRole.user,
+    const user = await this.userRepository.saveUser({
+      user: {
+        email,
+        password: hashedPassword,
+        role: UserRole.user,
+      },
     });
 
     this.loggerService.debug({

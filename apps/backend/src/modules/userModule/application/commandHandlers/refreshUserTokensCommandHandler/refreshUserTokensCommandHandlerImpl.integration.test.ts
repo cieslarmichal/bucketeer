@@ -67,13 +67,6 @@ describe('RefreshUserTokensCommandHandler', () => {
       expiresIn: Generator.number(10000, 100000),
     });
 
-    await userTestUtils.createAndPersistRefreshToken({
-      input: {
-        userId: user.id,
-        token: refreshToken,
-      },
-    });
-
     const result = await refreshUserTokensCommandHandler.execute({
       refreshToken,
     });
@@ -110,70 +103,10 @@ describe('RefreshUserTokensCommandHandler', () => {
     });
   });
 
-  it('throws an error if User tokens do not exist', async () => {
-    const user = await userTestUtils.createAndPersist();
-
-    const refreshToken = tokenService.createToken({
-      data: { userId: user.id },
-      expiresIn: Generator.number(10000, 100000),
-    });
-
-    await expect(async () =>
-      refreshUserTokensCommandHandler.execute({
-        refreshToken,
-      }),
-    ).toThrowErrorInstance({
-      instance: ResourceNotFoundError,
-      context: {
-        name: 'UserTokens',
-        userId: user.id,
-      },
-    });
-  });
-
-  it('throws an error if refresh token userId does not match userId from User tokens', async () => {
-    const user = await userTestUtils.createAndPersist();
-
-    const refreshToken = tokenService.createToken({
-      data: { userId: user.id },
-      expiresIn: Generator.number(10000, 100000),
-    });
-
-    await userTestUtils.createAndPersistRefreshToken({
-      input: {
-        userId: user.id,
-        token: tokenService.createToken({
-          data: { userId: user.id },
-          expiresIn: Generator.number(10000, 100000),
-        }),
-      },
-    });
-
-    await expect(async () =>
-      refreshUserTokensCommandHandler.execute({
-        refreshToken,
-      }),
-    ).toThrowErrorInstance({
-      instance: OperationNotValidError,
-      context: {
-        reason: 'Refresh token does not match the one from User tokens.',
-      },
-    });
-  });
-
   it('throws an error if refresh token does not contain userId', async () => {
-    const user = await userTestUtils.createAndPersist();
-
     const refreshToken = tokenService.createToken({
       data: {},
       expiresIn: Generator.number(10000, 100000),
-    });
-
-    await userTestUtils.createAndPersistRefreshToken({
-      input: {
-        userId: user.id,
-        token: refreshToken,
-      },
     });
 
     await expect(async () =>
@@ -194,13 +127,6 @@ describe('RefreshUserTokensCommandHandler', () => {
     const refreshToken = tokenService.createToken({
       data: { userId: user.id },
       expiresIn: Generator.number(10000, 100000),
-    });
-
-    await userTestUtils.createAndPersistRefreshToken({
-      input: {
-        userId: user.id,
-        token: refreshToken,
-      },
     });
 
     await blacklistTokenTestUtils.createAndPersist({ input: { token: refreshToken } });
