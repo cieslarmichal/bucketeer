@@ -18,6 +18,6 @@ jobs:
       - run: npm ci
       - run: npm run build:dev
       - run: npm run test:unit
-      - run: docker-compose -f docker-compose.dev.yml up -d
+      - run: docker-compose up -d
       - run: npm run test:integration
       # - run: NODE_ENV=ci npm run test:e2e
