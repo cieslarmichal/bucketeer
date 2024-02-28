@@ -1,4 +1,3 @@
-export interface DatabaseTable<Entity> {
+export interface DatabaseTable {
   readonly name: string;
-  readonly columns: Record<keyof Entity, string>;
 }

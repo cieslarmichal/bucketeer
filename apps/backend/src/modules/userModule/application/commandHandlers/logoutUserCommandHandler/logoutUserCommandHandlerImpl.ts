@@ -48,25 +48,6 @@ export class LogoutUserCommandHandlerImpl implements LogoutUserCommandHandler {
       });
     }
 
-    const userTokens = await this.userRepository.findUserTokens({
-      userId,
-    });
-
-    if (!userTokens) {
-      throw new OperationNotValidError({
-        reason: 'User tokens not found.',
-        userId,
-      });
-    }
-
-    if (!userTokens.refreshTokens.includes(refreshToken)) {
-      throw new OperationNotValidError({
-        reason: 'Refresh token is not valid.',
-        userId,
-        refreshToken,
-      });
-    }
-
     const { expiresAt } = this.tokenService.decodeToken({
       token: refreshToken,
     });

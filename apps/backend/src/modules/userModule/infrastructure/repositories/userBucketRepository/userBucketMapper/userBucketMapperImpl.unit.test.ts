@@ -1,15 +1,15 @@
 import { expect, describe, it } from 'vitest';
 
 import { UserBucketMapperImpl } from './userBucketMapperImpl.js';
-import { UserBucketEntityTestFactory } from '../../../../tests/factories/userBucketEntityTestFactory/userBucketEntityTestFactory.js';
+import { UserBucketTestFactory } from '../../../../tests/factories/userBucketTestFactory/userBucketTestFactory.js';
 
 describe('UserBucketMapperImpl', () => {
   const userBucketMapperImpl = new UserBucketMapperImpl();
 
-  const userBucketEntityTestFactory = new UserBucketEntityTestFactory();
+  const userBucketTestFactory = new UserBucketTestFactory();
 
   it('maps from UserBucketRawEntity to UserBucket', async () => {
-    const userBucketEntity = userBucketEntityTestFactory.create();
+    const userBucketEntity = userBucketTestFactory.createRaw();
 
     const userBucket = userBucketMapperImpl.mapToDomain(userBucketEntity);
 

@@ -3,6 +3,7 @@ export const symbols = {
   userMapper: Symbol('userMapper'),
   userBucketMapper: Symbol('userBucketMapper'),
   userRepository: Symbol('userRepository'),
+  userBucketRepository: Symbol('userBucketRepository'),
   blacklistTokenMapper: Symbol('blacklistTokenMapper'),
   blacklistTokenRepository: Symbol('blacklistTokenRepository'),
 

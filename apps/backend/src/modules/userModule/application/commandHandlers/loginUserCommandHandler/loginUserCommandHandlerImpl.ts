@@ -70,18 +70,6 @@ export class LoginUserCommandHandlerImpl implements LoginUserCommandHandler {
       expiresIn: refreshTokenExpiresIn,
     });
 
-    const expiresAt = new Date(Date.now() + refreshTokenExpiresIn * 1000);
-
-    user.addCreateRefreshTokenAction({
-      token: refreshToken,
-      expiresAt,
-    });
-
-    await this.userRepository.updateUser({
-      id: user.getId(),
-      domainActions: user.getDomainActions(),
-    });
-
     this.loggerService.debug({
       message: 'User logged in.',
       email,

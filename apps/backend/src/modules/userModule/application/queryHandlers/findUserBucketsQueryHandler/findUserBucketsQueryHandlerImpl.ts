@@ -3,15 +3,15 @@ import {
   type FindUserBucketsQueryHandlerPayload,
   type FindUserBucketsQueryHandlerResult,
 } from './findUserBucketsQueryHandler.js';
-import { type UserRepository } from '../../../domain/repositories/userRepository/userRepository.js';
+import { type UserBucketRepository } from '../../../domain/repositories/userBucketRepository/userBucketRepository.js';
 
 export class FindUserBucketsQueryHandlerImpl implements FindUserBucketsQueryHandler {
-  public constructor(private readonly userRepository: UserRepository) {}
+  public constructor(private readonly userBucketRepository: UserBucketRepository) {}
 
   public async execute(payload: FindUserBucketsQueryHandlerPayload): Promise<FindUserBucketsQueryHandlerResult> {
     const { userId } = payload;
 
-    const userBuckets = await this.userRepository.findUserBuckets({ userId });
+    const userBuckets = await this.userBucketRepository.findUserBuckets({ userId });
 
     const buckets = userBuckets.map((bucket) => bucket.getBucketName());
 

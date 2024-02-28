@@ -1,6 +1,7 @@
 import { Generator } from '@common/tests';
 
 import { type UserBucketDraft, UserBucket } from '../../../domain/entities/userBucket/userBucket.js';
+import { type UserBucketRawEntity } from '../../../infrastructure/databases/userDatabase/tables/userBucketTable/userBucketRawEntity.js';
 
 export class UserBucketTestFactory {
   public create(input: Partial<UserBucketDraft> = {}): UserBucket {
@@ -10,5 +11,14 @@ export class UserBucketTestFactory {
       bucketName: Generator.word(),
       ...input,
     });
+  }
+
+  public createRaw(input: Partial<UserBucketRawEntity> = {}): UserBucketRawEntity {
+    return {
+      id: Generator.uuid(),
+      userId: Generator.uuid(),
+      bucketName: Generator.word(),
+      ...input,
+    };
   }
 }

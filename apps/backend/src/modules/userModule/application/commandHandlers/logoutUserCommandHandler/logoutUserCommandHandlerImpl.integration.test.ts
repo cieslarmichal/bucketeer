@@ -55,13 +55,6 @@ describe('LogoutUserCommandHandlerImpl', () => {
 
     const user = await userTestUtils.createAndPersist();
 
-    await userTestUtils.createAndPersistRefreshToken({
-      input: {
-        userId: user.id,
-        token: refreshToken,
-      },
-    });
-
     await commandHandler.execute({
       userId: user.id,
       refreshToken,
@@ -93,65 +86,6 @@ describe('LogoutUserCommandHandlerImpl', () => {
       context: {
         reason: 'User not found.',
         userId,
-      },
-    });
-  });
-
-  it('throws an error - when UserTokens not found', async () => {
-    const refreshToken = tokenService.createToken({
-      data: { valid: 'true' },
-      expiresIn: Generator.number(10000, 100000),
-    });
-
-    const user = await userTestUtils.createAndPersist();
-
-    await expect(
-      async () =>
-        await commandHandler.execute({
-          userId: user.id,
-          refreshToken,
-        }),
-    ).toThrowErrorInstance({
-      instance: OperationNotValidError,
-      context: {
-        reason: 'User tokens not found.',
-        userId: user.id,
-      },
-    });
-  });
-
-  it('throws an error - when UserTokens were found but refreshToken is different', async () => {
-    const refreshToken = tokenService.createToken({
-      data: { valid: 'true' },
-      expiresIn: Generator.number(10000, 100000),
-    });
-
-    const user = await userTestUtils.createAndPersist();
-
-    await userTestUtils.createAndPersistRefreshToken({
-      input: {
-        userId: user.id,
-        token: refreshToken,
-      },
-    });
-
-    const invalidRefreshToken = tokenService.createToken({
-      data: { invalid: 'true' },
-      expiresIn: Generator.number(),
-    });
-
-    await expect(
-      async () =>
-        await commandHandler.execute({
-          userId: user.id,
-          refreshToken: invalidRefreshToken,
-        }),
-    ).toThrowErrorInstance({
-      instance: OperationNotValidError,
-      context: {
-        reason: 'Refresh token is not valid.',
-        userId: user.id,
-        refreshToken: invalidRefreshToken,
       },
     });
   });
