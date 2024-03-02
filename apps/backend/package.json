@@ -32,6 +32,7 @@
     "better-sqlite3": "^9.2.2",
     "config": "^3.3.9",
     "fastify": "^4.24.3",
+    "ffmpeg-static": "^5.2.0",
     "fluent-ffmpeg": "^2.1.2",
     "http-status-codes": "^2.3.0",
     "inversify": "^6.0.2",
