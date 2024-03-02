@@ -1,5 +1,8 @@
-import pathToFfmpeg from 'ffmpeg-static';
+import ffmpegPath from 'ffmpeg-static';
 import ffmpeg, { ffprobe } from 'fluent-ffmpeg';
+import * as fs from 'node:fs';
+import { type Readable } from 'node:stream';
+import * as tmp from 'tmp-promise';
 
 import {
   type DownloadVideoPreviewQueryHandlerPayload,
@@ -26,7 +29,7 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
   public async execute(
     payload: DownloadVideoPreviewQueryHandlerPayload,
   ): Promise<DownloadVideoPreviewQueryHandlerResult> {
-    const { userId, resourceName, bucketName, width, height } = payload;
+    const { userId, resourceName, bucketName } = payload;
 
     const { buckets } = await this.findUserBucketsQueryHandler.execute({ userId });
 
@@ -39,12 +42,10 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
     }
 
     this.loggerService.debug({
-      message: 'Downloading Video preview...',
+      message: 'Downloading video...',
       userId,
       bucketName,
       resourceName,
-      width,
-      height,
     });
 
     const resource = await this.resourceBlobSerice.downloadResource({
@@ -85,20 +86,27 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
       });
     }
 
-    ffmpeg()
-      .setFfmpegPath(pathToFfmpeg.default as string)
-      .input(resource.data)
-      .outputOptions([`-vf scale=${width}:${height}`, '-vframes 1']);
-
-    const resizedImageData = resource.data.pipe(resizing);
-
     this.loggerService.debug({
-      message: 'Video preview downloaded.',
+      message: 'Video downloaded.',
       userId,
       bucketName,
       resourceName,
-      width,
-      height,
+    });
+
+    const previewPath = 'preview.mp4';
+
+    this.loggerService.debug({
+      message: 'Creating video preview...',
+      resourceName,
+      previewPath,
+    });
+
+    const videoPreview = await this.createVideoPreview(resource.data, previewPath);
+
+    this.loggerService.debug({
+      message: 'Video preview created.',
+      resourceName,
+      previewPath,
     });
 
     return {
@@ -107,23 +115,61 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
         updatedAt: resource.updatedAt,
         contentType: resource.contentType,
         contentSize: resource.contentSize,
-        data: resizedImageData,
+        data: videoPreview,
       },
     };
   }
 
-  private getVideoInfo(inputPath: string): Promise<VideoInfo> {
+  private async createVideoPreview(videoData: Readable, previewPath: string): Promise<Readable> {
+    await new Promise(async (resolve, reject) => {
+      const { durationInSeconds } = await this.getVideoInfo(videoData);
+
+      const frameIntervalInSeconds = Math.floor(durationInSeconds / 10);
+
+      ffmpeg()
+        .input(videoData)
+        .outputOptions([`-vf fps=1/${frameIntervalInSeconds}`])
+        .output('thumb%04d.jpg')
+        .on('end', resolve)
+        .on('error', reject)
+        .run();
+    });
+
+    await new Promise(async (resolve, reject) => {
+      ffmpeg()
+        .inputOptions(['-framerate 1/0.6'])
+        .input('thumb%04d.jpg')
+        .output(previewPath)
+        .on('end', resolve)
+        .on('error', reject)
+        .run();
+    });
+
+    return fs.createReadStream(previewPath);
+  }
+
+  private async getVideoInfo(videoData: Readable): Promise<VideoInfo> {
+    ffmpeg().setFfprobePath(ffmpegPath.default as string);
+
+    const tmpFile = await tmp.file();
+
+    videoData.pipe(fs.createWriteStream(tmpFile.path));
+
     return new Promise((resolve, reject) => {
-      return ffprobe(inputPath, (error, videoInfo) => {
-        if (error) {
-          return reject(error);
-        }
+      videoData.on('end', () => {
+        ffprobe(tmpFile.path, (error, videoInfo) => {
+          tmpFile.cleanup();
 
-        const { duration, size } = videoInfo.format;
+          if (error) {
+            return reject(error);
+          }
 
-        return resolve({
-          size: Number(size),
-          durationInSeconds: Math.floor(Number(duration)),
+          const { duration, size } = videoInfo.format;
+
+          return resolve({
+            size: Number(size),
+            durationInSeconds: Math.floor(Number(duration)),
+          });
         });
       });
     });

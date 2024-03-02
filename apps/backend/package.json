@@ -41,6 +41,7 @@
     "node-fetch": "3.3.2",
     "pino": "^8.16.2",
     "sharp": "^0.33.2",
+    "tmp-promise": "^3.0.3",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

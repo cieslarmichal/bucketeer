@@ -5,8 +5,6 @@ export interface DownloadVideoPreviewQueryHandlerPayload {
   readonly userId: string;
   readonly resourceName: string;
   readonly bucketName: string;
-  readonly width: number;
-  readonly height: number;
 }
 
 export interface DownloadVideoPreviewQueryHandlerResult {
