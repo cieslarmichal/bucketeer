@@ -74,6 +74,8 @@ export class HttpServer {
       return (data) => JSON.stringify(data);
     });
 
+    this.addRequestPreprocessing();
+
     this.httpRouter.registerControllers({
       controllers: this.getControllers(),
     });
@@ -172,5 +174,26 @@ export class HttpServer {
       source: HttpServer.name,
       path: '/api/docs',
     });
+  }
+
+  private addRequestPreprocessing(): void {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    this.fastifyInstance.addHook('preValidation', (request, _reply, next) => {
+      const body = request.body as Record<string, unknown>;
+
+      this.trimStringProperties(body);
+
+      next();
+    });
+  }
+
+  private trimStringProperties(obj: Record<string, any>): void {
+    for (const key in obj) {
+      if (typeof obj[key] === 'string') {
+        obj[key] = obj[key].trim();
+      } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+        this.trimStringProperties(obj[key]);
+      }
+    }
   }
 }
