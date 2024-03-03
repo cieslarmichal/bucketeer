@@ -170,7 +170,7 @@ export class ResourceHttpController implements HttpController {
       }),
       new HttpRoute({
         method: HttpMethodName.get,
-        path: ':bucketName/resources/videos/previewes/:resourceName',
+        path: ':bucketName/resources/videos/previews/:resourceName',
         handler: this.downloadVideoPreview.bind(this),
         schema: {
           request: {
