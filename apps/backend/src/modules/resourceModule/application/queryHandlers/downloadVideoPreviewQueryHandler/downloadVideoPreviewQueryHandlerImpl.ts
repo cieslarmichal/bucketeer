@@ -124,14 +124,28 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
   }
 
   private async createVideoPreview(videoData: Readable, previewPath: string): Promise<Readable> {
-    await new Promise(async (resolve, reject) => {
-      const { durationInSeconds } = await this.getVideoInfo(videoData);
+    const tmpFile = await tmp.file();
 
+    videoData.pipe(fs.createWriteStream(tmpFile.path));
+
+    await new Promise<void>((resolve, reject) => {
+      videoData.on('end', () => {
+        resolve();
+      });
+
+      videoData.on('error', (error) => {
+        reject(error);
+      });
+    });
+
+    const { durationInSeconds } = await this.getVideoInfo(tmpFile.path);
+
+    await new Promise(async (resolve, reject) => {
       const frameIntervalInSeconds = Math.floor(durationInSeconds / 10);
 
       ffmpeg()
-        .setFfmpegPath(ffmpegPath.default as string)
-        .input(videoData)
+        .setFfmpegPath(ffmpegPath as unknown as string)
+        .input(tmpFile.path)
         .outputOptions([`-vf fps=1/${frameIntervalInSeconds}`])
         .output('thumb%04d.jpg')
         .on('end', resolve)
@@ -141,7 +155,7 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
 
     await new Promise(async (resolve, reject) => {
       ffmpeg()
-        .setFfmpegPath(ffmpegPath.default as string)
+        .setFfmpegPath(ffmpegPath as unknown as string)
         .inputOptions(['-framerate 1/0.6'])
         .input('thumb%04d.jpg')
         .output(previewPath)
@@ -150,31 +164,25 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
         .run();
     });
 
+    await tmpFile.cleanup();
+
     return fs.createReadStream(previewPath);
   }
 
-  private async getVideoInfo(videoData: Readable): Promise<VideoInfo> {
+  private async getVideoInfo(videoPath: string): Promise<VideoInfo> {
     ffmpeg().setFfprobePath(ffprobePath.path);
 
-    const tmpFile = await tmp.file();
-
-    videoData.pipe(fs.createWriteStream(tmpFile.path));
-
     return new Promise((resolve, reject) => {
-      videoData.on('end', () => {
-        ffmpeg.ffprobe(tmpFile.path, (error, videoInfo) => {
-          tmpFile.cleanup();
+      ffmpeg.ffprobe(videoPath, (error, videoInfo) => {
+        if (error) {
+          return reject(error);
+        }
 
-          if (error) {
-            return reject(error);
-          }
+        const { duration, size } = videoInfo.format;
 
-          const { duration, size } = videoInfo.format;
-
-          return resolve({
-            size: Number(size),
-            durationInSeconds: Math.floor(Number(duration)),
-          });
+        return resolve({
+          size: Number(size),
+          durationInSeconds: Math.floor(Number(duration)),
         });
       });
     });
