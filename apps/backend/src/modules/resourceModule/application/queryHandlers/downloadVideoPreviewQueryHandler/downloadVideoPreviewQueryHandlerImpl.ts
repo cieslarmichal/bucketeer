@@ -1,6 +1,7 @@
 /* eslint-disable import/no-named-as-default-member */
 
 import ffmpegPath from 'ffmpeg-static';
+import ffprobePath from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'node:fs';
 import { type Readable } from 'node:stream';
@@ -129,6 +130,7 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
       const frameIntervalInSeconds = Math.floor(durationInSeconds / 10);
 
       ffmpeg()
+        .setFfmpegPath(ffmpegPath.default as string)
         .input(videoData)
         .outputOptions([`-vf fps=1/${frameIntervalInSeconds}`])
         .output('thumb%04d.jpg')
@@ -139,6 +141,7 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
 
     await new Promise(async (resolve, reject) => {
       ffmpeg()
+        .setFfmpegPath(ffmpegPath.default as string)
         .inputOptions(['-framerate 1/0.6'])
         .input('thumb%04d.jpg')
         .output(previewPath)
@@ -151,7 +154,7 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
   }
 
   private async getVideoInfo(videoData: Readable): Promise<VideoInfo> {
-    ffmpeg().setFfprobePath(ffmpegPath.default as string);
+    ffmpeg().setFfprobePath(ffprobePath.path);
 
     const tmpFile = await tmp.file();
 
