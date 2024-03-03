@@ -49,7 +49,6 @@ export class HttpServer {
       this.container.get<AdminUserHttpController>(userSymbols.adminUserHttpController),
       this.container.get<ApplicationHttpController>(symbols.applicationHttpController),
       this.container.get<ResourceHttpController>(resourceSymbols.resourceHttpController),
-      this.container.get<AdminUserHttpController>(userSymbols.adminUserHttpController),
     ];
   }
 
