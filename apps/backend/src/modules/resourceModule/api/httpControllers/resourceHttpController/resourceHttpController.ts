@@ -54,6 +54,7 @@ import { type DeleteResourceCommandHandler } from '../../../application/commandH
 import { type DownloadImageQueryHandler } from '../../../application/queryHandlers/downloadImageQueryHandler/downloadImageQueryHandler.js';
 import { type DownloadResourceQueryHandler } from '../../../application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandler.js';
 import { type DownloadResourcesQueryHandler } from '../../../application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandler.js';
+import { type DownloadVideoPreviewQueryHandler } from '../../../application/queryHandlers/downloadVideoPreviewQueryHandler/downloadVideoPreviewQueryHandler.js';
 import { type FindResourcesMetadataQueryHandler } from '../../../application/queryHandlers/findResourcesMetadataQueryHandler/findResourcesMetadataQueryHandler.js';
 import { type ResourceMetadata } from '../../../domain/entities/resource/resourceMetadata.js';
 
@@ -66,6 +67,7 @@ export class ResourceHttpController implements HttpController {
     private readonly downloadResourceQueryHandler: DownloadResourceQueryHandler,
     private readonly downloadResourcesQueryHandler: DownloadResourcesQueryHandler,
     private readonly downloadImageQueryHandler: DownloadImageQueryHandler,
+    private readonly downloadVideoPreviewQueryHandler: DownloadVideoPreviewQueryHandler,
     private readonly findUserBucketsQueryHandler: FindUserBucketsQueryHandler,
     private readonly accessControlService: AccessControlService,
   ) {}
@@ -351,7 +353,7 @@ export class ResourceHttpController implements HttpController {
       authorizationHeader: request.headers['authorization'],
     });
 
-    const { resource } = await this.downloadImageQueryHandler.execute({
+    const { resource } = await this.downloadVideoPreviewQueryHandler.execute({
       userId,
       resourceName,
       bucketName,
