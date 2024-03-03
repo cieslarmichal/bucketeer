@@ -17,7 +17,7 @@
       "secret": null
     },
     "accessToken": {
-      "expiresIn": 3600
+      "expiresIn": 86400
     },
     "refreshToken": {
       "expiresIn": 604800

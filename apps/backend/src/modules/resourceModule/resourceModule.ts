@@ -12,6 +12,8 @@ import { type DownloadResourceQueryHandler } from './application/queryHandlers/d
 import { DownloadResourceQueryHandlerImpl } from './application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandlerImpl.js';
 import { type DownloadResourcesQueryHandler } from './application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandler.js';
 import { DownloadResourcesQueryHandlerImpl } from './application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandlerImpl.js';
+import { type DownloadVideoPreviewQueryHandler } from './application/queryHandlers/downloadVideoPreviewQueryHandler/downloadVideoPreviewQueryHandler.js';
+import { DownloadVideoPreviewQueryHandlerImpl } from './application/queryHandlers/downloadVideoPreviewQueryHandler/downloadVideoPreviewQueryHandlerImpl.js';
 import { type FindBucketsQueryHandler } from './application/queryHandlers/findBucketsQueryHandler/findBucketsQueryHandler.js';
 import { FindBucketsQueryHandlerImpl } from './application/queryHandlers/findBucketsQueryHandler/findBucketsQueryHandlerImpl.js';
 import { type FindResourcesMetadataQueryHandler } from './application/queryHandlers/findResourcesMetadataQueryHandler/findResourcesMetadataQueryHandler.js';
@@ -86,6 +88,16 @@ export class ResourceModule implements DependencyInjectionModule {
         ),
     );
 
+    container.bind<DownloadVideoPreviewQueryHandler>(
+      symbols.downloadVideoPreviewQueryHandler,
+      () =>
+        new DownloadVideoPreviewQueryHandlerImpl(
+          container.get<ResourceBlobService>(symbols.resourceBlobService),
+          container.get<LoggerService>(coreSymbols.loggerService),
+          container.get<FindUserBucketsQueryHandler>(userSymbols.findUserBucketsQueryHandler),
+        ),
+    );
+
     container.bind<FindBucketsQueryHandler>(
       symbols.findBucketsQueryHandler,
       () => new FindBucketsQueryHandlerImpl(container.get<S3Client>(coreSymbols.s3Client)),
@@ -118,6 +130,7 @@ export class ResourceModule implements DependencyInjectionModule {
           container.get<DownloadResourceQueryHandler>(symbols.downloadResourceQueryHandler),
           container.get<DownloadResourcesQueryHandler>(symbols.downloadResourcesQueryHandler),
           container.get<DownloadImageQueryHandler>(symbols.downloadImageQueryHandler),
+          container.get<DownloadVideoPreviewQueryHandler>(symbols.downloadVideoPreviewQueryHandler),
           container.get<FindUserBucketsQueryHandler>(userSymbols.findUserBucketsQueryHandler),
           container.get<AccessControlService>(authSymbols.accessControlService),
         ),

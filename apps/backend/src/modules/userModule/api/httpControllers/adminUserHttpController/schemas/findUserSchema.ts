@@ -6,7 +6,7 @@ import { type TypeExtends } from '../../../../../../common/types/schemaExtends.j
 import { userDTOSchema } from '../../common/userDTO.js';
 
 export const findUserPathParamsDTOSchema = Type.Object({
-  id: Type.String({ minLength: 1 }),
+  id: Type.String({ format: 'uuid' }),
 });
 
 export type FindUserPathParamsDTO = TypeExtends<
