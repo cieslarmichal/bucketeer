@@ -1,5 +1,5 @@
 import { type QueryHandler } from '../../../../../common/types/queryHandler.js';
-import { type Resource } from '../../../domain/entities/resource/resource.js';
+import { type VideoPreview } from '../../../domain/entities/video/videoPreview.js';
 
 export interface DownloadVideoPreviewQueryHandlerPayload {
   readonly userId: string;
@@ -8,7 +8,7 @@ export interface DownloadVideoPreviewQueryHandlerPayload {
 }
 
 export interface DownloadVideoPreviewQueryHandlerResult {
-  readonly resource: Resource;
+  readonly preview: VideoPreview;
 }
 
 export type DownloadVideoPreviewQueryHandler = QueryHandler<

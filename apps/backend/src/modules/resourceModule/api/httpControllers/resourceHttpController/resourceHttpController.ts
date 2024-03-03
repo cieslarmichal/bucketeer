@@ -353,7 +353,7 @@ export class ResourceHttpController implements HttpController {
       authorizationHeader: request.headers['authorization'],
     });
 
-    const { resource } = await this.downloadVideoPreviewQueryHandler.execute({
+    const { preview } = await this.downloadVideoPreviewQueryHandler.execute({
       userId,
       resourceName,
       bucketName,
@@ -361,11 +361,11 @@ export class ResourceHttpController implements HttpController {
 
     return {
       statusCode: HttpStatusCode.ok,
-      body: resource.data,
+      body: preview.data,
       headers: {
         [HttpHeader.cacheControl]: 'max-age=2592000',
-        [HttpHeader.contentDisposition]: `attachment; filename=${resource.name}`,
-        [HttpHeader.contentType]: resource.contentType,
+        [HttpHeader.contentDisposition]: `attachment; filename=${preview.name}`,
+        [HttpHeader.contentType]: preview.contentType,
       },
     };
   }

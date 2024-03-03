@@ -18,8 +18,7 @@ import { type FindUserBucketsQueryHandler } from '../../../../userModule/applica
 import { type ResourceBlobService } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
 
 interface VideoInfo {
-  readonly size: number;
-  readonly durationInSeconds: number;
+  readonly duration: number;
 }
 
 export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPreviewQueryHandler {
@@ -96,7 +95,7 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
       resourceName,
     });
 
-    const previewPath = 'preview.mp4';
+    const previewPath = 'preview.gif';
 
     this.loggerService.debug({
       message: 'Creating video preview...',
@@ -113,11 +112,9 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
     });
 
     return {
-      resource: {
-        name: resource.name,
-        updatedAt: resource.updatedAt,
-        contentType: resource.contentType,
-        contentSize: resource.contentSize,
+      preview: {
+        name: previewPath,
+        contentType: 'video/gif',
         data: videoPreview,
       },
     };
@@ -138,26 +135,16 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
       });
     });
 
-    const { durationInSeconds } = await this.getVideoInfo(tmpFile.path);
+    const { duration } = await this.getVideoInfo(tmpFile.path);
 
     await new Promise(async (resolve, reject) => {
-      const frameIntervalInSeconds = Math.floor(durationInSeconds / 10);
-
       ffmpeg()
         .setFfmpegPath(ffmpegPath as unknown as string)
         .input(tmpFile.path)
-        .outputOptions([`-vf fps=1/${frameIntervalInSeconds}`])
-        .output('thumb%04d.jpg')
-        .on('end', resolve)
-        .on('error', reject)
-        .run();
-    });
-
-    await new Promise(async (resolve, reject) => {
-      ffmpeg()
-        .setFfmpegPath(ffmpegPath as unknown as string)
-        .inputOptions(['-framerate 1/0.6'])
-        .input('thumb%04d.jpg')
+        .inputOptions('-y')
+        .outputOptions('-q:v 1')
+        .videoFilters(`setpts=N/TB/${duration * 10}`)
+        .fps(1)
         .output(previewPath)
         .on('end', resolve)
         .on('error', reject)
@@ -178,11 +165,10 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
           return reject(error);
         }
 
-        const { duration, size } = videoInfo.format;
+        const { duration } = videoInfo.format;
 
         return resolve({
-          size: Number(size),
-          durationInSeconds: Math.floor(Number(duration)),
+          duration: Math.floor(Number(duration)),
         });
       });
     });
