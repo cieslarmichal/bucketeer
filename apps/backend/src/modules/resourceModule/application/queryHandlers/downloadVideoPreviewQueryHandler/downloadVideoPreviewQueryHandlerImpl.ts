@@ -1,5 +1,7 @@
+/* eslint-disable import/no-named-as-default-member */
+
 import ffmpegPath from 'ffmpeg-static';
-import ffmpeg, { ffprobe } from 'fluent-ffmpeg';
+import ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'node:fs';
 import { type Readable } from 'node:stream';
 import * as tmp from 'tmp-promise';
@@ -157,7 +159,7 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
 
     return new Promise((resolve, reject) => {
       videoData.on('end', () => {
-        ffprobe(tmpFile.path, (error, videoInfo) => {
+        ffmpeg.ffprobe(tmpFile.path, (error, videoInfo) => {
           tmpFile.cleanup();
 
           if (error) {
