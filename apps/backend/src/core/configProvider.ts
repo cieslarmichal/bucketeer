@@ -34,15 +34,15 @@ export class ConfigProvider {
   }
 
   public getAccessTokenExpiresIn(): number {
-    return this.getValue<number>('auth.accessToken.expiresIn');
+    return Number(this.getValue<number>('auth.accessToken.expiresIn'));
   }
 
   public getRefreshTokenExpiresIn(): number {
-    return this.getValue<number>('auth.refreshToken.expiresIn');
+    return Number(this.getValue<number>('auth.refreshToken.expiresIn'));
   }
 
   public getHashSaltRounds(): number {
-    return this.getValue<number>('auth.hash.saltRounds');
+    return Number(this.getValue<number>('auth.hash.saltRounds'));
   }
 
   public getAwsAccessKeyId(): string {

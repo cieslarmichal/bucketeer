@@ -20,4 +20,3 @@ jobs:
       - run: npm run test:unit
       - run: docker-compose up -d
       - run: npm run test:integration
-      # - run: NODE_ENV=ci npm run test:e2e

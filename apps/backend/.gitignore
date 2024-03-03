@@ -25,3 +25,5 @@ data/*
 !.gitkeep
 
 **/local.json
+
+preview.gif

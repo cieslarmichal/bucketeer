@@ -15,6 +15,11 @@ import {
   downloadResourceResponseBodyDTOSchema,
 } from './schemas/downloadResourceSchema.js';
 import {
+  type DownloadVideoPreviewPathParamsDTO,
+  downloadVideoPreviewPathParamsDTOSchema,
+  downloadVideoPreviewResponseBodyDTOSchema,
+} from './schemas/downloadVideoPreviewSchema.js';
+import {
   type ExportResourcesResponseBodyDTO,
   exportResourcesResponseBodyDTOSchema,
   exportResourcesBodyDTOSchema,
@@ -49,6 +54,7 @@ import { type DeleteResourceCommandHandler } from '../../../application/commandH
 import { type DownloadImageQueryHandler } from '../../../application/queryHandlers/downloadImageQueryHandler/downloadImageQueryHandler.js';
 import { type DownloadResourceQueryHandler } from '../../../application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandler.js';
 import { type DownloadResourcesQueryHandler } from '../../../application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandler.js';
+import { type DownloadVideoPreviewQueryHandler } from '../../../application/queryHandlers/downloadVideoPreviewQueryHandler/downloadVideoPreviewQueryHandler.js';
 import { type FindResourcesMetadataQueryHandler } from '../../../application/queryHandlers/findResourcesMetadataQueryHandler/findResourcesMetadataQueryHandler.js';
 import { type ResourceMetadata } from '../../../domain/entities/resource/resourceMetadata.js';
 
@@ -61,6 +67,7 @@ export class ResourceHttpController implements HttpController {
     private readonly downloadResourceQueryHandler: DownloadResourceQueryHandler,
     private readonly downloadResourcesQueryHandler: DownloadResourcesQueryHandler,
     private readonly downloadImageQueryHandler: DownloadImageQueryHandler,
+    private readonly downloadVideoPreviewQueryHandler: DownloadVideoPreviewQueryHandler,
     private readonly findUserBucketsQueryHandler: FindUserBucketsQueryHandler,
     private readonly accessControlService: AccessControlService,
   ) {}
@@ -160,6 +167,25 @@ export class ResourceHttpController implements HttpController {
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
         description: 'Download image.',
+      }),
+      new HttpRoute({
+        method: HttpMethodName.get,
+        path: ':bucketName/resources/videos/previews/:resourceName',
+        handler: this.downloadVideoPreview.bind(this),
+        schema: {
+          request: {
+            pathParams: downloadVideoPreviewPathParamsDTOSchema,
+          },
+          response: {
+            [HttpStatusCode.ok]: {
+              schema: downloadVideoPreviewResponseBodyDTOSchema,
+              description: 'Video preview downloaded.',
+            },
+          },
+        },
+        securityMode: SecurityMode.bearer,
+        tags: ['Resource'],
+        description: 'Download video preview.',
       }),
       new HttpRoute({
         method: HttpMethodName.delete,
@@ -314,6 +340,32 @@ export class ResourceHttpController implements HttpController {
         [HttpHeader.cacheControl]: 'max-age=2592000',
         [HttpHeader.contentDisposition]: `attachment; filename=${resource.name}`,
         [HttpHeader.contentType]: resource.contentType,
+      },
+    };
+  }
+
+  private async downloadVideoPreview(
+    request: HttpRequest<undefined, undefined, DownloadVideoPreviewPathParamsDTO>,
+  ): Promise<HttpOkResponse<unknown>> {
+    const { resourceName, bucketName } = request.pathParams;
+
+    const { userId } = await this.accessControlService.verifyBearerToken({
+      authorizationHeader: request.headers['authorization'],
+    });
+
+    const { preview } = await this.downloadVideoPreviewQueryHandler.execute({
+      userId,
+      resourceName,
+      bucketName,
+    });
+
+    return {
+      statusCode: HttpStatusCode.ok,
+      body: preview.data,
+      headers: {
+        [HttpHeader.cacheControl]: 'max-age=2592000',
+        [HttpHeader.contentDisposition]: `attachment; filename=${preview.name}`,
+        [HttpHeader.contentType]: preview.contentType,
       },
     };
   }

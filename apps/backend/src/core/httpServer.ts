@@ -18,6 +18,7 @@ import { type HttpController } from '../common/types/http/httpController.js';
 import { HttpStatusCode } from '../common/types/http/httpStatusCode.js';
 import { type DependencyInjectionContainer } from '../libs/dependencyInjection/dependencyInjectionContainer.js';
 import { type LoggerService } from '../libs/logger/services/loggerService/loggerService.js';
+import { type AdminResourceHttpController } from '../modules/resourceModule/api/httpControllers/adminResourceHttpController/adminResourceHttpController.js';
 import { type ResourceHttpController } from '../modules/resourceModule/api/httpControllers/resourceHttpController/resourceHttpController.js';
 import { resourceSymbols } from '../modules/resourceModule/symbols.js';
 import { type AdminUserHttpController } from '../modules/userModule/api/httpControllers/adminUserHttpController/adminUserHttpController.js';
@@ -49,7 +50,7 @@ export class HttpServer {
       this.container.get<AdminUserHttpController>(userSymbols.adminUserHttpController),
       this.container.get<ApplicationHttpController>(symbols.applicationHttpController),
       this.container.get<ResourceHttpController>(resourceSymbols.resourceHttpController),
-      this.container.get<AdminUserHttpController>(userSymbols.adminUserHttpController),
+      this.container.get<AdminResourceHttpController>(resourceSymbols.adminResourceHttpController),
     ];
   }
 
@@ -73,6 +74,8 @@ export class HttpServer {
     this.fastifyInstance.setSerializerCompiler(() => {
       return (data) => JSON.stringify(data);
     });
+
+    this.addRequestPreprocessing();
 
     this.httpRouter.registerControllers({
       controllers: this.getControllers(),
@@ -172,5 +175,26 @@ export class HttpServer {
       source: HttpServer.name,
       path: '/api/docs',
     });
+  }
+
+  private addRequestPreprocessing(): void {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    this.fastifyInstance.addHook('preValidation', (request, _reply, next) => {
+      const body = request.body as Record<string, unknown>;
+
+      this.trimStringProperties(body);
+
+      next();
+    });
+  }
+
+  private trimStringProperties(obj: Record<string, any>): void {
+    for (const key in obj) {
+      if (typeof obj[key] === 'string') {
+        obj[key] = obj[key].trim();
+      } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+        this.trimStringProperties(obj[key]);
+      }
+    }
   }
 }
