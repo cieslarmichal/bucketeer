@@ -76,10 +76,10 @@ export function createAppRouter(): Router {
             const res = await refreshTokens();
 
             if (res) {
-              // storeDispatch(userStateActions.setCurrentUserTokens(res));
+              store.setTokens(res);
             }
           } catch (error) {
-            // storeDispatch(userStateActions.removeUserState());
+            store.removeTokens();
           } finally {
             setRefreshingToken(false);
           }
