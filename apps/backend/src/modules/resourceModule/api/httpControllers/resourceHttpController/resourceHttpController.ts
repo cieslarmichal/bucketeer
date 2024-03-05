@@ -42,9 +42,7 @@ import {
 import { type ResourceMetadataDTO } from './schemas/resourceMetadataDTO.js';
 import {
   type UploadResourceResponseBodyDTO,
-  type UploadResourceBodyDTO,
   type UploadResourcePathParamsDTO,
-  uploadResourceBodyDTOSchema,
   uploadResourceResponseBodyDTOSchema,
   uploadResourcePathParamsDTOSchema,
 } from './schemas/uploadResourceSchema.js';
@@ -131,7 +129,6 @@ export class ResourceHttpController implements HttpController {
         handler: this.uploadResource.bind(this),
         schema: {
           request: {
-            body: uploadResourceBodyDTOSchema,
             pathParams: uploadResourcePathParamsDTOSchema,
           },
           response: {
@@ -326,7 +323,7 @@ export class ResourceHttpController implements HttpController {
   }
 
   private async uploadResource(
-    request: HttpRequest<UploadResourceBodyDTO, undefined, UploadResourcePathParamsDTO>,
+    request: HttpRequest<undefined, undefined, UploadResourcePathParamsDTO>,
   ): Promise<HttpCreatedResponse<UploadResourceResponseBodyDTO>> {
     const { userId } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],

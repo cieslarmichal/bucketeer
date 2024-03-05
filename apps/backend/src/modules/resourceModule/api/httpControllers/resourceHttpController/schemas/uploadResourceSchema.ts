@@ -13,10 +13,6 @@ export type UploadResourcePathParamsDTO = TypeExtends<
   contracts.UploadResourcePathParams
 >;
 
-export const uploadResourceBodyDTOSchema = Type.Any();
-
-export type UploadResourceBodyDTO = Static<typeof uploadResourceBodyDTOSchema>;
-
 export const uploadResourceResponseBodyDTOSchema = Type.Any();
 
 export type UploadResourceResponseBodyDTO = Static<typeof uploadResourceResponseBodyDTOSchema>;
