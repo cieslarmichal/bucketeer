@@ -4,9 +4,9 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   ListObjectsV2Command,
-  PutObjectCommand,
   type ListObjectsV2CommandInput,
 } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
 import { type Readable } from 'node:stream';
 
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
@@ -28,16 +28,18 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
   public constructor(private readonly s3Client: S3Client) {}
 
   public async uploadResource(payload: UploadResourcePayload): Promise<void> {
-    const { bucketName, resourceName, data, contentType } = payload;
+    const { bucketName, resourceName, data } = payload;
 
-    const command = new PutObjectCommand({
-      Bucket: bucketName,
-      Key: resourceName,
-      Body: data,
-      ContentType: contentType,
+    const upload = new Upload({
+      client: this.s3Client,
+      params: {
+        Bucket: bucketName,
+        Key: resourceName,
+        Body: data,
+      },
     });
 
-    await this.s3Client.send(command);
+    await upload.done();
   }
 
   public async downloadResource(payload: DownloadResourcePayload): Promise<Resource> {

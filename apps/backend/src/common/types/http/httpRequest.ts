@@ -13,5 +13,5 @@ export interface HttpRequest<Body = any, QueryParams = any, PathParams = any> {
   readonly queryParams: QueryParams;
   readonly pathParams: PathParams;
   readonly headers: Record<string, string>;
-  readonly file?: AttachedFile;
+  readonly file?: AttachedFile | undefined;
 }
