@@ -7,6 +7,7 @@ export const symbols = {
   downloadImageQueryHandler: Symbol('downloadImageQueryHandler'),
   downloadVideoPreviewQueryHandler: Symbol('downloadVideoPreviewQueryHandler'),
   deleteResourceCommandHandler: Symbol('deleteResourceCommandHandler'),
+  uploadResourceCommandHandler: Symbol('uploadResourceCommandHandler'),
 
   findBucketsQueryHandler: Symbol('findBucketsQueryHandler'),
   createBucketCommandHandler: Symbol('createBucketCommandHandler'),

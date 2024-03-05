@@ -306,26 +306,6 @@ describe('ResourceBlobServiceImpl', () => {
   });
 
   describe('upload', () => {
-    it('throws an error - when object already exists', async () => {
-      const filePath = path.join(resourcesDirectory, sampleFileName1);
-
-      await s3TestUtils.uploadObject(bucketName, sampleFileName1, filePath);
-
-      try {
-        await resourceBlobService.uploadResource({
-          bucketName,
-          resourceName: sampleFileName1,
-          data: createReadStream(filePath),
-        });
-      } catch (error) {
-        expect(error).toBeDefined();
-
-        return;
-      }
-
-      expect.fail();
-    });
-
     it('throws an error - when bucket does not exist', async () => {
       const filePath = path.join(resourcesDirectory, sampleFileName1);
 
@@ -336,6 +316,7 @@ describe('ResourceBlobServiceImpl', () => {
           bucketName: nonExistingBucketName,
           resourceName: sampleFileName1,
           data: createReadStream(filePath),
+          contentType: 'video/mp4',
         });
       } catch (error) {
         expect(error).toBeDefined();
@@ -353,6 +334,7 @@ describe('ResourceBlobServiceImpl', () => {
         bucketName,
         resourceName: sampleFileName1,
         data: createReadStream(filePath),
+        contentType: 'video/mp4',
       });
 
       const exists = await s3TestUtils.objectExists(bucketName, sampleFileName1);

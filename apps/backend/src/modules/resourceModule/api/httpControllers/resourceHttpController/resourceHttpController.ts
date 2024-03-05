@@ -40,17 +40,29 @@ import {
   type FindUserBucketsResponseBodyDTO,
 } from './schemas/findUserBucketsSchema.js';
 import { type ResourceMetadataDTO } from './schemas/resourceMetadataDTO.js';
+import {
+  type UploadResourceResponseBodyDTO,
+  type UploadResourcePathParamsDTO,
+  uploadResourceResponseBodyDTOSchema,
+  uploadResourcePathParamsDTOSchema,
+} from './schemas/uploadResourceSchema.js';
+import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type HttpController } from '../../../../../common/types/http/httpController.js';
 import { HttpHeader } from '../../../../../common/types/http/httpHeader.js';
 import { HttpMethodName } from '../../../../../common/types/http/httpMethodName.js';
 import { type HttpRequest } from '../../../../../common/types/http/httpRequest.js';
-import { type HttpOkResponse, type HttpNoContentResponse } from '../../../../../common/types/http/httpResponse.js';
+import {
+  type HttpOkResponse,
+  type HttpNoContentResponse,
+  type HttpCreatedResponse,
+} from '../../../../../common/types/http/httpResponse.js';
 import { HttpRoute } from '../../../../../common/types/http/httpRoute.js';
 import { HttpStatusCode } from '../../../../../common/types/http/httpStatusCode.js';
 import { SecurityMode } from '../../../../../common/types/http/securityMode.js';
 import { type AccessControlService } from '../../../../authModule/application/services/accessControlService/accessControlService.js';
 import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
 import { type DeleteResourceCommandHandler } from '../../../application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandler.js';
+import { type UploadResourceCommandHandler } from '../../../application/commandHandlers/uploadResourceCommandHandler/uploadResourceCommandHandler.js';
 import { type DownloadImageQueryHandler } from '../../../application/queryHandlers/downloadImageQueryHandler/downloadImageQueryHandler.js';
 import { type DownloadResourceQueryHandler } from '../../../application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandler.js';
 import { type DownloadResourcesQueryHandler } from '../../../application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandler.js';
@@ -65,6 +77,7 @@ export class ResourceHttpController implements HttpController {
     private readonly deleteResourceCommandHandler: DeleteResourceCommandHandler,
     private readonly findResourcesMetadataQueryHandler: FindResourcesMetadataQueryHandler,
     private readonly downloadResourceQueryHandler: DownloadResourceQueryHandler,
+    private readonly uploadResourceCommandHandler: UploadResourceCommandHandler,
     private readonly downloadResourcesQueryHandler: DownloadResourcesQueryHandler,
     private readonly downloadImageQueryHandler: DownloadImageQueryHandler,
     private readonly downloadVideoPreviewQueryHandler: DownloadVideoPreviewQueryHandler,
@@ -109,6 +122,25 @@ export class ResourceHttpController implements HttpController {
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
         description: `Find bucket's resources metadata.`,
+      }),
+      new HttpRoute({
+        method: HttpMethodName.post,
+        path: ':bucketName/resources',
+        handler: this.uploadResource.bind(this),
+        schema: {
+          request: {
+            pathParams: uploadResourcePathParamsDTOSchema,
+          },
+          response: {
+            [HttpStatusCode.created]: {
+              schema: uploadResourceResponseBodyDTOSchema,
+              description: 'Resource uploaded.',
+            },
+          },
+        },
+        securityMode: SecurityMode.bearer,
+        tags: ['Resource'],
+        description: `Upload a Resource.`,
       }),
       new HttpRoute({
         method: HttpMethodName.post,
@@ -287,6 +319,37 @@ export class ResourceHttpController implements HttpController {
         [HttpHeader.contentDisposition]: 'attachment; filename=resources.zip',
         [HttpHeader.contentType]: 'application/zip',
       },
+    };
+  }
+
+  private async uploadResource(
+    request: HttpRequest<undefined, undefined, UploadResourcePathParamsDTO>,
+  ): Promise<HttpCreatedResponse<UploadResourceResponseBodyDTO>> {
+    const { userId } = await this.accessControlService.verifyBearerToken({
+      authorizationHeader: request.headers['authorization'],
+    });
+
+    if (!request.file) {
+      throw new OperationNotValidError({
+        reason: 'File is required.',
+      });
+    }
+
+    const { bucketName } = request.pathParams;
+
+    const { name, type, data } = request.file;
+
+    await this.uploadResourceCommandHandler.execute({
+      userId,
+      resourceName: name,
+      bucketName,
+      contentType: type,
+      data,
+    });
+
+    return {
+      statusCode: HttpStatusCode.created,
+      body: null,
     };
   }
 
