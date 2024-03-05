@@ -7,6 +7,7 @@ export interface UploadResourcePayload {
   readonly resourceName: string;
   readonly bucketName: string;
   readonly data: Readable;
+  readonly contentType: string;
 }
 
 export interface DownloadResourcePayload {

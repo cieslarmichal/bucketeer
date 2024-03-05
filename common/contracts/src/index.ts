@@ -39,3 +39,5 @@ export * from './schemas/resource/createBucket.js';
 export * from './schemas/resource/deleteBucket.js';
 
 export * from './schemas/resource/downloadVideoPreview.js';
+
+export * from './schemas/resource/uploadResource.js';
