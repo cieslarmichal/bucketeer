@@ -2,6 +2,7 @@
 
 import { fastifyCors } from '@fastify/cors';
 import { fastifyHelmet } from '@fastify/helmet';
+import { fastifyMultipart } from '@fastify/multipart';
 import { fastifySwagger } from '@fastify/swagger';
 import { fastifySwaggerUi } from '@fastify/swagger-ui';
 import { type TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
@@ -62,6 +63,8 @@ export class HttpServer {
     this.setupErrorHandler();
 
     await this.initSwagger();
+
+    this.fastifyInstance.register(fastifyMultipart);
 
     await this.fastifyInstance.register(fastifyHelmet);
 
