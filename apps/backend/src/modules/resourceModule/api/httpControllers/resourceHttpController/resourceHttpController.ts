@@ -371,7 +371,7 @@ export class ResourceHttpController implements HttpController {
       body: resource.data,
       headers: {
         [HttpHeader.cacheControl]: 'max-age=2592000',
-        [HttpHeader.contentDisposition]: `attachment; filename=${resource.name}`,
+        [HttpHeader.contentDisposition]: `attachment; filename=${`attachment; filename*=UTF-8''${encodeURIComponent(resource.name)}`}`,
         [HttpHeader.contentType]: resource.contentType,
       },
     };
@@ -399,7 +399,7 @@ export class ResourceHttpController implements HttpController {
       body: resource.data,
       headers: {
         [HttpHeader.cacheControl]: 'max-age=2592000',
-        [HttpHeader.contentDisposition]: `attachment; filename=${resource.name}`,
+        [HttpHeader.contentDisposition]: `attachment; filename=${`attachment; filename*=UTF-8''${encodeURIComponent(resource.name)}`}`,
         [HttpHeader.contentType]: resource.contentType,
       },
     };
@@ -425,7 +425,7 @@ export class ResourceHttpController implements HttpController {
       body: preview.data,
       headers: {
         [HttpHeader.cacheControl]: 'max-age=2592000',
-        [HttpHeader.contentDisposition]: `attachment; filename=${preview.name}`,
+        [HttpHeader.contentDisposition]: `attachment; filename*=UTF-8''${encodeURIComponent(preview.name)}`,
         [HttpHeader.contentType]: preview.contentType,
       },
     };
