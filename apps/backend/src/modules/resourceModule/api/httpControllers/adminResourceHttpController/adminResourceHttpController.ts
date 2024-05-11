@@ -8,9 +8,9 @@ import {
 } from './schemas/createBucketSchema.js';
 import {
   type DeleteBucketResponseBodyDTO,
-  deleteBucketPathParamsDTOSchema,
   deleteBucketResponseBodyDTOSchema,
   type DeleteBucketPathParamsDTO,
+  deleteBucketPathParamsDTOSchema,
 } from './schemas/deleteBucketSchema.js';
 import {
   type FindBucketsQueryParamsDTO,
