@@ -7,7 +7,7 @@ import { type TypeExtends } from '../../../../../../common/types/schemaExtends.j
 
 export const createBucketBodyDTOSchema = Type.Object({
   bucketName: Type.String({
-    pattern: '^(?!.*\\..*)([a-z0-9])(?:[a-z0-9.-]*[a-z0-9])?$',
+    pattern: `^(?!.*\.\.)([a-z0-9])(?:[a-z0-9.-]*[a-z0-9])?$`,
     minLength: 3,
     maxLength: 63,
   }),
