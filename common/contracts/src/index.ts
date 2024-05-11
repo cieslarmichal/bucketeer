@@ -40,4 +40,4 @@ export * from './schemas/resource/deleteBucket.js';
 
 export * from './schemas/resource/downloadVideoPreview.js';
 
-export * from './schemas/resource/uploadResource.js';
+export * from './schemas/resource/uploadResources.js';
