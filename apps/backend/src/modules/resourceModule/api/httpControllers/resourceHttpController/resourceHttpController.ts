@@ -41,10 +41,10 @@ import {
 } from './schemas/findUserBucketsSchema.js';
 import { type ResourceMetadataDTO } from './schemas/resourceMetadataDTO.js';
 import {
-  type UploadResourceResponseBodyDTO,
-  type UploadResourcePathParamsDTO,
-  uploadResourceResponseBodyDTOSchema,
-  uploadResourcePathParamsDTOSchema,
+  type UploadResourcesResponseBodyDTO,
+  type UploadResourcesPathParamsDTO,
+  uploadResourcesResponseBodyDTOSchema,
+  uploadResourcesPathParamsDTOSchema,
 } from './schemas/uploadResourceSchema.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type HttpController } from '../../../../../common/types/http/httpController.js';
@@ -62,7 +62,7 @@ import { SecurityMode } from '../../../../../common/types/http/securityMode.js';
 import { type AccessControlService } from '../../../../authModule/application/services/accessControlService/accessControlService.js';
 import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
 import { type DeleteResourceCommandHandler } from '../../../application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandler.js';
-import { type UploadResourceCommandHandler } from '../../../application/commandHandlers/uploadResourceCommandHandler/uploadResourceCommandHandler.js';
+import { type UploadResourcesCommandHandler } from '../../../application/commandHandlers/uploadResourcesCommandHandler/uploadResourcesCommandHandler.js';
 import { type DownloadImageQueryHandler } from '../../../application/queryHandlers/downloadImageQueryHandler/downloadImageQueryHandler.js';
 import { type DownloadResourceQueryHandler } from '../../../application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandler.js';
 import { type DownloadResourcesQueryHandler } from '../../../application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandler.js';
@@ -77,7 +77,7 @@ export class ResourceHttpController implements HttpController {
     private readonly deleteResourceCommandHandler: DeleteResourceCommandHandler,
     private readonly findResourcesMetadataQueryHandler: FindResourcesMetadataQueryHandler,
     private readonly downloadResourceQueryHandler: DownloadResourceQueryHandler,
-    private readonly uploadResourceCommandHandler: UploadResourceCommandHandler,
+    private readonly uploadResourceCommandHandler: UploadResourcesCommandHandler,
     private readonly downloadResourcesQueryHandler: DownloadResourcesQueryHandler,
     private readonly downloadImageQueryHandler: DownloadImageQueryHandler,
     private readonly downloadVideoPreviewQueryHandler: DownloadVideoPreviewQueryHandler,
@@ -126,21 +126,21 @@ export class ResourceHttpController implements HttpController {
       new HttpRoute({
         method: HttpMethodName.post,
         path: ':bucketName/resources',
-        handler: this.uploadResource.bind(this),
+        handler: this.uploadResources.bind(this),
         schema: {
           request: {
-            pathParams: uploadResourcePathParamsDTOSchema,
+            pathParams: uploadResourcesPathParamsDTOSchema,
           },
           response: {
             [HttpStatusCode.created]: {
-              schema: uploadResourceResponseBodyDTOSchema,
-              description: 'Resource uploaded.',
+              schema: uploadResourcesResponseBodyDTOSchema,
+              description: 'Resources uploaded.',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
-        description: `Upload a Resource.`,
+        description: `Upload Resources.`,
       }),
       new HttpRoute({
         method: HttpMethodName.post,
@@ -320,29 +320,27 @@ export class ResourceHttpController implements HttpController {
     };
   }
 
-  private async uploadResource(
-    request: HttpRequest<undefined, undefined, UploadResourcePathParamsDTO>,
-  ): Promise<HttpCreatedResponse<UploadResourceResponseBodyDTO>> {
+  private async uploadResources(
+    request: HttpRequest<undefined, undefined, UploadResourcesPathParamsDTO>,
+  ): Promise<HttpCreatedResponse<UploadResourcesResponseBodyDTO>> {
     const { userId } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
     });
 
-    if (!request.file) {
+    const files = request.files;
+
+    if (!files || files.length === 0) {
       throw new OperationNotValidError({
-        reason: 'File is required.',
+        reason: 'Files are required.',
       });
     }
 
     const { bucketName } = request.pathParams;
 
-    const { name, type, data } = request.file;
-
     await this.uploadResourceCommandHandler.execute({
       userId,
-      resourceName: name,
       bucketName,
-      contentType: type,
-      data,
+      files,
     });
 
     return {

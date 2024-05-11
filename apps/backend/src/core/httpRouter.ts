@@ -2,6 +2,9 @@
 
 import { TypeClone } from '@sinclair/typebox';
 import { type FastifyInstance, type FastifyReply, type FastifyRequest, type FastifySchema } from 'fastify';
+import { createWriteStream } from 'node:fs';
+import { pipeline } from 'node:stream';
+import { promisify } from 'node:util';
 
 import { coreSymbols } from './symbols.js';
 import { ApplicationError } from '../common/errors/base/applicationError.js';
@@ -19,6 +22,8 @@ import { type DependencyInjectionContainer } from '../libs/dependencyInjection/d
 import { type LoggerService } from '../libs/logger/services/loggerService/loggerService.js';
 import { ForbiddenAccessError } from '../modules/authModule/application/errors/forbiddenAccessError.js';
 import { UnauthorizedAccessError } from '../modules/authModule/application/errors/unathorizedAccessError.js';
+
+const streamPipeline = promisify(pipeline);
 
 export interface RegisterControllersPayload {
   controllers: HttpController[];
@@ -82,17 +87,27 @@ export class HttpRouter {
             headers: fastifyRequest.headers,
           });
 
-          let attachedFile: AttachedFile | undefined;
+          let attachedFiles: AttachedFile[] | undefined;
 
           if (fastifyRequest.isMultipart()) {
-            const file = await fastifyRequest.file();
+            attachedFiles = [];
 
-            if (file) {
-              attachedFile = {
-                name: file.filename,
-                type: file.mimetype,
-                data: file.file,
-              };
+            const files = fastifyRequest.files();
+
+            for await (const file of files) {
+              const { filename, mimetype, file: data } = file;
+
+              const filePath = `/tmp/${filename}`;
+
+              const writer = createWriteStream(filePath);
+
+              await streamPipeline(data, writer);
+
+              attachedFiles.push({
+                name: filename,
+                type: mimetype,
+                filePath,
+              });
             }
           }
 
@@ -105,7 +120,7 @@ export class HttpRouter {
             pathParams: fastifyRequest.params,
             queryParams: fastifyRequest.query,
             headers: fastifyRequest.headers as Record<string, string>,
-            file: attachedFile,
+            files: attachedFiles,
           });
 
           fastifyReply.status(statusCode);

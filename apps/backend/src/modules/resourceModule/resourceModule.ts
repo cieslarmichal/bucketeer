@@ -6,8 +6,8 @@ import { type DeleteBucketCommandHandler } from './application/commandHandlers/d
 import { DeleteBucketCommandHandlerImpl } from './application/commandHandlers/deleteBucketCommandHandler/deleteBucketCommandHandlerImpl.js';
 import { type DeleteResourceCommandHandler } from './application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandler.js';
 import { DeleteResourceCommandHandlerImpl } from './application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandlerImpl.js';
-import { type UploadResourceCommandHandler } from './application/commandHandlers/uploadResourceCommandHandler/uploadResourceCommandHandler.js';
-import { UploadResourceCommandHandlerImpl } from './application/commandHandlers/uploadResourceCommandHandler/uploadResourceCommandHandlerImpl.js';
+import { type UploadResourcesCommandHandler } from './application/commandHandlers/uploadResourcesCommandHandler/uploadResourcesCommandHandler.js';
+import { UploadResourcesCommandHandlerImpl } from './application/commandHandlers/uploadResourcesCommandHandler/uploadResourcesCommandHandlerImpl.js';
 import { type DownloadImageQueryHandler } from './application/queryHandlers/downloadImageQueryHandler/downloadImageQueryHandler.js';
 import { DownloadImageQueryHandlerImpl } from './application/queryHandlers/downloadImageQueryHandler/downloadImageQueryHandlerImpl.js';
 import { type DownloadResourceQueryHandler } from './application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandler.js';
@@ -50,10 +50,10 @@ export class ResourceModule implements DependencyInjectionModule {
         ),
     );
 
-    container.bind<UploadResourceCommandHandler>(
-      symbols.uploadResourceCommandHandler,
+    container.bind<UploadResourcesCommandHandler>(
+      symbols.uploadResourcesCommandHandler,
       () =>
-        new UploadResourceCommandHandlerImpl(
+        new UploadResourcesCommandHandlerImpl(
           container.get<ResourceBlobService>(symbols.resourceBlobService),
           container.get<LoggerService>(coreSymbols.loggerService),
           container.get<FindUserBucketsQueryHandler>(userSymbols.findUserBucketsQueryHandler),
@@ -140,7 +140,7 @@ export class ResourceModule implements DependencyInjectionModule {
           container.get<DeleteResourceCommandHandler>(symbols.deleteResourceCommandHandler),
           container.get<FindResourcesMetadataQueryHandler>(symbols.findResourcesMetadataQueryHandler),
           container.get<DownloadResourceQueryHandler>(symbols.downloadResourceQueryHandler),
-          container.get<UploadResourceCommandHandler>(symbols.uploadResourceCommandHandler),
+          container.get<UploadResourcesCommandHandler>(symbols.uploadResourcesCommandHandler),
           container.get<DownloadResourcesQueryHandler>(symbols.downloadResourcesQueryHandler),
           container.get<DownloadImageQueryHandler>(symbols.downloadImageQueryHandler),
           container.get<DownloadVideoPreviewQueryHandler>(symbols.downloadVideoPreviewQueryHandler),

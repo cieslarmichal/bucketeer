@@ -4,15 +4,15 @@ import type * as contracts from '@common/contracts';
 
 import { type TypeExtends } from '../../../../../../common/types/schemaExtends.js';
 
-export const uploadResourcePathParamsDTOSchema = Type.Object({
+export const uploadResourcesPathParamsDTOSchema = Type.Object({
   bucketName: Type.String({ minLength: 1 }),
 });
 
-export type UploadResourcePathParamsDTO = TypeExtends<
-  Static<typeof uploadResourcePathParamsDTOSchema>,
-  contracts.UploadResourcePathParams
+export type UploadResourcesPathParamsDTO = TypeExtends<
+  Static<typeof uploadResourcesPathParamsDTOSchema>,
+  contracts.UploadResourcesPathParams
 >;
 
-export const uploadResourceResponseBodyDTOSchema = Type.Any();
+export const uploadResourcesResponseBodyDTOSchema = Type.Null();
 
-export type UploadResourceResponseBodyDTO = Static<typeof uploadResourceResponseBodyDTOSchema>;
+export type UploadResourcesResponseBodyDTO = Static<typeof uploadResourcesResponseBodyDTOSchema>;
