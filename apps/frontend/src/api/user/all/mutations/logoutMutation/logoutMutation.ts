@@ -5,18 +5,24 @@ import { type LogoutUserBody, type LogoutUserPathParams } from '@common/contract
 import { HttpService } from '../../../../../services/httpService/httpService';
 import { UserApiError } from '../../../errors/userApiError';
 
-type LogoutUserPayload = LogoutUserBody & LogoutUserPathParams;
+type LogoutUserPayload = LogoutUserBody &
+  LogoutUserPathParams & {
+    accessToken: string;
+  };
 
 export const useLogoutUserMutation = (
   options: UseMutationOptions<void, UserApiError, LogoutUserPayload>,
 ): UseMutationResult<void, UserApiError, LogoutUserPayload, unknown> => {
   const logoutUser = async (values: LogoutUserPayload): Promise<void> => {
-    const { id, refreshToken } = values;
+    const { id, refreshToken, accessToken } = values;
 
     const logoutUserResponse = await HttpService.post<void>({
-      url: `/users/login/${id}/logout`,
+      url: `/users/${id}/logout`,
       body: {
         refreshToken,
+      },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
