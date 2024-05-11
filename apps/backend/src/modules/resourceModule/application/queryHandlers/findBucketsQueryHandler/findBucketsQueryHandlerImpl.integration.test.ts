@@ -40,7 +40,10 @@ describe('FindBucketsQueryHandler', () => {
   });
 
   it('finds buckets', async () => {
-    const { buckets } = await queryHandler.execute();
+    const { buckets, totalPages } = await queryHandler.execute({
+      page: 1,
+      pageSize: 10,
+    });
 
     expect(buckets.length).toEqual(3);
 
@@ -49,5 +52,18 @@ describe('FindBucketsQueryHandler', () => {
     expect(buckets.find((bucket) => bucket.name === bucketName2)).toBeDefined();
 
     expect(buckets.find((bucket) => bucket.name === bucketName3)).toBeDefined();
+
+    expect(totalPages).toEqual(1);
+  });
+
+  it('finds buckets limited by pagination', async () => {
+    const { buckets, totalPages } = await queryHandler.execute({
+      page: 1,
+      pageSize: 2,
+    });
+
+    expect(buckets.length).toEqual(2);
+
+    expect(totalPages).toEqual(2);
   });
 });
