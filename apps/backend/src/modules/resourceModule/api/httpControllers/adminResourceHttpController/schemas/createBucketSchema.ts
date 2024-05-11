@@ -6,7 +6,11 @@ import { bucketDtoSchema } from './bucketDto.js';
 import { type TypeExtends } from '../../../../../../common/types/schemaExtends.js';
 
 export const createBucketBodyDTOSchema = Type.Object({
-  bucketName: Type.String({ minLength: 1 }),
+  bucketName: Type.String({
+    pattern: '^(?!.*\\..*)([a-z0-9])(?:[a-z0-9.-]*[a-z0-9])?$',
+    minLength: 3,
+    maxLength: 63,
+  }),
 });
 
 export type CreateBucketBodyDTO = TypeExtends<Static<typeof createBucketBodyDTOSchema>, contracts.CreateBucketBody>;
