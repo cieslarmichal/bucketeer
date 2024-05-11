@@ -22,7 +22,7 @@ export class FindResourcesMetadataQueryHandlerImpl implements FindResourcesMetad
 
     const { buckets } = await this.findUserBucketsQueryHandler.execute({ userId });
 
-    if (!buckets.includes(bucketName)) {
+    if (!buckets.some((bucket) => bucket.name === bucketName)) {
       throw new OperationNotValidError({
         reason: 'Bucket does not exist.',
         userId,

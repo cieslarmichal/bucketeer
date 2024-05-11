@@ -51,13 +51,13 @@ export class AdminResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.created]: {
               schema: createBucketResponseBodyDTOSchema,
-              description: 'Bucket created.',
+              description: 'Bucket created',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Bucket'],
-        description: 'Create bucket.',
+        description: 'Create bucket',
       }),
       new HttpRoute({
         method: HttpMethodName.get,
@@ -67,13 +67,13 @@ export class AdminResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: findBucketsResponseBodyDTOSchema,
-              description: 'Buckets found.',
+              description: 'Buckets found',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Bucket'],
-        description: 'Find buckets.',
+        description: 'Find buckets',
       }),
       new HttpRoute({
         method: HttpMethodName.delete,
@@ -85,13 +85,13 @@ export class AdminResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.noContent]: {
               schema: deleteBucketResponseBodyDTOSchema,
-              description: 'Bucket deleted.',
+              description: 'Bucket deleted',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Bucket'],
-        description: 'Delete bucket.',
+        description: 'Delete bucket',
       }),
     ];
   }

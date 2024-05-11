@@ -31,6 +31,8 @@ import {
   type FindResourcesPathParamsDTO,
 } from './schemas/findResourcesSchema.js';
 import {
+  type FindUserBucketsQueryParamsDTO,
+  findUserBucketsQueryParamsDTOSchema,
   findUserBucketsResponseBodyDTOSchema,
   type FindUserBucketsResponseBodyDTO,
 } from './schemas/findUserBucketsSchema.js';
@@ -82,19 +84,21 @@ export class ResourceHttpController implements HttpController {
     return [
       new HttpRoute({
         method: HttpMethodName.get,
-        handler: this.findBuckets.bind(this),
+        handler: this.findUserBuckets.bind(this),
         schema: {
-          request: {},
+          request: {
+            queryParams: findUserBucketsQueryParamsDTOSchema,
+          },
           response: {
             [HttpStatusCode.ok]: {
               schema: findUserBucketsResponseBodyDTOSchema,
-              description: 'Buckets found.',
+              description: 'Buckets found',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Bucket'],
-        description: 'Find buckets.',
+        description: 'Find buckets',
       }),
       new HttpRoute({
         method: HttpMethodName.get,
@@ -127,7 +131,7 @@ export class ResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.created]: {
               schema: uploadResourcesResponseBodyDTOSchema,
-              description: 'Resources uploaded.',
+              description: 'Resources uploaded',
             },
           },
         },
@@ -166,13 +170,13 @@ export class ResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: downloadResourceResponseBodyDTOSchema,
-              description: 'Resource downloaded.',
+              description: 'Resource downloaded',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
-        description: 'Download resource.',
+        description: 'Download resource',
       }),
       new HttpRoute({
         method: HttpMethodName.get,
@@ -185,13 +189,13 @@ export class ResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: downloadVideoPreviewResponseBodyDTOSchema,
-              description: 'Video preview downloaded.',
+              description: 'Video preview downloaded',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
-        description: 'Download video preview.',
+        description: 'Download video preview',
       }),
       new HttpRoute({
         method: HttpMethodName.delete,
@@ -204,22 +208,25 @@ export class ResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.noContent]: {
               schema: deleteResourceResponseBodyDTOSchema,
-              description: 'Resource deleted.',
+              description: 'Resource deleted',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
-        description: 'Delete resource.',
+        description: 'Delete resource',
       }),
     ];
   }
 
-  private async findBuckets(
-    request: HttpRequest<undefined, undefined, undefined>,
+  private async findUserBuckets(
+    request: HttpRequest<undefined, FindUserBucketsQueryParamsDTO, undefined>,
   ): Promise<HttpOkResponse<FindUserBucketsResponseBodyDTO>> {
-    const { userId } = await this.accessControlService.verifyBearerToken({
+    const { userId } = request.queryParams;
+
+    await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
+      expectedUserId: userId,
     });
 
     const { buckets } = await this.findUserBucketsQueryHandler.execute({

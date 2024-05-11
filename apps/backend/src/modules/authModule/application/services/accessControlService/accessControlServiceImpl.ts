@@ -10,12 +10,11 @@ import { ForbiddenAccessError } from '../../errors/forbiddenAccessError.js';
 import { UnauthorizedAccessError } from '../../errors/unathorizedAccessError.js';
 import { type TokenService } from '../tokenService/tokenService.js';
 
-// TODO: add integration tests
 export class AccessControlServiceImpl implements AccessControlService {
   public constructor(private readonly tokenService: TokenService) {}
 
   public async verifyBearerToken(payload: VerifyBearerTokenPayload): Promise<VerifyBearerTokenResult> {
-    const { authorizationHeader, expectedUserId } = payload;
+    const { authorizationHeader, expectedUserId, expectedRole } = payload;
 
     if (!authorizationHeader) {
       throw new UnauthorizedAccessError({
@@ -36,7 +35,7 @@ export class AccessControlServiceImpl implements AccessControlService {
     let tokenPayload;
 
     try {
-      tokenPayload = this.tokenService.verifyToken({ token: token as string });
+      tokenPayload = this.tokenService.verifyToken({ token: token as string }) as unknown as VerifyBearerTokenResult;
     } catch (error) {
       throw new UnauthorizedAccessError({
         securityMode: SecurityMode.bearer,
@@ -44,20 +43,22 @@ export class AccessControlServiceImpl implements AccessControlService {
       });
     }
 
-    const accessTokenPayload = tokenPayload as unknown as VerifyBearerTokenResult;
+    if (tokenPayload.role === UserRole.admin) {
+      return tokenPayload;
+    }
 
-    if (payload.expectedRole && accessTokenPayload.role !== payload.expectedRole) {
+    if (expectedRole && tokenPayload.role !== expectedRole) {
       throw new ForbiddenAccessError({
-        reason: 'User role does not match User role from token.',
+        reason: 'The user role is not sufficient to perform this operation.',
       });
     }
 
-    if (accessTokenPayload.role === UserRole.user && expectedUserId && accessTokenPayload.userId !== expectedUserId) {
+    if (expectedUserId && tokenPayload.userId !== expectedUserId) {
       throw new ForbiddenAccessError({
-        reason: 'User id does not match User id from token.',
+        reason: 'User id does not match expected user id.',
       });
     }
 
-    return accessTokenPayload;
+    return tokenPayload;
   }
 }

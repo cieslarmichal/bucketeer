@@ -59,12 +59,12 @@ export class UserHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: loginUserResponseBodyDTOSchema,
-              description: 'User logged in.',
+              description: 'User logged in',
             },
           },
         },
         tags: ['User'],
-        description: 'Login user.',
+        description: 'Login user',
       }),
       new HttpRoute({
         method: HttpMethodName.get,
@@ -75,13 +75,13 @@ export class UserHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: findMyUserResponseBodyDTOSchema,
-              description: 'User found.',
+              description: 'User found',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['User'],
-        description: 'Find user by token.',
+        description: 'Find user by token',
       }),
       new HttpRoute({
         method: HttpMethodName.post,
@@ -101,7 +101,7 @@ export class UserHttpController implements HttpController {
         },
         securityMode: SecurityMode.bearer,
         tags: ['User'],
-        description: 'Logout user.',
+        description: 'Logout user',
       }),
       new HttpRoute({
         method: HttpMethodName.post,
@@ -114,12 +114,12 @@ export class UserHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: refreshUserTokensResponseBodyDTOSchema,
-              description: 'User tokens refreshed.',
+              description: 'User tokens refreshed',
             },
           },
         },
         tags: ['User'],
-        description: 'Refresh user tokens.',
+        description: 'Refresh user tokens',
       }),
     ];
   }
