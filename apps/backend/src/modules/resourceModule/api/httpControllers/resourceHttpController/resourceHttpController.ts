@@ -8,6 +8,8 @@ import {
   type DownloadVideoPreviewPathParamsDTO,
   downloadVideoPreviewPathParamsDTOSchema,
   downloadVideoPreviewResponseBodyDTOSchema,
+  type DownloadVideoPreviewQueryParamsDTO,
+  downloadVideoPreviewQueryParamsDTOSchema,
 } from './schemas/downloadVideoPreviewSchema.js';
 import {
   type ExportResourcesResponseBodyDTO,
@@ -154,11 +156,12 @@ export class ResourceHttpController implements HttpController {
       }),
       new HttpRoute({
         method: HttpMethodName.get,
-        path: ':bucketName/resources/videos/previews/:resourceId',
+        path: ':bucketName/resources/:resourceId/previews',
         handler: this.downloadVideoPreview.bind(this),
         schema: {
           request: {
             pathParams: downloadVideoPreviewPathParamsDTOSchema,
+            queryParams: downloadVideoPreviewQueryParamsDTOSchema,
           },
           response: {
             [HttpStatusCode.ok]: {
@@ -305,9 +308,11 @@ export class ResourceHttpController implements HttpController {
   }
 
   private async downloadVideoPreview(
-    request: HttpRequest<undefined, undefined, DownloadVideoPreviewPathParamsDTO>,
+    request: HttpRequest<undefined, DownloadVideoPreviewQueryParamsDTO, DownloadVideoPreviewPathParamsDTO>,
   ): Promise<HttpOkResponse<unknown>> {
     const { resourceId, bucketName } = request.pathParams;
+
+    const { previewType } = request.queryParams;
 
     const { userId } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
@@ -317,6 +322,7 @@ export class ResourceHttpController implements HttpController {
       userId,
       resourceId,
       bucketName,
+      previewType,
     });
 
     return {
