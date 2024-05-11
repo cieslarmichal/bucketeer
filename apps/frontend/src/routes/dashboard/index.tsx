@@ -28,8 +28,6 @@ function Dashboard(): JSX.Element {
 
   const userId = useUserStore((state) => state.user.id);
 
-  // const buckets = useSuspenseQuery(findBucketsQueryOptions(tokens.getState().accessToken as string));
-
   const bucketsQuery = findBucketsQueryOptions({
     accessToken: accessToken as string,
     userId: userId as string,
@@ -67,12 +65,12 @@ function Dashboard(): JSX.Element {
   return (
     <div className="w-full flex justify-center p-4">
       <select>
-        {bucketsData?.map((option) => (
+        {bucketsData?.data?.map((option) => (
           <option
-            key={option}
-            value={option}
+            key={option.name}
+            value={option.name}
           >
-            {option}
+            {option.name}
           </option>
         ))}
       </select>

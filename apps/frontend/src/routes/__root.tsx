@@ -2,9 +2,11 @@ import { createRootRoute, Link, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 import { useEffect } from 'react';
 
+import { useLogoutUserMutation } from '../api/user/all/mutations/logoutMutation/logoutMutation';
 import { useFindMeQuery } from '../api/user/all/queries/findMeQuery/findMe';
 import { useUserStore } from '../core/stores/userStore/userStore';
 import { useUserTokensStore } from '../core/stores/userTokens/userTokens';
+import { CookieService } from '../services/cookieService/cookieService';
 
 import { ModeToggle } from '@/components/mode-toggle';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -15,6 +17,14 @@ export const Route = createRootRoute({
 
 function RootComponent(): JSX.Element {
   const accessToken = useUserTokensStore((userTokens) => userTokens.accessToken);
+
+  const refreshToken = useUserTokensStore((userTokens) => userTokens.refreshToken);
+
+  const { mutateAsync: logout } = useLogoutUserMutation({});
+
+  const removeTokens = useUserTokensStore((state) => state.removeTokens);
+
+  const removeUserDetails = useUserStore((state) => state.removeUser);
 
   const { data } = useFindMeQuery({
     accessToken: accessToken as string,
@@ -65,6 +75,26 @@ function RootComponent(): JSX.Element {
                   className="[&.active]:font-bold"
                 >
                   Dashboard
+                </Link>
+                <Link
+                  to="/"
+                  onClick={async () => {
+                    await logout({
+                      id: data?.id as string,
+                      refreshToken: refreshToken as string,
+                      accessToken: accessToken as string,
+                    });
+
+                    removeTokens();
+
+                    removeUserDetails();
+
+                    CookieService.removeUserDataCookie();
+
+                    CookieService.removeUserTokensCookie();
+                  }}
+                >
+                  Logout
                 </Link>
               </>
             ) : (
