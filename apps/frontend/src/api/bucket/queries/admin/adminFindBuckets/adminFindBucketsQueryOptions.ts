@@ -8,6 +8,6 @@ export const adminFindBucketsQueryOptions = (
   accessToken: string,
 ): UseQueryOptions<FindBucketsResponseBody, Error, FindBucketsResponseBody, string[]> =>
   queryOptions({
-    queryKey: ['findBuckets'],
+    queryKey: ['adminFindBuckets'],
     queryFn: () => adminFindBuckets(accessToken),
   });
