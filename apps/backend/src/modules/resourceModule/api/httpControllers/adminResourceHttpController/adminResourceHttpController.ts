@@ -90,6 +90,7 @@ export class AdminResourceHttpController implements HttpController {
           },
         },
         securityMode: SecurityMode.bearer,
+        path: '/:bucketName',
         tags: ['Bucket'],
         description: 'Delete bucket',
       }),

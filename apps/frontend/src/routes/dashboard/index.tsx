@@ -6,6 +6,7 @@ import { columns } from '../../components/dataTable/columns/columns';
 import { DataTable } from '../../components/dataTable/dataTable';
 import { requireAuth } from '../../core/auth/requireAuth';
 import { type AppRouterContext } from '../../core/router/routerContext';
+import { useUserStore } from '../../core/stores/userStore/userStore';
 import { useUserTokensStore } from '../../core/stores/userTokens/userTokens';
 
 export const Route = createFileRoute('/dashboard/')({
@@ -25,9 +26,14 @@ export const Route = createFileRoute('/dashboard/')({
 function Dashboard(): JSX.Element {
   const accessToken = useUserTokensStore((state) => state.accessToken);
 
+  const userId = useUserStore((state) => state.user.id);
+
   // const buckets = useSuspenseQuery(findBucketsQueryOptions(tokens.getState().accessToken as string));
 
-  const bucketsQuery = findBucketsQueryOptions(accessToken as string);
+  const bucketsQuery = findBucketsQueryOptions({
+    accessToken: accessToken as string,
+    userId: userId as string,
+  });
 
   const { data: bucketsData } = useQuery(bucketsQuery);
 

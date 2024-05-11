@@ -1,9 +1,13 @@
 import { type UseQueryOptions, queryOptions } from '@tanstack/react-query';
 
-import { findBuckets } from './findBuckets';
+import { type FindBucketsResponseBody } from '@common/contracts';
 
-export const findBucketsQueryOptions = (accessToken: string): UseQueryOptions<string[], Error, string[], string[]> =>
+import { type FindBucketsPayload, findBuckets } from './findBuckets';
+
+export const findBucketsQueryOptions = (
+  payload: FindBucketsPayload,
+): UseQueryOptions<FindBucketsResponseBody, Error, FindBucketsResponseBody, string[]> =>
   queryOptions({
-    queryKey: ['findBuckets'],
-    queryFn: () => findBuckets(accessToken),
+    queryKey: ['findBuckets', payload.userId],
+    queryFn: () => findBuckets(payload),
   });
