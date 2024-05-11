@@ -8,9 +8,9 @@ import {
 } from './schemas/createBucketSchema.js';
 import {
   type DeleteBucketResponseBodyDTO,
-  deleteBucketPathParamsDTOSchema,
+  deleteBucketQueryParamsDTOSchema,
   deleteBucketResponseBodyDTOSchema,
-  type DeleteBucketPathParamsDTO,
+  type DeleteBucketQueryParamsDTO,
 } from './schemas/deleteBucketSchema.js';
 import {
   type FindBucketsQueryParamsDTO,
@@ -80,7 +80,7 @@ export class AdminResourceHttpController implements HttpController {
         handler: this.deleteBucket.bind(this),
         schema: {
           request: {
-            queryParams: deleteBucketPathParamsDTOSchema,
+            queryParams: deleteBucketQueryParamsDTOSchema,
           },
           response: {
             [HttpStatusCode.noContent]: {
@@ -143,14 +143,14 @@ export class AdminResourceHttpController implements HttpController {
   }
 
   private async deleteBucket(
-    request: HttpRequest<undefined, undefined, DeleteBucketPathParamsDTO>,
+    request: HttpRequest<undefined, DeleteBucketQueryParamsDTO>,
   ): Promise<HttpNoContentResponse<DeleteBucketResponseBodyDTO>> {
     await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
       expectedRole: UserRole.admin,
     });
 
-    const { bucketName } = request.pathParams;
+    const { bucketName } = request.queryParams;
 
     await this.deleteBucketCommandHandler.execute({ bucketName });
 

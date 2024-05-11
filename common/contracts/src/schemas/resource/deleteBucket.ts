@@ -1,3 +1,3 @@
-export interface DeleteBucketPathParams {
+export interface DeleteBucketQueryParams {
   readonly bucketName: string;
 }

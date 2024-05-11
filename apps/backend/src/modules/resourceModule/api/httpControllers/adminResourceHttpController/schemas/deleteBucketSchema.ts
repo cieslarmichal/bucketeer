@@ -4,13 +4,13 @@ import type * as contracts from '@common/contracts';
 
 import { type TypeExtends } from '../../../../../../common/types/schemaExtends.js';
 
-export const deleteBucketPathParamsDTOSchema = Type.Object({
+export const deleteBucketQueryParamsDTOSchema = Type.Object({
   bucketName: Type.String({ minLength: 1 }),
 });
 
-export type DeleteBucketPathParamsDTO = TypeExtends<
-  Static<typeof deleteBucketPathParamsDTOSchema>,
-  contracts.DeleteBucketPathParams
+export type DeleteBucketQueryParamsDTO = TypeExtends<
+  Static<typeof deleteBucketQueryParamsDTOSchema>,
+  contracts.DeleteBucketQueryParams
 >;
 
 export const deleteBucketResponseBodyDTOSchema = Type.Null();
