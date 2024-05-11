@@ -1,11 +1,11 @@
 import { RouterProvider } from '@tanstack/react-router';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { useStore } from 'zustand';
 
 import { createAppRouter } from './core/router/router';
 import { useUserStore } from './core/stores/userStore/userStore';
-import { UserTokensStoreContext, userTokensStore } from './core/stores/userTokens/userTokens';
+import { useUserTokensStore } from './core/stores/userTokens/userTokens';
+import { CookieService } from './services/cookieService/cookieService';
 
 // Create a new router instance
 const router = createAppRouter();
@@ -21,9 +21,21 @@ declare module '@tanstack/react-router' {
 const rootElement = document.getElementById('app')!;
 
 function WrappedApp(): JSX.Element {
-  const userTokens = useStore(userTokensStore);
+  const setUserTokens = useUserTokensStore((state) => state.setTokens);
 
-  const isLoggedIn = userTokens.accessToken !== null && userTokens.refreshToken !== null;
+  const userTokensCookie = CookieService.getUserTokensCookie();
+
+  if (userTokensCookie && userTokensCookie !== '') {
+    const tokens = JSON.parse(userTokensCookie);
+
+    setUserTokens(tokens);
+  }
+
+  const accessToken = useUserTokensStore((state) => state.accessToken);
+
+  const refreshToken = useUserTokensStore((state) => state.refreshToken);
+
+  const isLoggedIn = accessToken !== null && refreshToken !== null;
 
   const userRole = useUserStore((state) => state.user.role);
 
@@ -33,7 +45,7 @@ function WrappedApp(): JSX.Element {
       context={{
         authenticated: isLoggedIn,
         role: userRole,
-        accessToken: userTokens.accessToken,
+        accessToken,
       }}
     />
   );
@@ -45,9 +57,7 @@ if (!rootElement?.innerHTML) {
 
   root.render(
     <React.StrictMode>
-      <UserTokensStoreContext.Provider value={userTokensStore}>
-        <WrappedApp />
-      </UserTokensStoreContext.Provider>
+      <WrappedApp />
     </React.StrictMode>,
   );
 }

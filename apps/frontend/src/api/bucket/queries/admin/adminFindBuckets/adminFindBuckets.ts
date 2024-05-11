@@ -1,9 +1,11 @@
+import { type FindBucketsResponseBody } from '@common/contracts';
+
 import { ApiError } from '../../../../../common/errors/apiError';
 import { HttpService } from '../../../../../services/httpService/httpService';
 
-export const adminFindBuckets = async (accessToken: string): Promise<Array<string>> => {
-  const adminFindBucketsResponse = await HttpService.get<{ data: Array<string> }>({
-    url: `admin/api/buckets`,
+export const adminFindBuckets = async (accessToken: string): Promise<FindBucketsResponseBody> => {
+  const adminFindBucketsResponse = await HttpService.get<FindBucketsResponseBody>({
+    url: `/admin/buckets`,
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
@@ -17,5 +19,5 @@ export const adminFindBuckets = async (accessToken: string): Promise<Array<strin
     });
   }
 
-  return adminFindBucketsResponse.body.data;
+  return adminFindBucketsResponse.body;
 };

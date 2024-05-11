@@ -1,10 +1,10 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { useFindMeQuery } from '../api/user/all/queries/findMeQuery/findMe';
 import { useUserStore } from '../core/stores/userStore/userStore';
-import { UserTokensStoreContext } from '../core/stores/userTokens/userTokens';
+import { useUserTokensStore } from '../core/stores/userTokens/userTokens';
 
 import { ModeToggle } from '@/components/mode-toggle';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -14,10 +14,10 @@ export const Route = createRootRoute({
 });
 
 function RootComponent(): JSX.Element {
-  const userTokensStore = useContext(UserTokensStoreContext);
+  const accessToken = useUserTokensStore((userTokens) => userTokens.accessToken);
 
   const { data } = useFindMeQuery({
-    accessToken: userTokensStore.getState().accessToken ?? '',
+    accessToken: accessToken as string,
   });
 
   const setUser = useUserStore((state) => state.setUser);
@@ -38,7 +38,7 @@ function RootComponent(): JSX.Element {
       >
         <div className="top-0 relative flex flex-1 justify-end w-full items-center">
           <div className="p-4 flex gap-4 items-center">
-            {userTokensStore.getState().accessToken ? (
+            {accessToken ? (
               <>
                 <Link
                   to="/"

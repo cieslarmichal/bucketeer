@@ -10,7 +10,7 @@ export async function findMe(payload: FindMePayload): Promise<FindMyUserResponse
   const { accessToken } = payload;
 
   const response = await HttpService.get<FindMyUserResponseBody>({
-    url: 'api/users/me',
+    url: '/users/me',
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
