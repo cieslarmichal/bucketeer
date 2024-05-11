@@ -1,7 +1,7 @@
 import { UserRole } from '@common/contracts';
 
 import { ApplicationHttpController } from './api/httpControllers/applicationHttpController/applicationHttpController.js';
-import { ConfigProvider } from './configProvider.js';
+import { type Config, ConfigFactory } from './config.js';
 import { type SqliteDatabaseClient } from './database/sqliteDatabaseClient/sqliteDatabaseClient.js';
 import { SqliteDatabaseClientFactory } from './database/sqliteDatabaseClient/sqliteDatabaseClientFactory.js';
 import { HttpServer } from './httpServer.js';
@@ -56,15 +56,15 @@ export class Application {
 
     const uuidService = container.get<UuidService>(coreSymbols.uuidService);
 
-    const configProvider = container.get<ConfigProvider>(coreSymbols.configProvider);
+    const config = container.get<Config>(coreSymbols.config);
 
     const loggerService = container.get<LoggerService>(coreSymbols.loggerService);
 
     const hashService = container.get<HashService>(userSymbols.hashService);
 
-    const email = configProvider.getAdminEmail();
-
     const userTable = new UserTable();
+
+    const { email, password } = config.admin;
 
     const userExists = await sqliteDatabaseClient<UserRawEntity>(userTable.name).where({ email }).first();
 
@@ -79,8 +79,6 @@ export class Application {
     }
 
     const id = uuidService.generateUuid();
-
-    const password = configProvider.getAdminPassword();
 
     const hashedPassword = await hashService.hash({ plainData: password });
 
@@ -99,7 +97,7 @@ export class Application {
   }
 
   public static createContainer(): DependencyInjectionContainer {
-    const configProvider = new ConfigProvider();
+    const config = ConfigFactory.create();
 
     const modules: DependencyInjectionModule[] = [new UserModule(), new AuthModule(), new ResourceModule()];
 
@@ -107,23 +105,23 @@ export class Application {
 
     container.bind<LoggerService>(symbols.loggerService, () =>
       LoggerServiceFactory.create({
-        logLevel: configProvider.getLogLevel(),
+        logLevel: config.logLevel,
       }),
     );
 
+    container.bind<Config>(symbols.config, () => config);
+
     container.bind<UuidService>(symbols.uuidService, () => new UuidServiceImpl());
 
-    container.bind<ConfigProvider>(symbols.configProvider, () => configProvider);
-
     container.bind<SqliteDatabaseClient>(symbols.sqliteDatabaseClient, () =>
-      SqliteDatabaseClientFactory.create({ databasePath: configProvider.getSqliteDatabasePath() }),
+      SqliteDatabaseClientFactory.create({ databasePath: config.databasePath }),
     );
 
     const s3Config: S3Config = {
-      accessKeyId: configProvider.getAwsAccessKeyId(),
-      secretAccessKey: configProvider.getAwsSecretAccessKey(),
-      region: configProvider.getAwsRegion(),
-      endpoint: configProvider.getAwsEndpoint(),
+      accessKeyId: config.aws.accessKeyId,
+      secretAccessKey: config.aws.secretAccessKey,
+      region: config.aws.region,
+      endpoint: config.aws.endpoint ?? undefined,
     };
 
     container.bind<S3Client>(symbols.s3Client, () => S3ClientFactory.create(s3Config));

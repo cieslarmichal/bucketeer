@@ -10,17 +10,15 @@ import {
   type DecodeTokenResult,
 } from './tokenService.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
-import { type AuthModuleConfigProvider } from '../../../authModuleConfigProvider.js';
+import { type Config } from '../../../../../core/config.js';
 
 export class TokenServiceImpl implements TokenService {
-  public constructor(private readonly configProvider: AuthModuleConfigProvider) {}
+  public constructor(private readonly config: Config) {}
 
   public createToken(payload: CreateTokenPayload): string {
     const { data, expiresIn } = payload;
 
-    const jwtSecret = this.configProvider.getJwtSecret();
-
-    const token = jwt.sign(data, jwtSecret, {
+    const token = jwt.sign(data, this.config.token.secret, {
       expiresIn,
       algorithm: 'HS512',
     });
@@ -31,10 +29,8 @@ export class TokenServiceImpl implements TokenService {
   public verifyToken(payload: VerifyTokenPayload): Record<string, string> {
     const { token } = payload;
 
-    const jwtSecret = this.configProvider.getJwtSecret();
-
     try {
-      const data = jwt.verify(token, jwtSecret, { algorithms: ['HS512'] });
+      const data = jwt.verify(token, this.config.token.secret, { algorithms: ['HS512'] });
 
       return data as Record<string, string>;
     } catch (error) {

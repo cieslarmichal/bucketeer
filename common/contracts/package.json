@@ -8,16 +8,14 @@
   "files": [
     "/dist"
   ],
-  "private": true,
   "scripts": {
-    "build:clean": "rimraf dist",
     "build": "tsc --build tsconfig.json",
     "build:dev": "tsc --build tsconfig.json"
   },
   "volta": {
-    "node": "20.10.0"
+    "node": "20.12.2"
   },
   "engines": {
-    "node": "20.10.0"
+    "node": "20.12.2"
   }
 }

@@ -3,25 +3,10 @@
     "email": "ADMIN_EMAIL",
     "password": "ADMIN_PASSWORD"
   },
-  "logger": {
-    "level": "LOGGER_LEVEL"
-  },
-  "database": {
-    "path": "DATABASE_PATH"
-  },
-  "auth": {
-    "hash": {
-      "saltRounds": "AUTH_HASH_SALT_ROUNDS"
-    },
-    "jwt": {
-      "secret": "AUTH_JWT_SECRET"
-    },
-    "accessToken": {
-      "expiresIn": "AUTH_ACCESS_TOKEN_EXPIRES_IN"
-    },
-    "refreshToken": {
-      "expiresIn": "AUTH_REFRESH_TOKEN_EXPIRES_IN"
-    }
+  "logLevel": "LOG_LEVEL",
+  "databasePath": "DATABASE_PATH",
+  "token": {
+    "secret": "TOKEN_SECRET"
   },
   "aws": {
     "accessKeyId": "AWS_ACCESS_KEY_ID",

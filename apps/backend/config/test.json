@@ -1,14 +1,11 @@
 {
-  "database": {
-    "path": "data/test.db"
+  "admin": {
+    "email": "admin@gmail.com",
+    "password": "AdminPassword123"
   },
-  "auth": {
-    "hash": {
-      "saltRounds": 10
-    },
-    "jwt": {
-      "secret": "12321313423565365654546654121890008"
-    }
+  "databasePath": "data/test.db",
+  "token": {
+    "secret": "12321313423565365654546654121890008"
   },
   "aws": {
     "accessKeyId": "test",

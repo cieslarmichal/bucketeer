@@ -1,7 +1,6 @@
 import { beforeEach, afterEach, expect, describe, it } from 'vitest';
 
-import { Generator } from '@common/tests';
-
+import { Generator } from '../../../../../../tests/generator.js';
 import { RepositoryError } from '../../../../../common/errors/common/repositoryError.js';
 import { Application } from '../../../../../core/application.js';
 import { type SqliteDatabaseClient } from '../../../../../core/database/sqliteDatabaseClient/sqliteDatabaseClient.js';

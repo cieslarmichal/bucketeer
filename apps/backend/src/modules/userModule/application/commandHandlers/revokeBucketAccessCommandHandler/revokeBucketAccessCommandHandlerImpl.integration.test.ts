@@ -1,10 +1,9 @@
 import { beforeEach, afterEach, expect, it, describe } from 'vitest';
 
-import { Generator } from '@common/tests';
-
 import { type RevokeBucketAccessCommandHandler } from './revokeBucketAccessCommandHandler.js';
 import { testSymbols } from '../../../../../../tests/container/symbols.js';
 import { TestContainer } from '../../../../../../tests/container/testContainer.js';
+import { Generator } from '../../../../../../tests/generator.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type SqliteDatabaseClient } from '../../../../../core/database/sqliteDatabaseClient/sqliteDatabaseClient.js';
 import { coreSymbols } from '../../../../../core/symbols.js';

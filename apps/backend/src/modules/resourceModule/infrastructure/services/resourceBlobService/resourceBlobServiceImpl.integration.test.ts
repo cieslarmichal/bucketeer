@@ -2,10 +2,9 @@ import { createReadStream } from 'node:fs';
 import path from 'path';
 import { expect, describe, it, beforeEach, afterEach } from 'vitest';
 
-import { Generator } from '@common/tests';
-
 import { testSymbols } from '../../../../../../tests/container/symbols.js';
 import { TestContainer } from '../../../../../../tests/container/testContainer.js';
+import { Generator } from '../../../../../../tests/generator.js';
 import { type DependencyInjectionContainer } from '../../../../../libs/dependencyInjection/dependencyInjectionContainer.js';
 import { type ResourceBlobService } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
 import { symbols } from '../../../symbols.js';

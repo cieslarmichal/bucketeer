@@ -1,5 +1,4 @@
 export const symbols = {
-  authModuleConfigProvider: Symbol('authModuleConfigProvider'),
   tokenService: Symbol('tokenService'),
   accessControlService: Symbol('accessControlService'),
 };

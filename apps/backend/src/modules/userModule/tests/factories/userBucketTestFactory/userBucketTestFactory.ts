@@ -1,5 +1,4 @@
-import { Generator } from '@common/tests';
-
+import { Generator } from '../../../../../../tests/generator.js';
 import { type UserBucketDraft, UserBucket } from '../../../domain/entities/userBucket/userBucket.js';
 import { type UserBucketRawEntity } from '../../../infrastructure/databases/userDatabase/tables/userBucketTable/userBucketRawEntity.js';
 
