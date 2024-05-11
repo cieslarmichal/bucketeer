@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../../@/components/u
 import { cn } from '../../../@/lib/utils';
 import { useCreateBucketMutation } from '../../api/bucket/mutations/admin/createBucketMutation/createBucketMutation';
 import { adminFindBucketsQueryOptions } from '../../api/bucket/queries/admin/adminFindBuckets/adminFindBucketsQueryOptions';
+import { useCreateUserMutation } from '../../api/user/admin/mutations/createUserMutation/createUserMutation';
 import { useGrantBucketAccessMutation } from '../../api/user/admin/mutations/grantUserBucketAccessMutation/grantUserBucketAccessMutation';
 import { adminFindUsersQueryOptions } from '../../api/user/admin/queries/findUsersQuery/findUsersQueryOptions';
 import { requireAdmin } from '../../core/auth/requireAdmin';
@@ -46,6 +47,16 @@ const grantBucketAccessSchema = z.object({
   userId: z.string().uuid(),
 });
 
+const createUserSchema = z.object({
+  email: z.string().email(),
+  password: z
+    .string()
+    .regex(
+      /^(?=.*[A-Z])(?=.*[0-9]).{8,}$/gi,
+      'Password should have at least one uppercase letter, a number & minimum 8 characters',
+    ),
+});
+
 function Admin(): JSX.Element {
   const accessToken = useUserTokensStore.getState().accessToken;
 
@@ -57,6 +68,7 @@ function Admin(): JSX.Element {
     data: users,
     isFetched: isUsersFetched,
     isLoading: isUsersLoading,
+    refetch: refetchUsers,
   } = useQuery({
     ...adminFindUsersQueryOptions({
       accessToken: accessToken as string,
@@ -67,12 +79,16 @@ function Admin(): JSX.Element {
 
   const [grantAccessDialogOpen, setGrantAccessDialogOpen] = useState(false);
 
+  const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [__, setSearchedUser] = useState('');
 
   const { mutateAsync: createBucket } = useCreateBucketMutation({});
 
   const { mutateAsync: grantBucketAccess } = useGrantBucketAccessMutation({});
+
+  const { mutateAsync: createUser } = useCreateUserMutation({});
 
   const createBucketForm = useForm({
     resolver: zodResolver(createBucketSchema),
@@ -86,6 +102,15 @@ function Admin(): JSX.Element {
     resolver: zodResolver(grantBucketAccessSchema),
     values: {
       userId: '',
+    },
+    mode: 'onChange',
+  });
+
+  const createUserForm = useForm({
+    resolver: zodResolver(createUserSchema),
+    values: {
+      email: '',
+      password: '',
     },
     mode: 'onChange',
   });
@@ -121,8 +146,21 @@ function Admin(): JSX.Element {
     grantBucketAccessForm.reset();
   };
 
+  const onCreateUser = async (payload: z.infer<typeof createUserSchema>): Promise<void> => {
+    await createUser({
+      ...payload,
+      accessToken: accessToken as string,
+    });
+
+    setCreateUserDialogOpen(false);
+
+    createUserForm.reset();
+
+    refetchUsers();
+  };
+
   return (
-    <div className="grid grid-cols-3">
+    <div className="grid grid-cols-4 gap-4">
       <div className="col-start-2">
         <div className="pb-4">
           <div>Buckets</div>
@@ -274,6 +312,81 @@ function Admin(): JSX.Element {
                   </DialogContent>
                 </Dialog>
               </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="col-start-3">
+        <div className="pb-4">
+          <div>Users</div>
+          <Dialog
+            open={createUserDialogOpen}
+            onOpenChange={setCreateUserDialogOpen}
+          >
+            <DialogTrigger asChild>
+              <Button>Create a user</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Create a user</DialogTitle>
+              </DialogHeader>
+              <Form {...createUserForm}>
+                <form
+                  className="grid gap-4"
+                  onSubmit={createUserForm.handleSubmit(onCreateUser)}
+                >
+                  <FormField
+                    control={createUserForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="email"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage></FormMessage>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={createUserForm.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="password"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage></FormMessage>
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    disabled={!createUserForm.formState.isValid}
+                    type="submit"
+                  >
+                    Create
+                  </Button>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
+        <div className="flex flex-col gap-2">
+          {users?.data.map((user) => (
+            <div
+              key={`user-${user.id}`}
+              className="flex rounded-xl bg-zinc-700 p-2 text-white"
+            >
+              {user.email}
             </div>
           ))}
         </div>
