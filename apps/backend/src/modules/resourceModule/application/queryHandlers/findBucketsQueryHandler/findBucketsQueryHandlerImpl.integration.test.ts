@@ -44,10 +44,10 @@ describe('FindBucketsQueryHandler', () => {
 
     expect(buckets.length).toEqual(3);
 
-    expect(buckets.find((bucket) => bucket === bucketName1)).toBeDefined();
+    expect(buckets.find((bucket) => bucket.name === bucketName1)).toBeDefined();
 
-    expect(buckets.find((bucket) => bucket === bucketName2)).toBeDefined();
+    expect(buckets.find((bucket) => bucket.name === bucketName2)).toBeDefined();
 
-    expect(buckets.find((bucket) => bucket === bucketName3)).toBeDefined();
+    expect(buckets.find((bucket) => bucket.name === bucketName3)).toBeDefined();
   });
 });

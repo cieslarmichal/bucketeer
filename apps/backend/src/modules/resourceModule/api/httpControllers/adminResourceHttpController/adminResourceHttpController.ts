@@ -45,7 +45,7 @@ export class AdminResourceHttpController implements HttpController {
             body: createBucketBodyDTOSchema,
           },
           response: {
-            [HttpStatusCode.noContent]: {
+            [HttpStatusCode.created]: {
               schema: createBucketResponseBodyDTOSchema,
               description: 'Bucket created.',
             },
@@ -100,13 +100,13 @@ export class AdminResourceHttpController implements HttpController {
       expectedRole: UserRole.admin,
     });
 
-    await this.createBucketCommandHandler.execute({
+    const { bucket } = await this.createBucketCommandHandler.execute({
       bucketName: request.body.bucketName,
     });
 
     return {
       statusCode: HttpStatusCode.noContent,
-      body: null,
+      body: bucket,
     };
   }
 

@@ -15,10 +15,8 @@ export class FindBucketsQueryHandlerImpl implements FindBucketsQueryHandler {
       };
     }
 
-    const buckets = result.Buckets.map((bucket) => bucket.Name as string);
+    const buckets = result.Buckets.map((bucket) => ({ name: bucket.Name as string }));
 
-    return {
-      buckets,
-    };
+    return { buckets };
   }
 }

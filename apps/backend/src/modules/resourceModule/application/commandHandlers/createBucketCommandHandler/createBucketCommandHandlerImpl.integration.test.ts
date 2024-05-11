@@ -29,11 +29,13 @@ describe('CreateBucketCommandHandler', () => {
   });
 
   it('create a bucket', async () => {
-    await commandHandler.execute({ bucketName: bucketName1 });
+    const { bucket } = await commandHandler.execute({ bucketName: bucketName1 });
 
     const createdBuckets = await s3TestUtils.getBuckets();
 
     expect(createdBuckets.includes(bucketName1)).toBe(true);
+
+    expect(bucket.name).toBe(bucketName1);
   });
 
   it('throws an error - when a bucket with the same name already exists', async () => {
