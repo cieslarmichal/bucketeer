@@ -1,13 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { useContext } from 'react';
 
 import { findBucketsQueryOptions } from '../../api/bucket/queries/findBuckets/findBucketsQueryOptions';
 import { columns } from '../../components/dataTable/columns/columns';
 import { DataTable } from '../../components/dataTable/dataTable';
 import { requireAuth } from '../../core/auth/requireAuth';
 import { type AppRouterContext } from '../../core/router/routerContext';
-import { UserTokensStoreContext } from '../../core/stores/userTokens/userTokens';
+import { useUserTokensStore } from '../../core/stores/userTokens/userTokens';
 
 export const Route = createFileRoute('/dashboard/')({
   component: Dashboard,
@@ -24,11 +23,11 @@ export const Route = createFileRoute('/dashboard/')({
 });
 
 function Dashboard(): JSX.Element {
-  const tokens = useContext(UserTokensStoreContext);
+  const accessToken = useUserTokensStore((state) => state.accessToken);
 
   // const buckets = useSuspenseQuery(findBucketsQueryOptions(tokens.getState().accessToken as string));
 
-  const bucketsQuery = findBucketsQueryOptions(tokens.getState().accessToken as string);
+  const bucketsQuery = findBucketsQueryOptions(accessToken as string);
 
   const { data: bucketsData } = useQuery(bucketsQuery);
 

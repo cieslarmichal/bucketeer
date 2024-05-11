@@ -9,7 +9,7 @@ import { UserApiError } from '../../api/user/errors/userApiError';
 import { ApiError } from '../../common/errors/apiError';
 import { routeTree } from '../../routeTree.gen';
 import { HttpService } from '../../services/httpService/httpService';
-import { userTokensStore } from '../stores/userTokens/userTokens';
+import { useUserTokensStore } from '../stores/userTokens/userTokens';
 
 export function createAppRouter(): Router {
   const queryClient = new QueryClient({
@@ -38,7 +38,7 @@ export function createAppRouter(): Router {
     Wrap: ({ children }) => {
       const [refreshingToken, setRefreshingToken] = useState<boolean>(false);
 
-      const store = useStore(userTokensStore);
+      const store = useStore(useUserTokensStore);
 
       const refreshToken = store.accessToken;
 

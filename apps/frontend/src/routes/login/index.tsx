@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -10,7 +10,8 @@ import { Input } from '../../../@/components/ui/input';
 import { useLoginUserMutation } from '../../api/user/all/mutations/loginMutation/loginMutation';
 import { ApiError } from '../../common/errors/apiError';
 import { type AppRouterContext } from '../../core/router/routerContext';
-import { UserTokensStoreContext } from '../../core/stores/userTokens/userTokens';
+import { useUserTokensStore } from '../../core/stores/userTokens/userTokens';
+import { CookieService } from '../../services/cookieService/cookieService';
 
 export const Route = createFileRoute('/login/')({
   component: Login,
@@ -42,7 +43,7 @@ function Login(): JSX.Element {
     mode: 'onTouched',
   });
 
-  const userTokensStore = useContext(UserTokensStoreContext);
+  const setUserTokens = useUserTokensStore((state) => state.setTokens);
 
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -56,9 +57,15 @@ function Login(): JSX.Element {
     try {
       const result = await mutateAsync({ email, password });
 
-      userTokensStore.setState({
+      setUserTokens({
         accessToken: result.accessToken,
         refreshToken: result.refreshToken,
+      });
+
+      CookieService.setUserTokensCookie({
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        expiresIn: result.expiresIn,
       });
 
       navigate({
