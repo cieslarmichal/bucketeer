@@ -31,6 +31,8 @@ import {
   type FindResourcesPathParamsDTO,
 } from './schemas/findResourcesSchema.js';
 import {
+  type FindUserBucketsQueryParamsDTO,
+  findUserBucketsQueryParamsDTOSchema,
   findUserBucketsResponseBodyDTOSchema,
   type FindUserBucketsResponseBodyDTO,
 } from './schemas/findUserBucketsSchema.js';
@@ -82,9 +84,11 @@ export class ResourceHttpController implements HttpController {
     return [
       new HttpRoute({
         method: HttpMethodName.get,
-        handler: this.findBuckets.bind(this),
+        handler: this.findUserBuckets.bind(this),
         schema: {
-          request: {},
+          request: {
+            queryParams: findUserBucketsQueryParamsDTOSchema,
+          },
           response: {
             [HttpStatusCode.ok]: {
               schema: findUserBucketsResponseBodyDTOSchema,
@@ -215,11 +219,14 @@ export class ResourceHttpController implements HttpController {
     ];
   }
 
-  private async findBuckets(
-    request: HttpRequest<undefined, undefined, undefined>,
+  private async findUserBuckets(
+    request: HttpRequest<undefined, FindUserBucketsQueryParamsDTO, undefined>,
   ): Promise<HttpOkResponse<FindUserBucketsResponseBodyDTO>> {
-    const { userId } = await this.accessControlService.verifyBearerToken({
+    const { userId } = request.queryParams;
+
+    await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
+      expectedUserId: userId,
     });
 
     const { buckets } = await this.findUserBucketsQueryHandler.execute({
