@@ -6,7 +6,7 @@ import { type TypeExtends } from '../../../../../../common/types/schemaExtends.j
 
 export const downloadVideoPreviewPathParamsDTOSchema = Type.Object({
   bucketName: Type.String({ minLength: 1 }),
-  resourceName: Type.String({ minLength: 1 }),
+  resourceId: Type.String({ format: 'uuid' }),
 });
 
 export type DownloadVideoPreviewPathParamsDTO = TypeExtends<

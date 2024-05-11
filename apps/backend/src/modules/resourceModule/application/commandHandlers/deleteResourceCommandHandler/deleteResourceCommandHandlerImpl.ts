@@ -15,7 +15,7 @@ export class DeleteResourceCommandHandlerImpl implements DeleteResourceCommandHa
   ) {}
 
   public async execute(payload: DeleteResourceCommandHandlerPayload): Promise<void> {
-    const { userId, resourceName, bucketName } = payload;
+    const { userId, resourceId, bucketName } = payload;
 
     const { buckets } = await this.findUserBucketsQueryHandler.execute({ userId });
 
@@ -31,32 +31,32 @@ export class DeleteResourceCommandHandlerImpl implements DeleteResourceCommandHa
       message: 'Deleting Resource...',
       userId,
       bucketName,
-      resourceName,
+      resourceId,
     });
 
     const existingResource = await this.resourceBlobSerice.resourceExists({
       bucketName,
-      resourceName,
+      resourceId,
     });
 
     if (!existingResource) {
       throw new OperationNotValidError({
         reason: 'Cannot delete resource because it does not exist.',
-        resourceName,
+        resourceId,
         bucketName,
       });
     }
 
     await this.resourceBlobSerice.deleteResource({
       bucketName,
-      resourceName,
+      resourceId,
     });
 
     this.loggerService.debug({
       message: 'Resource deleted.',
       userId,
       bucketName,
-      resourceName,
+      resourceId,
     });
   }
 }

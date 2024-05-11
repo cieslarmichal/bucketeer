@@ -18,7 +18,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
   ) {}
 
   public async execute(payload: DownloadResourcesQueryHandlerPayload): Promise<DownloadResourcesQueryHandlerResult> {
-    const { userId, names, bucketName } = payload;
+    const { userId, ids, bucketName } = payload;
 
     const { buckets } = await this.findUserBucketsQueryHandler.execute({ userId });
 
@@ -36,28 +36,28 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
       bucketName,
     });
 
-    const blobsNames = await this.resourceBlobSerice.getResourcesNames({ bucketName });
+    const blobsIds = await this.resourceBlobSerice.getResourcesIds({ bucketName });
 
-    if (!blobsNames.length) {
+    if (!blobsIds.length) {
       this.loggerService.error({
         message: 'Resources not found.',
         userId,
         bucketName,
-        names,
+        ids,
       });
 
       throw new OperationNotValidError({
         reason: 'Resources not found.',
         bucketName,
-        names,
+        ids,
       });
     }
 
-    if (names.length && !names.every((name) => blobsNames.includes(name))) {
+    if (ids.length && !ids.every((id) => blobsIds.includes(id))) {
       throw new OperationNotValidError({
-        reason: 'Provided Resource names do not exist.',
+        reason: 'Resources with given ids do not exist.',
         bucketName,
-        names,
+        ids,
       });
     }
 
@@ -65,14 +65,14 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
 
     let archivedResourcesCount = 0;
 
-    for (const blobName of blobsNames) {
-      if (!names.length || names.includes(blobName)) {
-        const { data: blobData } = await this.resourceBlobSerice.downloadResource({
+    for (const blobId of blobsIds) {
+      if (!ids.length || ids.includes(blobId)) {
+        const { data: blobData, name } = await this.resourceBlobSerice.downloadResource({
           bucketName,
-          resourceName: blobName,
+          resourceId: blobId,
         });
 
-        archive.append(blobData, { name: blobName });
+        archive.append(blobData, { name });
 
         archivedResourcesCount++;
       }

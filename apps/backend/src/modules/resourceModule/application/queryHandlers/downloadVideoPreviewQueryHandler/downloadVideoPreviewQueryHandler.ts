@@ -3,7 +3,7 @@ import { type VideoPreview } from '../../../domain/entities/video/videoPreview.j
 
 export interface DownloadVideoPreviewQueryHandlerPayload {
   readonly userId: string;
-  readonly resourceName: string;
+  readonly resourceId: string;
   readonly bucketName: string;
 }
 

@@ -11,7 +11,7 @@ export interface UploadResourcePayload {
 }
 
 export interface DownloadResourcePayload {
-  readonly resourceName: string;
+  readonly resourceId: string;
   readonly bucketName: string;
 }
 
@@ -26,17 +26,17 @@ export interface GetResourcesMetadataResult {
   readonly totalPages: number;
 }
 
-export interface GetResourcesNamesPayload {
+export interface GetResourcesIdsPayload {
   readonly bucketName: string;
 }
 
 export interface ResourceExistsPayload {
-  readonly resourceName: string;
+  readonly resourceId: string;
   readonly bucketName: string;
 }
 
 export interface DeleteResourcePayload {
-  readonly resourceName: string;
+  readonly resourceId: string;
   readonly bucketName: string;
 }
 
@@ -44,7 +44,7 @@ export interface ResourceBlobService {
   uploadResource(payload: UploadResourcePayload): Promise<void>;
   downloadResource(payload: DownloadResourcePayload): Promise<Resource>;
   getResourcesMetadata(payload: GetResourcesMetadataPayload): Promise<GetResourcesMetadataResult>;
-  getResourcesNames(payload: GetResourcesNamesPayload): Promise<string[]>;
+  getResourcesIds(payload: GetResourcesIdsPayload): Promise<string[]>;
   resourceExists(payload: ResourceExistsPayload): Promise<boolean>;
   deleteResource(payload: DeleteResourcePayload): Promise<void>;
 }

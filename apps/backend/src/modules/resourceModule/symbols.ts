@@ -4,7 +4,6 @@ export const symbols = {
   findResourcesMetadataQueryHandler: Symbol('findResourcesMetadataQueryHandler'),
   downloadResourceQueryHandler: Symbol('downloadResourceQueryHandler'),
   downloadResourcesQueryHandler: Symbol('downloadResourcesQueryHandler'),
-  downloadImageQueryHandler: Symbol('downloadImageQueryHandler'),
   downloadVideoPreviewQueryHandler: Symbol('downloadVideoPreviewQueryHandler'),
   deleteResourceCommandHandler: Symbol('deleteResourceCommandHandler'),
   uploadResourcesCommandHandler: Symbol('uploadResourcesCommandHandler'),

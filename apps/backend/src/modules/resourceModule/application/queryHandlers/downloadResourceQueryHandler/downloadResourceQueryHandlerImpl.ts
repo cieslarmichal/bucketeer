@@ -16,7 +16,7 @@ export class DownloadResourceQueryHandlerImpl implements DownloadResourceQueryHa
   ) {}
 
   public async execute(payload: DownloadResourceQueryHandlerPayload): Promise<DownloadResourceQueryHandlerResult> {
-    const { userId, resourceName, bucketName } = payload;
+    const { userId, resourceId, bucketName } = payload;
 
     const { buckets } = await this.findUserBucketsQueryHandler.execute({ userId });
 
@@ -32,19 +32,19 @@ export class DownloadResourceQueryHandlerImpl implements DownloadResourceQueryHa
       message: 'Downloading Resource...',
       userId,
       bucketName,
-      resourceName,
+      resourceId,
     });
 
     const resource = await this.resourceBlobSerice.downloadResource({
       bucketName,
-      resourceName,
+      resourceId,
     });
 
     this.loggerService.debug({
       message: 'Resource downloaded.',
       userId,
       bucketName,
-      resourceName,
+      resourceId,
     });
 
     return { resource };

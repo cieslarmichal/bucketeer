@@ -46,7 +46,7 @@ describe('ResourceBlobServiceImpl', () => {
       try {
         await resourceBlobService.downloadResource({
           bucketName: nonExistingBucketName,
-          resourceName: sampleFileName1,
+          resourceId: sampleFileName1,
         });
       } catch (error) {
         expect(error).toBeDefined();
@@ -63,7 +63,7 @@ describe('ResourceBlobServiceImpl', () => {
       try {
         await resourceBlobService.downloadResource({
           bucketName,
-          resourceName: nonExistingResourceName,
+          resourceId: nonExistingResourceName,
         });
       } catch (error) {
         expect(error).toBeDefined();
@@ -79,7 +79,7 @@ describe('ResourceBlobServiceImpl', () => {
 
       const resource = await resourceBlobService.downloadResource({
         bucketName,
-        resourceName: sampleFileName1,
+        resourceId: sampleFileName1,
       });
 
       expect(resource.name).toBe(sampleFileName1);
@@ -96,7 +96,7 @@ describe('ResourceBlobServiceImpl', () => {
 
       const resourceExists = await resourceBlobService.resourceExists({
         bucketName: nonExistingBucketName,
-        resourceName: sampleFileName1,
+        resourceId: sampleFileName1,
       });
 
       expect(resourceExists).toBe(false);
@@ -107,7 +107,7 @@ describe('ResourceBlobServiceImpl', () => {
 
       const resourceExists = await resourceBlobService.resourceExists({
         bucketName,
-        resourceName: nonExistingResourceName,
+        resourceId: nonExistingResourceName,
       });
 
       expect(resourceExists).toBe(false);
@@ -118,7 +118,7 @@ describe('ResourceBlobServiceImpl', () => {
 
       const resourceExists = await resourceBlobService.resourceExists({
         bucketName,
-        resourceName: sampleFileName1,
+        resourceId: sampleFileName1,
       });
 
       expect(resourceExists).toBe(true);
@@ -132,7 +132,7 @@ describe('ResourceBlobServiceImpl', () => {
       try {
         await resourceBlobService.deleteResource({
           bucketName: nonExistingBucketName,
-          resourceName: sampleFileName1,
+          resourceId: sampleFileName1,
         });
       } catch (error) {
         expect(error).toBeDefined();
@@ -149,7 +149,7 @@ describe('ResourceBlobServiceImpl', () => {
       try {
         await resourceBlobService.deleteResource({
           bucketName,
-          resourceName: nonExistingResourceName,
+          resourceId: nonExistingResourceName,
         });
       } catch (error) {
         expect(error).toBeDefined();
@@ -169,7 +169,7 @@ describe('ResourceBlobServiceImpl', () => {
 
       await resourceBlobService.deleteResource({
         bucketName,
-        resourceName: sampleFileName1,
+        resourceId: sampleFileName1,
       });
 
       const existsAfter = await s3TestUtils.objectExists(bucketName, sampleFileName1);
@@ -275,7 +275,7 @@ describe('ResourceBlobServiceImpl', () => {
       const nonExistingBucketName = Generator.word();
 
       try {
-        await resourceBlobService.getResourcesNames({
+        await resourceBlobService.getResourcesIds({
           bucketName: nonExistingBucketName,
         });
       } catch (error) {
@@ -292,7 +292,7 @@ describe('ResourceBlobServiceImpl', () => {
 
       await s3TestUtils.uploadObject(bucketName, sampleFileName2, path.join(resourcesDirectory, sampleFileName2));
 
-      const resourcesNames = await resourceBlobService.getResourcesNames({
+      const resourcesNames = await resourceBlobService.getResourcesIds({
         bucketName,
       });
 

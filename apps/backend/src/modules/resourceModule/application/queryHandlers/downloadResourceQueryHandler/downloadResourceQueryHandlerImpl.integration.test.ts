@@ -69,7 +69,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     try {
       await queryHandler.execute({
         userId,
-        resourceName: sampleFileName1,
+        resourceId: sampleFileName1,
         bucketName,
       });
     } catch (error) {
@@ -87,7 +87,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     try {
       await queryHandler.execute({
         userId: user.id,
-        resourceName: sampleFileName1,
+        resourceId: sampleFileName1,
         bucketName,
       });
     } catch (error) {
@@ -112,7 +112,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     try {
       await queryHandler.execute({
         userId: user.id,
-        resourceName: sampleFileName1,
+        resourceId: sampleFileName1,
         bucketName,
       });
     } catch (error) {
@@ -138,7 +138,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
 
     const { resource } = await queryHandler.execute({
       userId: user.id,
-      resourceName: sampleFileName1,
+      resourceId: sampleFileName1,
       bucketName,
     });
 

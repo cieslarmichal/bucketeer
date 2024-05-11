@@ -80,7 +80,7 @@ export class AdminResourceHttpController implements HttpController {
         handler: this.deleteBucket.bind(this),
         schema: {
           request: {
-            queryParams: deleteBucketPathParamsDTOSchema,
+            pathParams: deleteBucketPathParamsDTOSchema,
           },
           response: {
             [HttpStatusCode.noContent]: {

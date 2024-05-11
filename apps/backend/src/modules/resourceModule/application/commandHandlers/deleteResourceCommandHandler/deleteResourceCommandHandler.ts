@@ -2,7 +2,7 @@ import { type CommandHandler } from '../../../../../common/types/commandHandler.
 
 export interface DeleteResourceCommandHandlerPayload {
   readonly userId: string;
-  readonly resourceName: string;
+  readonly resourceId: string;
   readonly bucketName: string;
 }
 
