@@ -1,7 +1,9 @@
 import { createRootRoute, Link, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 
+import { useFindMeQuery } from '../api/user/all/queries/findMeQuery/findMe';
+import { useUserStore } from '../core/stores/userStore/userStore';
 import { UserTokensStoreContext } from '../core/stores/userTokens/userTokens';
 
 import { ModeToggle } from '@/components/mode-toggle';
@@ -13,6 +15,20 @@ export const Route = createRootRoute({
 
 function RootComponent(): JSX.Element {
   const userTokensStore = useContext(UserTokensStoreContext);
+
+  const { data } = useFindMeQuery({
+    accessToken: userTokensStore.getState().accessToken ?? '',
+  });
+
+  const setUser = useUserStore((state) => state.setUser);
+
+  useEffect(() => {
+    if (data?.email) {
+      setUser(data);
+    }
+  }, [data, setUser]);
+
+  const userRole = useUserStore((state) => state.user.role);
 
   return (
     <>
@@ -30,6 +46,14 @@ function RootComponent(): JSX.Element {
                 >
                   Home
                 </Link>{' '}
+                {userRole === 'admin' && (
+                  <Link
+                    to="/admin"
+                    className="[&.active]:font-bold"
+                  >
+                    Admin
+                  </Link>
+                )}
                 <Link
                   to="/about"
                   className="[&.active]:font-bold"

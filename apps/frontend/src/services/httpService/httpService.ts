@@ -111,4 +111,49 @@ export class HttpService {
       statusCode: response.status,
     };
   }
+
+  public static async delete<T = unknown>(payload: Omit<RequestPayload, 'body'>): Promise<HttpResponse<T>> {
+    const { url, headers, queryParams } = payload;
+
+    let requestUrl = `${this.baseUrl}${url}`;
+
+    if (queryParams) {
+      const queryString = new URLSearchParams(queryParams).toString();
+
+      requestUrl = `${requestUrl}?${queryString}`;
+    }
+
+    const response = await fetch(`${requestUrl}`, {
+      headers: {
+        ...headers,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      method: 'DELETE',
+    });
+
+    const responseBodyText = await response.text();
+
+    let responseBody = {};
+
+    try {
+      responseBody = JSON.parse(responseBodyText);
+    } catch (error) {
+      responseBody = {};
+    }
+
+    if (!response.ok) {
+      return {
+        body: responseBody as BaseApiError,
+        success: false,
+        statusCode: response.status,
+      };
+    }
+
+    return {
+      body: responseBody as T,
+      success: true,
+      statusCode: response.status,
+    };
+  }
 }

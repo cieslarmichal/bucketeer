@@ -1,6 +1,6 @@
 export interface UserState {
   user: {
-    name: string | null;
+    id: string | null;
     email: string | null;
     role: 'user' | 'admin' | null;
   };

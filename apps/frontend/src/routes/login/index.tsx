@@ -27,7 +27,7 @@ export const Route = createFileRoute('/login/')({
 
 const loginFormSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(4),
 });
 
 function Login(): JSX.Element {
