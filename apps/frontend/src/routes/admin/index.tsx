@@ -119,7 +119,7 @@ function Admin(): JSX.Element {
               className="flex rounded-xl bg-zinc-700 p-2 text-white"
               key={`bucket-${bucket}-${index}`}
             >
-              <div className="flex justify-center items-center">
+              <div className="flex items-center justify-between w-full px-2">
                 <p>{bucket}</p>
                 <Button>Assign access</Button>
               </div>
