@@ -157,7 +157,7 @@ export class ResourceHttpController implements HttpController {
       }),
       new HttpRoute({
         method: HttpMethodName.get,
-        path: ':bucketName/resources/:resourceName',
+        path: ':bucketName/resources/:resourceId',
         handler: this.downloadResource.bind(this),
         schema: {
           request: {
@@ -176,7 +176,7 @@ export class ResourceHttpController implements HttpController {
       }),
       new HttpRoute({
         method: HttpMethodName.get,
-        path: ':bucketName/resources/videos/previews/:resourceName',
+        path: ':bucketName/resources/videos/previews/:resourceId',
         handler: this.downloadVideoPreview.bind(this),
         schema: {
           request: {
@@ -195,7 +195,7 @@ export class ResourceHttpController implements HttpController {
       }),
       new HttpRoute({
         method: HttpMethodName.delete,
-        path: ':bucketName/resources/:resourceName',
+        path: ':bucketName/resources/:resourceId',
         handler: this.deleteResource.bind(this),
         schema: {
           request: {
