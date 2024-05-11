@@ -1,4 +1,4 @@
 export interface DownloadVideoPreviewPathParams {
   readonly bucketName: string;
-  readonly resourceName: string;
+  readonly resourceId: string;
 }

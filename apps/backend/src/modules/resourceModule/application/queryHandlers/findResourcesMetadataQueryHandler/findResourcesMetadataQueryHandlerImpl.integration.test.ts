@@ -133,12 +133,14 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     const file2Index = resourcesMetadata.findIndex((resourceMetadata) => resourceMetadata.name === sampleFileName2);
 
     expect(resourcesMetadata[file1Index]).toEqual({
+      id: expect.any(String),
       name: sampleFileName1,
       updatedAt: expect.any(Date),
       contentSize: 17839845,
     });
 
     expect(resourcesMetadata[file2Index]).toEqual({
+      id: expect.any(String),
       name: sampleFileName2,
       updatedAt: expect.any(Date),
       contentSize: 7735619,

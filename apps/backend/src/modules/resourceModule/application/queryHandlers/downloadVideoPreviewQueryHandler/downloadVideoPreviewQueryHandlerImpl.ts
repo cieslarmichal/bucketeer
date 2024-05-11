@@ -31,7 +31,7 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
   public async execute(
     payload: DownloadVideoPreviewQueryHandlerPayload,
   ): Promise<DownloadVideoPreviewQueryHandlerResult> {
-    const { userId, resourceName, bucketName } = payload;
+    const { userId, resourceId, bucketName } = payload;
 
     const { buckets } = await this.findUserBucketsQueryHandler.execute({ userId });
 
@@ -47,12 +47,12 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
       message: 'Downloading video...',
       userId,
       bucketName,
-      resourceName,
+      resourceId,
     });
 
     const resource = await this.resourceBlobSerice.downloadResource({
       bucketName,
-      resourceName,
+      resourceId,
     });
 
     const videoExtensions: string[] = [
@@ -79,12 +79,13 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
       '.f4v',
     ];
 
-    if (!videoExtensions.some((ext) => resourceName.toLowerCase().endsWith(ext))) {
+    if (!videoExtensions.some((ext) => resource.name.toLowerCase().endsWith(ext))) {
       throw new OperationNotValidError({
         reason: 'Resource is not a video.',
         userId,
         bucketName,
-        resourceName,
+        resourceId,
+        resourceName: resource.name,
       });
     }
 
@@ -92,14 +93,16 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
       message: 'Video downloaded.',
       userId,
       bucketName,
-      resourceName,
+      resourceId,
+      resourceName: resource.name,
     });
 
     const previewPath = 'preview.gif';
 
     this.loggerService.debug({
       message: 'Creating video preview...',
-      resourceName,
+      resourceId,
+      resourceName: resource.name,
       previewPath,
     });
 
@@ -107,7 +110,8 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
 
     this.loggerService.debug({
       message: 'Video preview created.',
-      resourceName,
+      resourceId,
+      resourceName: resource.name,
       previewPath,
     });
 

@@ -8,8 +8,6 @@ import { type DeleteResourceCommandHandler } from './application/commandHandlers
 import { DeleteResourceCommandHandlerImpl } from './application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandlerImpl.js';
 import { type UploadResourcesCommandHandler } from './application/commandHandlers/uploadResourcesCommandHandler/uploadResourcesCommandHandler.js';
 import { UploadResourcesCommandHandlerImpl } from './application/commandHandlers/uploadResourcesCommandHandler/uploadResourcesCommandHandlerImpl.js';
-import { type DownloadImageQueryHandler } from './application/queryHandlers/downloadImageQueryHandler/downloadImageQueryHandler.js';
-import { DownloadImageQueryHandlerImpl } from './application/queryHandlers/downloadImageQueryHandler/downloadImageQueryHandlerImpl.js';
 import { type DownloadResourceQueryHandler } from './application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandler.js';
 import { DownloadResourceQueryHandlerImpl } from './application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandlerImpl.js';
 import { type DownloadResourcesQueryHandler } from './application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandler.js';
@@ -28,6 +26,7 @@ import { type DependencyInjectionContainer } from '../../libs/dependencyInjectio
 import { type DependencyInjectionModule } from '../../libs/dependencyInjection/dependencyInjectionModule.js';
 import { type LoggerService } from '../../libs/logger/services/loggerService/loggerService.js';
 import { type S3Client } from '../../libs/s3/clients/s3Client/s3Client.js';
+import { type UuidService } from '../../libs/uuid/services/uuidService/uuidService.js';
 import { type AccessControlService } from '../authModule/application/services/accessControlService/accessControlService.js';
 import { authSymbols } from '../authModule/symbols.js';
 import { type FindUserBucketsQueryHandler } from '../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
@@ -37,7 +36,11 @@ export class ResourceModule implements DependencyInjectionModule {
   public declareBindings(container: DependencyInjectionContainer): void {
     container.bind<ResourceBlobService>(
       symbols.resourceBlobService,
-      () => new ResourceBlobServiceImpl(container.get<S3Client>(coreSymbols.s3Client)),
+      () =>
+        new ResourceBlobServiceImpl(
+          container.get<S3Client>(coreSymbols.s3Client),
+          container.get<UuidService>(coreSymbols.uuidService),
+        ),
     );
 
     container.bind<DeleteResourceCommandHandler>(
@@ -90,16 +93,6 @@ export class ResourceModule implements DependencyInjectionModule {
         ),
     );
 
-    container.bind<DownloadImageQueryHandler>(
-      symbols.downloadImageQueryHandler,
-      () =>
-        new DownloadImageQueryHandlerImpl(
-          container.get<ResourceBlobService>(symbols.resourceBlobService),
-          container.get<LoggerService>(coreSymbols.loggerService),
-          container.get<FindUserBucketsQueryHandler>(userSymbols.findUserBucketsQueryHandler),
-        ),
-    );
-
     container.bind<DownloadVideoPreviewQueryHandler>(
       symbols.downloadVideoPreviewQueryHandler,
       () =>
@@ -142,7 +135,6 @@ export class ResourceModule implements DependencyInjectionModule {
           container.get<DownloadResourceQueryHandler>(symbols.downloadResourceQueryHandler),
           container.get<UploadResourcesCommandHandler>(symbols.uploadResourcesCommandHandler),
           container.get<DownloadResourcesQueryHandler>(symbols.downloadResourcesQueryHandler),
-          container.get<DownloadImageQueryHandler>(symbols.downloadImageQueryHandler),
           container.get<DownloadVideoPreviewQueryHandler>(symbols.downloadVideoPreviewQueryHandler),
           container.get<FindUserBucketsQueryHandler>(userSymbols.findUserBucketsQueryHandler),
           container.get<AccessControlService>(authSymbols.accessControlService),

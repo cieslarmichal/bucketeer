@@ -5,11 +5,6 @@ import {
   deleteResourcePathParamsDTOSchema,
 } from './schemas/deleteResourceSchema.js';
 import {
-  type DownloadImagePathParamsDTO,
-  downloadImagePathParamsDTOSchema,
-  downloadImageResponseBodyDTOSchema,
-} from './schemas/downloadImageSchema.js';
-import {
   type DownloadResourcePathParamsDTO,
   downloadResourcePathParamsDTOSchema,
   downloadResourceResponseBodyDTOSchema,
@@ -63,7 +58,6 @@ import { type AccessControlService } from '../../../../authModule/application/se
 import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
 import { type DeleteResourceCommandHandler } from '../../../application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandler.js';
 import { type UploadResourcesCommandHandler } from '../../../application/commandHandlers/uploadResourcesCommandHandler/uploadResourcesCommandHandler.js';
-import { type DownloadImageQueryHandler } from '../../../application/queryHandlers/downloadImageQueryHandler/downloadImageQueryHandler.js';
 import { type DownloadResourceQueryHandler } from '../../../application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandler.js';
 import { type DownloadResourcesQueryHandler } from '../../../application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandler.js';
 import { type DownloadVideoPreviewQueryHandler } from '../../../application/queryHandlers/downloadVideoPreviewQueryHandler/downloadVideoPreviewQueryHandler.js';
@@ -79,7 +73,6 @@ export class ResourceHttpController implements HttpController {
     private readonly downloadResourceQueryHandler: DownloadResourceQueryHandler,
     private readonly uploadResourceCommandHandler: UploadResourcesCommandHandler,
     private readonly downloadResourcesQueryHandler: DownloadResourcesQueryHandler,
-    private readonly downloadImageQueryHandler: DownloadImageQueryHandler,
     private readonly downloadVideoPreviewQueryHandler: DownloadVideoPreviewQueryHandler,
     private readonly findUserBucketsQueryHandler: FindUserBucketsQueryHandler,
     private readonly accessControlService: AccessControlService,
@@ -183,25 +176,6 @@ export class ResourceHttpController implements HttpController {
       }),
       new HttpRoute({
         method: HttpMethodName.get,
-        path: ':bucketName/resources/images/:width/:height/:resourceName',
-        handler: this.downloadImage.bind(this),
-        schema: {
-          request: {
-            pathParams: downloadImagePathParamsDTOSchema,
-          },
-          response: {
-            [HttpStatusCode.ok]: {
-              schema: downloadImageResponseBodyDTOSchema,
-              description: 'Image downloaded.',
-            },
-          },
-        },
-        securityMode: SecurityMode.bearer,
-        tags: ['Resource'],
-        description: 'Download image.',
-      }),
-      new HttpRoute({
-        method: HttpMethodName.get,
         path: ':bucketName/resources/videos/previews/:resourceName',
         handler: this.downloadVideoPreview.bind(this),
         schema: {
@@ -296,7 +270,7 @@ export class ResourceHttpController implements HttpController {
   private async exportResources(
     request: HttpRequest<ExportResourcesBodyDTO, undefined, ExportResourcesPathParamsDTO>,
   ): Promise<HttpOkResponse<ExportResourcesResponseBodyDTO>> {
-    const names = request.body.names || [];
+    const ids = request.body.ids || [];
 
     const { bucketName } = request.pathParams;
 
@@ -306,7 +280,7 @@ export class ResourceHttpController implements HttpController {
 
     const { resourcesData } = await this.downloadResourcesQueryHandler.execute({
       userId,
-      names,
+      ids,
       bucketName,
     });
 
@@ -352,7 +326,7 @@ export class ResourceHttpController implements HttpController {
   private async downloadResource(
     request: HttpRequest<undefined, undefined, DownloadResourcePathParamsDTO>,
   ): Promise<HttpOkResponse<unknown>> {
-    const { resourceName, bucketName } = request.pathParams;
+    const { resourceId, bucketName } = request.pathParams;
 
     const { userId } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
@@ -360,35 +334,7 @@ export class ResourceHttpController implements HttpController {
 
     const { resource } = await this.downloadResourceQueryHandler.execute({
       userId,
-      resourceName,
-      bucketName,
-    });
-
-    return {
-      statusCode: HttpStatusCode.ok,
-      body: resource.data,
-      headers: {
-        [HttpHeader.cacheControl]: 'max-age=2592000',
-        [HttpHeader.contentDisposition]: `attachment; filename=${`attachment; filename*=UTF-8''${encodeURIComponent(resource.name)}`}`,
-        [HttpHeader.contentType]: resource.contentType,
-      },
-    };
-  }
-
-  private async downloadImage(
-    request: HttpRequest<undefined, undefined, DownloadImagePathParamsDTO>,
-  ): Promise<HttpOkResponse<unknown>> {
-    const { resourceName, bucketName, width, height } = request.pathParams;
-
-    const { userId } = await this.accessControlService.verifyBearerToken({
-      authorizationHeader: request.headers['authorization'],
-    });
-
-    const { resource } = await this.downloadImageQueryHandler.execute({
-      userId,
-      resourceName,
-      width,
-      height,
+      resourceId,
       bucketName,
     });
 
@@ -406,7 +352,7 @@ export class ResourceHttpController implements HttpController {
   private async downloadVideoPreview(
     request: HttpRequest<undefined, undefined, DownloadVideoPreviewPathParamsDTO>,
   ): Promise<HttpOkResponse<unknown>> {
-    const { resourceName, bucketName } = request.pathParams;
+    const { resourceId, bucketName } = request.pathParams;
 
     const { userId } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
@@ -414,7 +360,7 @@ export class ResourceHttpController implements HttpController {
 
     const { preview } = await this.downloadVideoPreviewQueryHandler.execute({
       userId,
-      resourceName,
+      resourceId,
       bucketName,
     });
 
@@ -432,7 +378,7 @@ export class ResourceHttpController implements HttpController {
   private async deleteResource(
     request: HttpRequest<undefined, undefined, DeleteResourcePathParamsDTO>,
   ): Promise<HttpNoContentResponse<DeleteResourceResponseBodyDTO>> {
-    const { resourceName, bucketName } = request.pathParams;
+    const { resourceId, bucketName } = request.pathParams;
 
     const { userId } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
@@ -440,7 +386,7 @@ export class ResourceHttpController implements HttpController {
 
     await this.deleteResourceCommandHandler.execute({
       userId,
-      resourceName,
+      resourceId,
       bucketName,
     });
 
@@ -452,6 +398,7 @@ export class ResourceHttpController implements HttpController {
 
   private mapResourceMetadataToResourceMetadataDTO(resource: ResourceMetadata): ResourceMetadataDTO {
     return {
+      id: resource.id,
       name: resource.name,
       updatedAt: resource.updatedAt,
       contentSize: resource.contentSize,

@@ -8,6 +8,7 @@ import {
   type ListObjectsV2CommandInput,
   PutObjectCommand,
   ListBucketsCommand,
+  HeadObjectCommand,
 } from '@aws-sdk/client-s3';
 import { existsSync, readFileSync } from 'node:fs';
 
@@ -82,7 +83,22 @@ export class S3TestUtils {
       return false;
     }
 
-    return result.Contents.some((metadata) => metadata.Key === objectKey);
+    for (const resultEntry of result.Contents) {
+      const metadataCommand = new HeadObjectCommand({
+        Bucket: bucketName,
+        Key: resultEntry.Key as string,
+      });
+
+      const metadataResult = await this.s3Client.send(metadataCommand);
+
+      const actualName = metadataResult.Metadata?.['actualname'];
+
+      if (actualName === objectKey) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   public async uploadObject(bucketName: string, objectKey: string, filePath: string): Promise<void> {
@@ -98,6 +114,9 @@ export class S3TestUtils {
         Key: objectKey,
         Body: objectData,
         ContentType: 'application/octet-stream',
+        Metadata: {
+          actualName: encodeURIComponent(objectKey),
+        },
       });
 
       await this.s3Client.send(command);

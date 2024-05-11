@@ -3,6 +3,7 @@
 import {
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadObjectCommand,
   ListObjectsV2Command,
   type ListObjectsV2CommandInput,
 } from '@aws-sdk/client-s3';
@@ -11,6 +12,7 @@ import { type Readable } from 'node:stream';
 
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type S3Client } from '../../../../../libs/s3/clients/s3Client/s3Client.js';
+import { type UuidService } from '../../../../../libs/uuid/services/uuidService/uuidService.js';
 import { type Resource } from '../../../domain/entities/resource/resource.js';
 import { type ResourceMetadata } from '../../../domain/entities/resource/resourceMetadata.js';
 import {
@@ -20,12 +22,15 @@ import {
   type ResourceBlobService,
   type DownloadResourcePayload,
   type GetResourcesMetadataResult,
-  type GetResourcesNamesPayload,
+  type GetResourcesIdsPayload,
   type UploadResourcePayload,
 } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
 
 export class ResourceBlobServiceImpl implements ResourceBlobService {
-  public constructor(private readonly s3Client: S3Client) {}
+  public constructor(
+    private readonly s3Client: S3Client,
+    private readonly uuidService: UuidService,
+  ) {}
 
   public async uploadResource(payload: UploadResourcePayload): Promise<void> {
     const { bucketName, resourceName, data } = payload;
@@ -34,8 +39,11 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
       client: this.s3Client,
       params: {
         Bucket: bucketName,
-        Key: resourceName,
+        Key: this.uuidService.generateUuid(),
         Body: data,
+        Metadata: {
+          actualname: encodeURIComponent(resourceName),
+        },
       },
     });
 
@@ -43,17 +51,17 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
   }
 
   public async downloadResource(payload: DownloadResourcePayload): Promise<Resource> {
-    const { resourceName, bucketName } = payload;
+    const { resourceId, bucketName } = payload;
 
     const command = new GetObjectCommand({
       Bucket: bucketName,
-      Key: resourceName,
+      Key: resourceId,
     });
 
     const result = await this.s3Client.send(command);
 
     return {
-      name: resourceName,
+      name: decodeURIComponent(result.Metadata?.['actualname'] ?? ''),
       updatedAt: result.LastModified as Date,
       contentSize: result.ContentLength as number,
       contentType: result.ContentType as string,
@@ -86,18 +94,26 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
 
       totalPages++;
 
-      if (totalPages === page) {
-        resourcesMetadata = result.Contents
-          ? result.Contents.map((resultEntry) => {
-              const { Key, LastModified, Size } = resultEntry;
+      if (totalPages === page && result.Contents) {
+        resourcesMetadata = await Promise.all(
+          result.Contents.map(async (resultEntry) => {
+            const { Key, LastModified, Size } = resultEntry;
 
-              return {
-                name: Key as string,
-                updatedAt: LastModified as Date,
-                contentSize: Size as number,
-              };
-            })
-          : [];
+            const metadataCommand = new HeadObjectCommand({
+              Bucket: bucketName,
+              Key: Key as string,
+            });
+
+            const metadataResult = await this.s3Client.send(metadataCommand);
+
+            return {
+              id: Key as string,
+              name: decodeURIComponent(metadataResult.Metadata?.['actualname'] ?? ''),
+              updatedAt: LastModified as Date,
+              contentSize: Size as number,
+            };
+          }),
+        );
       }
 
       continuationToken = result.NextContinuationToken;
@@ -109,7 +125,7 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
     };
   }
 
-  public async getResourcesNames(payload: GetResourcesNamesPayload): Promise<string[]> {
+  public async getResourcesIds(payload: GetResourcesIdsPayload): Promise<string[]> {
     const { bucketName } = payload;
 
     const command = new ListObjectsV2Command({
@@ -126,36 +142,36 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
   }
 
   public async resourceExists(payload: ResourceExistsPayload): Promise<boolean> {
-    const { resourceName, bucketName } = payload;
+    const { resourceId, bucketName } = payload;
 
     try {
-      const resourcesNames = await this.getResourcesNames({ bucketName });
+      const resourcesIds = await this.getResourcesIds({ bucketName });
 
-      return resourcesNames.includes(resourceName);
+      return resourcesIds.includes(resourceId);
     } catch (error) {
       return false;
     }
   }
 
   public async deleteResource(payload: DeleteResourcePayload): Promise<void> {
-    const { resourceName, bucketName } = payload;
+    const { resourceId, bucketName } = payload;
 
     const exists = await this.resourceExists({
-      resourceName,
+      resourceId,
       bucketName,
     });
 
     if (!exists) {
       throw new OperationNotValidError({
         reason: 'Resource does not exist in bucket.',
-        resourceName,
+        resourceId,
         bucketName,
       });
     }
 
     const command = new DeleteObjectCommand({
       Bucket: bucketName,
-      Key: resourceName,
+      Key: resourceId,
     });
 
     await this.s3Client.send(command);

@@ -14,7 +14,7 @@ export type ExportResourcesPathParamsDTO = TypeExtends<
 >;
 
 export const exportResourcesBodyDTOSchema = Type.Object({
-  names: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
+  ids: Type.Optional(Type.Array(Type.String({ minLength: 1 }))),
 });
 
 export type ExportResourcesBodyDTO = TypeExtends<

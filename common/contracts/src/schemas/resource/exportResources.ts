@@ -3,5 +3,5 @@ export interface ExportResourcesPathParams {
 }
 
 export interface ExportResourcesBody {
-  readonly names?: string[];
+  readonly ids?: string[];
 }

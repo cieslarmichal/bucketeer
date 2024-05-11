@@ -70,7 +70,7 @@ describe('DeleteResourceCommandHandlerImpl', () => {
     try {
       await commandHandler.execute({
         userId,
-        resourceName: sampleFileName,
+        resourceId: sampleFileName,
         bucketName,
       });
     } catch (error) {
@@ -88,7 +88,7 @@ describe('DeleteResourceCommandHandlerImpl', () => {
     try {
       await commandHandler.execute({
         userId: user.id,
-        resourceName: sampleFileName,
+        resourceId: sampleFileName,
         bucketName,
       });
     } catch (error) {
@@ -115,7 +115,7 @@ describe('DeleteResourceCommandHandlerImpl', () => {
     try {
       await commandHandler.execute({
         userId: user.id,
-        resourceName: nonExistingResourceName,
+        resourceId: nonExistingResourceName,
         bucketName,
       });
     } catch (error) {
@@ -145,7 +145,7 @@ describe('DeleteResourceCommandHandlerImpl', () => {
 
     await commandHandler.execute({
       userId: user.id,
-      resourceName: sampleFileName,
+      resourceId: sampleFileName,
       bucketName,
     });
 
