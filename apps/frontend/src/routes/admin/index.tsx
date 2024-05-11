@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AlertDialog } from '@radix-ui/react-alert-dialog';
 import { DialogTitle } from '@radix-ui/react-dialog';
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
@@ -8,6 +9,16 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
+import {
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../../../@/components/ui/alert-dialog';
 import { Button } from '../../../@/components/ui/button';
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from '../../../@/components/ui/command';
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from '../../../@/components/ui/dialog';
@@ -16,6 +27,7 @@ import { Input } from '../../../@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../@/components/ui/popover';
 import { cn } from '../../../@/lib/utils';
 import { useCreateBucketMutation } from '../../api/bucket/mutations/admin/createBucketMutation/createBucketMutation';
+import { useDeleteBucketMutation } from '../../api/bucket/mutations/admin/deleteBucketMutation/deleteBucketMutation';
 import { adminFindBucketsQueryOptions } from '../../api/bucket/queries/admin/adminFindBuckets/adminFindBucketsQueryOptions';
 import { useCreateUserMutation } from '../../api/user/admin/mutations/createUserMutation/createUserMutation';
 import { useGrantBucketAccessMutation } from '../../api/user/admin/mutations/grantUserBucketAccessMutation/grantUserBucketAccessMutation';
@@ -81,6 +93,8 @@ function Admin(): JSX.Element {
 
   const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
 
+  const [deleteBucketAlertDialogOpen, setDeleteBucketAlertDialogOpen] = useState(false);
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [__, setSearchedUser] = useState('');
 
@@ -89,6 +103,8 @@ function Admin(): JSX.Element {
   const { mutateAsync: grantBucketAccess } = useGrantBucketAccessMutation({});
 
   const { mutateAsync: createUser } = useCreateUserMutation({});
+
+  const { mutateAsync: deleteBucket } = useDeleteBucketMutation({});
 
   const createBucketForm = useForm({
     resolver: zodResolver(createBucketSchema),
@@ -159,6 +175,17 @@ function Admin(): JSX.Element {
     refetchUsers();
   };
 
+  const onDeleteBucket = async (bucketName: string): Promise<void> => {
+    await deleteBucket({
+      accessToken: accessToken as string,
+      bucketName,
+    });
+
+    setDeleteBucketAlertDialogOpen(false);
+
+    refetchBuckets();
+  };
+
   return (
     <div className="grid grid-cols-4 gap-4">
       <div className="col-start-2">
@@ -215,7 +242,7 @@ function Admin(): JSX.Element {
               className="flex rounded-xl bg-zinc-700 p-2 text-white"
               key={`bucket-${bucket.name}-${index}`}
             >
-              <div className="flex items-center justify-between w-full px-2">
+              <div className="flex items-center justify-between w-full px-2 gap-4">
                 <p>{bucket.name}</p>
                 <Dialog
                   open={grantAccessDialogOpen}
@@ -311,6 +338,34 @@ function Admin(): JSX.Element {
                     </Form>
                   </DialogContent>
                 </Dialog>
+                <AlertDialog
+                  open={deleteBucketAlertDialogOpen}
+                  onOpenChange={setDeleteBucketAlertDialogOpen}
+                >
+                  <AlertDialogTrigger asChild>
+                    <Button className="bg-red-800 hover:bg-red-700">Delete bucket</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete your account and remove your data
+                        from our servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction asChild>
+                        <Button
+                          className="bg-red-800 hover:bg-red-700"
+                          onClick={() => onDeleteBucket(bucket.name)}
+                        >
+                          Delete
+                        </Button>
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           ))}
