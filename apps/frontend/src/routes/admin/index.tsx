@@ -30,6 +30,7 @@ import { useCreateBucketMutation } from '../../api/bucket/mutations/admin/create
 import { useDeleteBucketMutation } from '../../api/bucket/mutations/admin/deleteBucketMutation/deleteBucketMutation';
 import { adminFindBucketsQueryOptions } from '../../api/bucket/queries/admin/adminFindBuckets/adminFindBucketsQueryOptions';
 import { useCreateUserMutation } from '../../api/user/admin/mutations/createUserMutation/createUserMutation';
+import { useDeleteUserMutation } from '../../api/user/admin/mutations/deleteUserMutation/deleteUserMutation';
 import { useGrantBucketAccessMutation } from '../../api/user/admin/mutations/grantUserBucketAccessMutation/grantUserBucketAccessMutation';
 import { adminFindUsersQueryOptions } from '../../api/user/admin/queries/findUsersQuery/findUsersQueryOptions';
 import { requireAdmin } from '../../core/auth/requireAdmin';
@@ -95,16 +96,30 @@ function Admin(): JSX.Element {
 
   const [deleteBucketAlertDialogOpen, setDeleteBucketAlertDialogOpen] = useState(false);
 
+  const [deleteUserAlertDialogOpen, setDeleteUserAlertDialogOpen] = useState(false);
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [__, setSearchedUser] = useState('');
 
-  const { mutateAsync: createBucket } = useCreateBucketMutation({});
+  const { mutateAsync: createBucketMutation } = useCreateBucketMutation({});
 
-  const { mutateAsync: grantBucketAccess } = useGrantBucketAccessMutation({});
+  const { mutateAsync: grantBucketAccessMutation } = useGrantBucketAccessMutation({});
 
-  const { mutateAsync: createUser } = useCreateUserMutation({});
+  const { mutateAsync: createUserMutation } = useCreateUserMutation({});
 
-  const { mutateAsync: deleteBucket } = useDeleteBucketMutation({});
+  const { mutateAsync: deleteBucketMutation } = useDeleteBucketMutation({});
+
+  const { mutateAsync: deleteUserMutation } = useDeleteUserMutation({});
+
+  const [deleteBucketName, setDeleteBucketName] = useState('');
+
+  const [deleteUser, setDeleteUser] = useState<
+    | {
+        email: string;
+        id: string;
+      }
+    | undefined
+  >(undefined);
 
   const createBucketForm = useForm({
     resolver: zodResolver(createBucketSchema),
@@ -132,7 +147,7 @@ function Admin(): JSX.Element {
   });
 
   const onCreateBucket = async (payload: z.infer<typeof createBucketSchema>): Promise<void> => {
-    await createBucket({
+    await createBucketMutation({
       accessToken: accessToken as string,
       bucketName: payload.bucketName.toLowerCase(),
     });
@@ -151,7 +166,7 @@ function Admin(): JSX.Element {
       return;
     }
 
-    await grantBucketAccess({
+    await grantBucketAccessMutation({
       accessToken: accessToken as string,
       bucketName: payload.bucketName,
       id: payload.userId,
@@ -163,7 +178,7 @@ function Admin(): JSX.Element {
   };
 
   const onCreateUser = async (payload: z.infer<typeof createUserSchema>): Promise<void> => {
-    await createUser({
+    await createUserMutation({
       ...payload,
       accessToken: accessToken as string,
     });
@@ -176,7 +191,7 @@ function Admin(): JSX.Element {
   };
 
   const onDeleteBucket = async (bucketName: string): Promise<void> => {
-    await deleteBucket({
+    await deleteBucketMutation({
       accessToken: accessToken as string,
       bucketName,
     });
@@ -184,6 +199,15 @@ function Admin(): JSX.Element {
     setDeleteBucketAlertDialogOpen(false);
 
     refetchBuckets();
+  };
+
+  const onDeleteUser = async (userId: string): Promise<void> => {
+    await deleteUserMutation({
+      accessToken: accessToken as string,
+      id: userId,
+    });
+
+    refetchUsers();
   };
 
   return (
@@ -343,14 +367,21 @@ function Admin(): JSX.Element {
                   onOpenChange={setDeleteBucketAlertDialogOpen}
                 >
                   <AlertDialogTrigger asChild>
-                    <Button className="bg-red-800 hover:bg-red-700">Delete bucket</Button>
+                    <Button
+                      onClick={() => {
+                        setDeleteBucketName(bucket.name);
+                      }}
+                      className="bg-red-800 hover:bg-red-700"
+                    >
+                      Delete bucket
+                    </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete your account and remove your data
-                        from our servers.
+                        This action cannot be undone. This will permanently delete <b>{bucket.name}</b> and all it`s
+                        contents.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -358,7 +389,7 @@ function Admin(): JSX.Element {
                       <AlertDialogAction asChild>
                         <Button
                           className="bg-red-800 hover:bg-red-700"
-                          onClick={() => onDeleteBucket(bucket.name)}
+                          onClick={() => onDeleteBucket(deleteBucketName)}
                         >
                           Delete
                         </Button>
@@ -439,9 +470,46 @@ function Admin(): JSX.Element {
           {users?.data.map((user) => (
             <div
               key={`user-${user.id}`}
-              className="flex rounded-xl bg-zinc-700 p-2 text-white"
+              className="flex items-center justify-between rounded-xl bg-zinc-700 p-2 text-white"
             >
-              {user.email}
+              <p>{user.email}</p>
+              <AlertDialog
+                open={deleteUserAlertDialogOpen}
+                onOpenChange={setDeleteUserAlertDialogOpen}
+              >
+                <AlertDialogTrigger asChild>
+                  <Button
+                    onClick={() => {
+                      setDeleteUser({
+                        email: user.email,
+                        id: user.id,
+                      });
+                    }}
+                    className="bg-red-800 hover:bg-red-700"
+                  >
+                    Delete user
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete user <b>{deleteUser?.email}</b>.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction asChild>
+                      <Button
+                        className="bg-red-800 hover:bg-red-700"
+                        onClick={() => onDeleteUser(deleteUser?.id as string)}
+                      >
+                        Delete
+                      </Button>
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           ))}
         </div>
