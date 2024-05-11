@@ -269,9 +269,7 @@ export class ResourceHttpController implements HttpController {
 
     const { bucketName } = request.pathParams;
 
-    const page = request.queryParams.page ?? 1;
-
-    const pageSize = request.queryParams.pageSize ?? 10;
+    const { page = 1, pageSize = 10 } = request.queryParams;
 
     const { resourcesMetadata, totalPages } = await this.findResourcesMetadataQueryHandler.execute({
       userId,

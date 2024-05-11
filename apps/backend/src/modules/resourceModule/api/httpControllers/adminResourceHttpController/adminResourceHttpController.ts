@@ -12,7 +12,11 @@ import {
   deleteBucketResponseBodyDTOSchema,
   type DeleteBucketPathParamsDTO,
 } from './schemas/deleteBucketSchema.js';
-import { findBucketsResponseBodyDTOSchema, type FindBucketsResponseBodyDTO } from './schemas/findBucketsSchema.js';
+import {
+  type FindBucketsQueryParamsDTO,
+  findBucketsResponseBodyDTOSchema,
+  type FindBucketsResponseBodyDTO,
+} from './schemas/findBucketsSchema.js';
 import { type HttpController } from '../../../../../common/types/http/httpController.js';
 import { HttpMethodName } from '../../../../../common/types/http/httpMethodName.js';
 import { type HttpRequest } from '../../../../../common/types/http/httpRequest.js';
@@ -26,7 +30,7 @@ import { type DeleteBucketCommandHandler } from '../../../application/commandHan
 import { type FindBucketsQueryHandler } from '../../../application/queryHandlers/findBucketsQueryHandler/findBucketsQueryHandler.js';
 
 export class AdminResourceHttpController implements HttpController {
-  public readonly basePath = '/admin/api/buckets';
+  public readonly basePath = '/api/admin/buckets';
 
   public constructor(
     private readonly findBucketsQueryHandler: FindBucketsQueryHandler,
@@ -111,19 +115,29 @@ export class AdminResourceHttpController implements HttpController {
   }
 
   private async findBuckets(
-    request: HttpRequest<undefined, undefined, undefined>,
+    request: HttpRequest<undefined, FindBucketsQueryParamsDTO, undefined>,
   ): Promise<HttpOkResponse<FindBucketsResponseBodyDTO>> {
     await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
       expectedRole: UserRole.admin,
     });
 
-    const { buckets } = await this.findBucketsQueryHandler.execute();
+    const { page = 1, pageSize = 10 } = request.queryParams;
+
+    const { buckets, totalPages } = await this.findBucketsQueryHandler.execute({
+      page,
+      pageSize,
+    });
 
     return {
       statusCode: HttpStatusCode.ok,
       body: {
         data: buckets,
+        metadata: {
+          page,
+          pageSize,
+          totalPages,
+        },
       },
     };
   }
