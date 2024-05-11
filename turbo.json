@@ -13,6 +13,10 @@
       "dependsOn": [],
       "cache": false
     },
+    "start:dev": {
+      "dependsOn": [],
+      "cache": false
+    },
     "lint": {
       "dependsOn": [],
       "cache": false

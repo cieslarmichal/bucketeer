@@ -33,6 +33,7 @@ function WrappedApp(): JSX.Element {
       context={{
         authenticated: isLoggedIn,
         role: user.user.role,
+        accessToken: userTokens.accessToken,
       }}
     />
   );
