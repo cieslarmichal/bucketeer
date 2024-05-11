@@ -14,7 +14,7 @@ export const useCreateBucketMutation = (
 ): UseMutationResult<null, BaseApiError, CreateBucketMutationPayload, unknown> => {
   const createBook = async (payload: CreateBucketMutationPayload): Promise<null> => {
     const response = await HttpService.post<null>({
-      url: '/admin/api/buckets',
+      url: 'admin/api/buckets',
       body: {
         bucketName: payload.bucketName,
       },

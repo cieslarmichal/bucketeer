@@ -18,7 +18,7 @@ export const useLoginUserMutation = (
 > => {
   const loginUser = async (values: { email: string; password: string }): Promise<LoginUserResponseBody> => {
     const loginUserResponse = await HttpService.post<LoginUserResponseBody>({
-      url: '/users/login',
+      url: 'api/users/login',
       body: {
         email: values.email,
         password: values.password,

@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom/client';
 import { useStore } from 'zustand';
 
 import { createAppRouter } from './core/router/router';
-import { UserStoreContext, userStore } from './core/stores/userStore/userStore';
+import { useUserStore } from './core/stores/userStore/userStore';
 import { UserTokensStoreContext, userTokensStore } from './core/stores/userTokens/userTokens';
 
 // Create a new router instance
@@ -25,14 +25,14 @@ function WrappedApp(): JSX.Element {
 
   const isLoggedIn = userTokens.accessToken !== null && userTokens.refreshToken !== null;
 
-  const user = useStore(userStore);
+  const userRole = useUserStore((state) => state.user.role);
 
   return (
     <RouterProvider
       router={router}
       context={{
         authenticated: isLoggedIn,
-        role: user.user.role,
+        role: userRole,
         accessToken: userTokens.accessToken,
       }}
     />
@@ -46,9 +46,7 @@ if (!rootElement?.innerHTML) {
   root.render(
     <React.StrictMode>
       <UserTokensStoreContext.Provider value={userTokensStore}>
-        <UserStoreContext.Provider value={userStore}>
-          <WrappedApp />
-        </UserStoreContext.Provider>
+        <WrappedApp />
       </UserTokensStoreContext.Provider>
     </React.StrictMode>,
   );

@@ -3,7 +3,7 @@ import { HttpService } from '../../../../services/httpService/httpService';
 
 export const findBuckets = async (accessToken: string): Promise<Array<string>> => {
   const findBucketsResponse = await HttpService.get<{ data: Array<string> }>({
-    url: '/buckets',
+    url: 'api/buckets',
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
