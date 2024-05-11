@@ -88,8 +88,7 @@ export class HttpServer {
     });
 
     this.loggerService.info({
-      message: `HTTP Server started.`,
-      source: HttpServer.name,
+      message: 'HTTP Server started.',
       port,
       host,
     });
@@ -170,12 +169,6 @@ export class HttpServer {
         defaultModelExpandDepth: 3,
       },
       staticCSP: true,
-    });
-
-    this.loggerService.info({
-      message: 'OpenAPI documentation initialized',
-      source: HttpServer.name,
-      path: '/api/docs',
     });
   }
 

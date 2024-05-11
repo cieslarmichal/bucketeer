@@ -30,7 +30,7 @@ import { type DeleteBucketCommandHandler } from '../../../application/commandHan
 import { type FindBucketsQueryHandler } from '../../../application/queryHandlers/findBucketsQueryHandler/findBucketsQueryHandler.js';
 
 export class AdminResourceHttpController implements HttpController {
-  public readonly basePath = '/api/admin/buckets';
+  public readonly basePath = '/admin/buckets';
 
   public constructor(
     private readonly findBucketsQueryHandler: FindBucketsQueryHandler,

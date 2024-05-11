@@ -5,6 +5,8 @@ export const resourceMetadataDTOSchema = Type.Object({
   name: Type.String(),
   updatedAt: Type.Date(),
   contentSize: Type.Number(),
+  contentType: Type.String(),
+  url: Type.String(),
 });
 
 export type ResourceMetadataDTO = Static<typeof resourceMetadataDTOSchema>;

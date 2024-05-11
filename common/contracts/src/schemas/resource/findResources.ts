@@ -1,3 +1,5 @@
+import { type Resource } from './resource.js';
+
 export interface FindResourcesPathParams {
   readonly bucketName: string;
 }
@@ -8,11 +10,7 @@ export interface FindResourcesQueryParams {
 }
 
 export interface FindResourcesResponseBody {
-  readonly data: {
-    readonly name: string;
-    readonly updatedAt: Date;
-    readonly contentSize: number;
-  }[];
+  readonly data: Resource[];
   readonly metadata: {
     readonly page: number;
     readonly pageSize: number;

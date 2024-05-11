@@ -26,20 +26,20 @@ import { UnauthorizedAccessError } from '../modules/authModule/application/error
 const streamPipeline = promisify(pipeline);
 
 export interface RegisterControllersPayload {
-  controllers: HttpController[];
+  readonly controllers: HttpController[];
 }
 
 export interface RegisterRoutesPayload {
-  routes: HttpRoute[];
-  basePath: string;
+  readonly routes: HttpRoute[];
+  readonly basePath: string;
 }
 
 export interface NormalizePathPayload {
-  path: string;
+  readonly path: string;
 }
 
 export class HttpRouter {
-  private readonly rootPath = '';
+  private readonly rootPath = '/api';
   private readonly loggerService: LoggerService;
 
   public constructor(
@@ -73,18 +73,10 @@ export class HttpRouter {
       const path = this.normalizePath({ path: `/${this.rootPath}/${basePath}/${controllerPath}` });
 
       const handler = async (fastifyRequest: FastifyRequest, fastifyReply: FastifyReply): Promise<void> => {
-        const requestDate = new Date();
-
         try {
           this.loggerService.debug({
             message: 'Received an HTTP request.',
-            source: HttpRouter.name,
-            path: fastifyRequest.url,
-            method,
-            pathParams: fastifyRequest.params,
-            queryParams: fastifyRequest.query,
-            body: fastifyRequest.body,
-            headers: fastifyRequest.headers,
+            endpoint: `${method} ${fastifyRequest.url}`,
           });
 
           let attachedFiles: AttachedFile[] | undefined;
@@ -141,39 +133,24 @@ export class HttpRouter {
 
           this.loggerService.info({
             message: 'Sent an HTTP response.',
-            source: HttpRouter.name,
-            path: fastifyRequest.url,
-            method,
+            endpoint: `${method} ${fastifyRequest.url}`,
             statusCode,
           });
-
-          return;
         } catch (error) {
+          this.loggerService.error({
+            message: 'Caught an error in the HTTP router.',
+            err: error,
+            path: fastifyRequest.url,
+            method,
+            statusCode: fastifyReply.statusCode,
+          });
+
           if (error instanceof BaseError) {
             const formattedError: Record<string, unknown> = {
               name: error.name,
               message: error.message,
               context: error.context,
             };
-
-            this.loggerService.error({
-              message: 'Caught an error in the HTTP router.',
-              source: HttpRouter.name,
-              error:
-                error instanceof Error
-                  ? {
-                      name: error.name,
-                      message: error.message,
-                      context: error.context,
-                      stack: error.stack,
-                      cause: error.cause,
-                    }
-                  : undefined,
-              path: fastifyRequest.url,
-              method,
-              statusCode: fastifyReply.statusCode,
-              time: new Date().getTime() - requestDate.getTime(),
-            });
 
             if (error instanceof ResourceNotFoundError) {
               fastifyReply.status(HttpStatusCode.notFound).send({
@@ -236,29 +213,6 @@ export class HttpRouter {
             });
 
             return;
-          }
-
-          if (error instanceof Error) {
-            this.loggerService.error({
-              message: 'Caught an unknown error in the HTTP router.',
-              source: HttpRouter.name,
-              originalErrorMessage: error.message,
-              originalErrorStack: error.stack,
-              path: fastifyRequest.url,
-              method,
-              statusCode: fastifyReply.statusCode,
-              time: new Date().getTime() - requestDate.getTime(),
-            });
-          } else {
-            this.loggerService.error({
-              message: 'Caught an unknown error in the HTTP router.',
-              source: HttpRouter.name,
-              path: fastifyRequest.url,
-              method,
-              statusCode: fastifyReply.statusCode,
-              time: new Date().getTime() - requestDate.getTime(),
-              error,
-            });
           }
 
           fastifyReply.status(HttpStatusCode.internalServerError).send({

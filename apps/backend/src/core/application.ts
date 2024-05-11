@@ -28,27 +28,13 @@ export class Application {
   private static async setupDatabase(container: DependencyInjectionContainer): Promise<void> {
     const databaseManagers = [UserDatabaseManager];
 
-    const loggerService = container.get<LoggerService>(coreSymbols.loggerService);
-
-    try {
-      for (const databaseManager of databaseManagers) {
-        await databaseManager.bootstrapDatabase(container);
-      }
-
-      loggerService.debug({
-        message: 'Migrations run success.',
-        source: Application.name,
-      });
-    } catch (error) {
-      loggerService.error({
-        message: 'Migrations run error.',
-        source: Application.name,
-      });
-
-      const sqliteDatabaseClient = container.get<SqliteDatabaseClient>(coreSymbols.sqliteDatabaseClient);
-
-      await sqliteDatabaseClient.raw('PRAGMA journal_mode = WAL');
+    for (const databaseManager of databaseManagers) {
+      await databaseManager.bootstrapDatabase(container);
     }
+
+    const sqliteDatabaseClient = container.get<SqliteDatabaseClient>(coreSymbols.sqliteDatabaseClient);
+
+    await sqliteDatabaseClient.raw('PRAGMA journal_mode = WAL');
   }
 
   private static async createAdminUser(container: DependencyInjectionContainer): Promise<void> {
@@ -72,7 +58,6 @@ export class Application {
       loggerService.debug({
         message: 'Admin user already exists.',
         email,
-        source: Application.name,
       });
 
       return;
@@ -92,7 +77,6 @@ export class Application {
     loggerService.debug({
       message: 'Admin user created.',
       email,
-      source: Application.name,
     });
   }
 

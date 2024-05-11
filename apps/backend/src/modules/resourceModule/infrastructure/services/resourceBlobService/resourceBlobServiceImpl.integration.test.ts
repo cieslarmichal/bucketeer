@@ -312,6 +312,7 @@ describe('ResourceBlobServiceImpl', () => {
 
       try {
         await resourceBlobService.uploadResource({
+          resourceId: sampleFileName1,
           bucketName: nonExistingBucketName,
           resourceName: sampleFileName1,
           data: createReadStream(filePath),
@@ -330,6 +331,7 @@ describe('ResourceBlobServiceImpl', () => {
       const filePath = path.join(resourcesDirectory, sampleFileName1);
 
       await resourceBlobService.uploadResource({
+        resourceId: sampleFileName1,
         bucketName,
         resourceName: sampleFileName1,
         data: createReadStream(filePath),

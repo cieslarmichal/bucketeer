@@ -5,11 +5,11 @@ export class Generator {
     return faker.internet.email();
   }
 
-  public static number(min = 0, max = 100, precision = 1): number {
+  public static number(min = 0, max = 100, multipleOf = 1): number {
     return faker.number.float({
       min,
       max,
-      precision,
+      multipleOf,
     });
   }
 

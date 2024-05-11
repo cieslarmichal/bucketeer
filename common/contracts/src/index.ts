@@ -24,8 +24,6 @@ export * from './schemas/resource/findResources.js';
 
 export * from './schemas/resource/deleteResource.js';
 
-export * from './schemas/resource/downloadResource.js';
-
 export * from './schemas/resource/exportResources.js';
 
 export * from './schemas/resource/findUserBuckets.js';
