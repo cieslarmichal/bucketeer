@@ -4,6 +4,7 @@ import { type LoginUserCommandHandler } from './loginUserCommandHandler.js';
 import { testSymbols } from '../../../../../../tests/container/symbols.js';
 import { TestContainer } from '../../../../../../tests/container/testContainer.js';
 import { ResourceNotFoundError } from '../../../../../common/errors/common/resourceNotFoundError.js';
+import { type Config } from '../../../../../core/config.js';
 import { type SqliteDatabaseClient } from '../../../../../core/database/sqliteDatabaseClient/sqliteDatabaseClient.js';
 import { coreSymbols } from '../../../../../core/symbols.js';
 import { type TokenService } from '../../../../authModule/application/services/tokenService/tokenService.js';
@@ -11,7 +12,6 @@ import { authSymbols } from '../../../../authModule/symbols.js';
 import { symbols } from '../../../symbols.js';
 import { UserTestFactory } from '../../../tests/factories/userTestFactory/userTestFactory.js';
 import { type UserTestUtils } from '../../../tests/utils/userTestUtils/userTestUtils.js';
-import { type UserModuleConfigProvider } from '../../../userModuleConfigProvider.js';
 import { type HashService } from '../../services/hashService/hashService.js';
 
 describe('LoginUserCommandHandler', () => {
@@ -25,7 +25,7 @@ describe('LoginUserCommandHandler', () => {
 
   let hashService: HashService;
 
-  let configProvider: UserModuleConfigProvider;
+  let config: Config;
 
   const userTestFactory = new UserTestFactory();
 
@@ -36,7 +36,7 @@ describe('LoginUserCommandHandler', () => {
 
     tokenService = container.get<TokenService>(authSymbols.tokenService);
 
-    configProvider = container.get<UserModuleConfigProvider>(symbols.userModuleConfigProvider);
+    config = container.get<Config>(coreSymbols.config);
 
     hashService = container.get<HashService>(symbols.hashService);
 
@@ -80,7 +80,7 @@ describe('LoginUserCommandHandler', () => {
 
     expect(refreshTokenPayload['userId']).toBe(createdUser.getId());
 
-    expect(accessTokenExpiresIn).toBe(configProvider.getAccessTokenExpiresIn());
+    expect(accessTokenExpiresIn).toBe(config.token.access.expiresIn);
   });
 
   it('throws an error if a User with given email does not exist', async () => {

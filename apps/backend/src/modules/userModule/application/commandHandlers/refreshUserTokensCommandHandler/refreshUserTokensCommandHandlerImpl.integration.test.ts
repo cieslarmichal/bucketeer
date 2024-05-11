@@ -1,12 +1,12 @@
 import { beforeEach, expect, it, describe, afterEach } from 'vitest';
 
-import { Generator } from '@common/tests';
-
 import { type RefreshUserTokensCommandHandler } from './refreshUserTokensCommandHandler.js';
 import { testSymbols } from '../../../../../../tests/container/symbols.js';
 import { TestContainer } from '../../../../../../tests/container/testContainer.js';
+import { Generator } from '../../../../../../tests/generator.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { ResourceNotFoundError } from '../../../../../common/errors/common/resourceNotFoundError.js';
+import { type Config } from '../../../../../core/config.js';
 import { type SqliteDatabaseClient } from '../../../../../core/database/sqliteDatabaseClient/sqliteDatabaseClient.js';
 import { coreSymbols } from '../../../../../core/symbols.js';
 import { type TokenService } from '../../../../authModule/application/services/tokenService/tokenService.js';
@@ -14,7 +14,6 @@ import { authSymbols } from '../../../../authModule/symbols.js';
 import { symbols } from '../../../symbols.js';
 import { type BlacklistTokenTestUtils } from '../../../tests/utils/blacklistTokenTestUtils/blacklistTokenTestUtils.js';
 import { type UserTestUtils } from '../../../tests/utils/userTestUtils/userTestUtils.js';
-import { type UserModuleConfigProvider } from '../../../userModuleConfigProvider.js';
 
 describe('RefreshUserTokensCommandHandler', () => {
   let refreshUserTokensCommandHandler: RefreshUserTokensCommandHandler;
@@ -27,7 +26,7 @@ describe('RefreshUserTokensCommandHandler', () => {
 
   let tokenService: TokenService;
 
-  let configProvider: UserModuleConfigProvider;
+  let config: Config;
 
   beforeEach(async () => {
     const container = TestContainer.create();
@@ -38,7 +37,7 @@ describe('RefreshUserTokensCommandHandler', () => {
 
     tokenService = container.get<TokenService>(authSymbols.tokenService);
 
-    configProvider = container.get<UserModuleConfigProvider>(symbols.userModuleConfigProvider);
+    config = container.get<Config>(coreSymbols.config);
 
     sqliteDatabaseClient = container.get<SqliteDatabaseClient>(coreSymbols.sqliteDatabaseClient);
 
@@ -79,7 +78,7 @@ describe('RefreshUserTokensCommandHandler', () => {
 
     expect(refreshTokenPayload['userId']).toBe(user.id);
 
-    expect(result.accessTokenExpiresIn).toBe(configProvider.getAccessTokenExpiresIn());
+    expect(result.accessTokenExpiresIn).toBe(config.token.access.expiresIn);
   });
 
   it('throws an error if User does not exist', async () => {

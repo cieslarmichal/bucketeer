@@ -1,11 +1,10 @@
 import path from 'path';
 import { expect, describe, it, beforeEach, afterEach } from 'vitest';
 
-import { Generator } from '@common/tests';
-
 import { type DownloadResourceQueryHandler } from './downloadResourceQueryHandler.js';
 import { testSymbols } from '../../../../../../tests/container/symbols.js';
 import { TestContainer } from '../../../../../../tests/container/testContainer.js';
+import { Generator } from '../../../../../../tests/generator.js';
 import { ResourceNotFoundError } from '../../../../../common/errors/common/resourceNotFoundError.js';
 import { type SqliteDatabaseClient } from '../../../../../core/database/sqliteDatabaseClient/sqliteDatabaseClient.js';
 import { coreSymbols } from '../../../../../core/symbols.js';

@@ -1,5 +1,5 @@
 export const symbols = {
-  configProvider: Symbol('configProvider'),
+  config: Symbol('config'),
   loggerService: Symbol('loggerService'),
   uuidService: Symbol('uuidService'),
   sqliteDatabaseClient: Symbol('sqliteDatabaseClient'),
@@ -8,7 +8,7 @@ export const symbols = {
 };
 
 export const coreSymbols = {
-  configProvider: symbols.configProvider,
+  config: symbols.config,
   loggerService: symbols.loggerService,
   uuidService: symbols.uuidService,
   s3Client: symbols.s3Client,

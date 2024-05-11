@@ -11,7 +11,7 @@ import { type FastifySchemaValidationError } from 'fastify/types/schema.js';
 import { type Server } from 'http';
 
 import { type ApplicationHttpController } from './api/httpControllers/applicationHttpController/applicationHttpController.js';
-import { type ConfigProvider } from './configProvider.js';
+import { type Config } from './config.js';
 import { HttpRouter } from './httpRouter.js';
 import { coreSymbols, symbols } from './symbols.js';
 import { InputNotValidError } from '../common/errors/common/inputNotValidError.js';
@@ -31,14 +31,14 @@ export class HttpServer {
   private readonly httpRouter: HttpRouter;
   private readonly container: DependencyInjectionContainer;
   private readonly loggerService: LoggerService;
-  private readonly configProvider: ConfigProvider;
+  private readonly config: Config;
 
   public constructor(container: DependencyInjectionContainer) {
     this.container = container;
 
     this.loggerService = this.container.get<LoggerService>(coreSymbols.loggerService);
 
-    this.configProvider = container.get<ConfigProvider>(coreSymbols.configProvider);
+    this.config = container.get<Config>(coreSymbols.config);
 
     this.fastifyInstance = fastify({ bodyLimit: 10 * 1024 * 1024 }).withTypeProvider<TypeBoxTypeProvider>();
 
@@ -56,9 +56,7 @@ export class HttpServer {
   }
 
   public async start(): Promise<void> {
-    const host = this.configProvider.getServerHost();
-
-    const port = this.configProvider.getServerPort();
+    const { host, port } = this.config.server;
 
     this.setupErrorHandler();
 

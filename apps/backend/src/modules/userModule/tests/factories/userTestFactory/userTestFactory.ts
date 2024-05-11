@@ -1,6 +1,6 @@
 import { UserRole } from '@common/contracts';
-import { Generator } from '@common/tests';
 
+import { Generator } from '../../../../../../tests/generator.js';
 import { User, type UserDraft } from '../../../domain/entities/user/user.js';
 import { type UserRawEntity } from '../../../infrastructure/databases/userDatabase/tables/userTable/userRawEntity.js';
 

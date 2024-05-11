@@ -4,10 +4,10 @@ import {
   type LoginUserCommandHandlerResult,
 } from './loginUserCommandHandler.js';
 import { ResourceNotFoundError } from '../../../../../common/errors/common/resourceNotFoundError.js';
+import { type Config } from '../../../../../core/config.js';
 import { type LoggerService } from '../../../../../libs/logger/services/loggerService/loggerService.js';
 import { type TokenService } from '../../../../authModule/application/services/tokenService/tokenService.js';
 import { type UserRepository } from '../../../domain/repositories/userRepository/userRepository.js';
-import { type UserModuleConfigProvider } from '../../../userModuleConfigProvider.js';
 import { type HashService } from '../../services/hashService/hashService.js';
 
 export class LoginUserCommandHandlerImpl implements LoginUserCommandHandler {
@@ -16,7 +16,7 @@ export class LoginUserCommandHandlerImpl implements LoginUserCommandHandler {
     private readonly loggerService: LoggerService,
     private readonly hashService: HashService,
     private readonly tokenService: TokenService,
-    private readonly configProvider: UserModuleConfigProvider,
+    private readonly config: Config,
   ) {}
 
   public async execute(payload: LoginUserCommandHandlerPayload): Promise<LoginUserCommandHandlerResult> {
@@ -50,7 +50,7 @@ export class LoginUserCommandHandlerImpl implements LoginUserCommandHandler {
       });
     }
 
-    const accessTokenExpiresIn = this.configProvider.getAccessTokenExpiresIn();
+    const accessTokenExpiresIn = this.config.token.access.expiresIn;
 
     const accessToken = this.tokenService.createToken({
       data: {
@@ -60,7 +60,7 @@ export class LoginUserCommandHandlerImpl implements LoginUserCommandHandler {
       expiresIn: accessTokenExpiresIn,
     });
 
-    const refreshTokenExpiresIn = this.configProvider.getRefreshTokenExpiresIn();
+    const refreshTokenExpiresIn = this.config.token.refresh.expiresIn;
 
     const refreshToken = this.tokenService.createToken({
       data: {

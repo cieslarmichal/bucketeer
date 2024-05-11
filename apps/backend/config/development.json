@@ -1,6 +1,11 @@
 {
-  "database": {
-    "path": "data/dev.db"
+  "admin": {
+    "email": "admin@gmail.com",
+    "password": "AdminPassword123"
+  },
+  "databasePath": "data/dev.db",
+  "token": {
+    "secret": "12321313423565365654546654121890008"
   },
   "auth": {
     "hash": {
