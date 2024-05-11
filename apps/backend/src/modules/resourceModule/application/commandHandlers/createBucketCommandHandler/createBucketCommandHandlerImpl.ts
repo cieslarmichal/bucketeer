@@ -2,6 +2,7 @@
 import { CreateBucketCommand, ListBucketsCommand } from '@aws-sdk/client-s3';
 
 import {
+  type CreateBucketCommandHandlerResult,
   type CreateBucketCommandHandler,
   type CreateBucketCommandHandlerPayload,
 } from './createBucketCommandHandler.js';
@@ -15,7 +16,7 @@ export class CreateBucketCommandHandlerImpl implements CreateBucketCommandHandle
     private readonly loggerService: LoggerService,
   ) {}
 
-  public async execute(payload: CreateBucketCommandHandlerPayload): Promise<void> {
+  public async execute(payload: CreateBucketCommandHandlerPayload): Promise<CreateBucketCommandHandlerResult> {
     const { bucketName } = payload;
 
     const result = await this.s3Client.send(new ListBucketsCommand({}));
@@ -38,5 +39,11 @@ export class CreateBucketCommandHandlerImpl implements CreateBucketCommandHandle
       message: 'Bucket created.',
       bucketName,
     });
+
+    return {
+      bucket: {
+        name: bucketName,
+      },
+    };
   }
 }

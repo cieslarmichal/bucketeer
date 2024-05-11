@@ -2,6 +2,7 @@ import { type Static, Type } from '@sinclair/typebox';
 
 import type * as contracts from '@common/contracts';
 
+import { bucketDtoSchema } from './bucketDto.js';
 import { type TypeExtends } from '../../../../../../common/types/schemaExtends.js';
 
 export const createBucketBodyDTOSchema = Type.Object({
@@ -10,6 +11,9 @@ export const createBucketBodyDTOSchema = Type.Object({
 
 export type CreateBucketBodyDTO = TypeExtends<Static<typeof createBucketBodyDTOSchema>, contracts.CreateBucketBody>;
 
-export const createBucketResponseBodyDTOSchema = Type.Null();
+export const createBucketResponseBodyDTOSchema = bucketDtoSchema;
 
-export type CreateBucketResponseBodyDTO = Static<typeof createBucketResponseBodyDTOSchema>;
+export type CreateBucketResponseBodyDTO = TypeExtends<
+  Static<typeof createBucketResponseBodyDTOSchema>,
+  contracts.CreateBucketResponseBody
+>;
