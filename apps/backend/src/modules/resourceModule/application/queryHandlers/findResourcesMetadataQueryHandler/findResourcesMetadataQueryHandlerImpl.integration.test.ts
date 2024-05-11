@@ -137,6 +137,8 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
       name: sampleFileName1,
       updatedAt: expect.any(Date),
       contentSize: 17839845,
+      contentType: 'video/mp4',
+      url: expect.any(String),
     });
 
     expect(resourcesMetadata[file2Index]).toEqual({
@@ -144,6 +146,8 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
       name: sampleFileName2,
       updatedAt: expect.any(Date),
       contentSize: 7735619,
+      contentType: 'image/jpeg',
+      url: expect.any(String),
     });
   });
 });

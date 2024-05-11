@@ -36,7 +36,7 @@ import { type FindUserResponseBodyDTO } from '../adminUserHttpController/schemas
 import { type UserDTO } from '../common/userDTO.js';
 
 export class UserHttpController implements HttpController {
-  public readonly basePath = '/api/users';
+  public readonly basePath = '/users';
 
   public constructor(
     private readonly loginUserCommandHandler: LoginUserCommandHandler,

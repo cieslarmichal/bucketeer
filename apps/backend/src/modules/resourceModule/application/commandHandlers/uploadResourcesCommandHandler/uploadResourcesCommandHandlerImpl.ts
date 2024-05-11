@@ -7,6 +7,7 @@ import {
 } from './uploadResourcesCommandHandler.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type LoggerService } from '../../../../../libs/logger/services/loggerService/loggerService.js';
+import { type UuidService } from '../../../../../libs/uuid/services/uuidService/uuidService.js';
 import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
 import { type ResourceBlobService } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
 
@@ -15,6 +16,7 @@ export class UploadResourcesCommandHandlerImpl implements UploadResourcesCommand
     private readonly resourceBlobSerice: ResourceBlobService,
     private readonly loggerService: LoggerService,
     private readonly findUserBucketsQueryHandler: FindUserBucketsQueryHandler,
+    private readonly uuidService: UuidService,
   ) {}
 
   public async execute(payload: UploadResourcesCommandHandlerPayload): Promise<void> {
@@ -34,7 +36,7 @@ export class UploadResourcesCommandHandlerImpl implements UploadResourcesCommand
       files.map(async (file) => {
         const { name: resourceName, filePath } = file;
 
-        const contentType = mime.getType(filePath);
+        const contentType = mime.getType(resourceName);
 
         if (!contentType) {
           throw new OperationNotValidError({
@@ -43,17 +45,21 @@ export class UploadResourcesCommandHandlerImpl implements UploadResourcesCommand
           });
         }
 
+        const resourceId = this.uuidService.generateUuid();
+
         this.loggerService.debug({
           message: 'Uploading Resource...',
           userId,
           bucketName,
           resourceName,
           contentType,
+          resourceId,
         });
 
         const data = createReadStream(filePath);
 
         await this.resourceBlobSerice.uploadResource({
+          resourceId,
           bucketName,
           resourceName,
           data,
@@ -66,6 +72,7 @@ export class UploadResourcesCommandHandlerImpl implements UploadResourcesCommand
           bucketName,
           resourceName,
           contentType,
+          resourceId,
         });
       }),
     );

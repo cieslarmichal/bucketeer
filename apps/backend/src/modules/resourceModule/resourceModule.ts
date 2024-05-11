@@ -8,8 +8,6 @@ import { type DeleteResourceCommandHandler } from './application/commandHandlers
 import { DeleteResourceCommandHandlerImpl } from './application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandlerImpl.js';
 import { type UploadResourcesCommandHandler } from './application/commandHandlers/uploadResourcesCommandHandler/uploadResourcesCommandHandler.js';
 import { UploadResourcesCommandHandlerImpl } from './application/commandHandlers/uploadResourcesCommandHandler/uploadResourcesCommandHandlerImpl.js';
-import { type DownloadResourceQueryHandler } from './application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandler.js';
-import { DownloadResourceQueryHandlerImpl } from './application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandlerImpl.js';
 import { type DownloadResourcesQueryHandler } from './application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandler.js';
 import { DownloadResourcesQueryHandlerImpl } from './application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandlerImpl.js';
 import { type DownloadVideoPreviewQueryHandler } from './application/queryHandlers/downloadVideoPreviewQueryHandler/downloadVideoPreviewQueryHandler.js';
@@ -36,11 +34,7 @@ export class ResourceModule implements DependencyInjectionModule {
   public declareBindings(container: DependencyInjectionContainer): void {
     container.bind<ResourceBlobService>(
       symbols.resourceBlobService,
-      () =>
-        new ResourceBlobServiceImpl(
-          container.get<S3Client>(coreSymbols.s3Client),
-          container.get<UuidService>(coreSymbols.uuidService),
-        ),
+      () => new ResourceBlobServiceImpl(container.get<S3Client>(coreSymbols.s3Client)),
     );
 
     container.bind<DeleteResourceCommandHandler>(
@@ -60,6 +54,7 @@ export class ResourceModule implements DependencyInjectionModule {
           container.get<ResourceBlobService>(symbols.resourceBlobService),
           container.get<LoggerService>(coreSymbols.loggerService),
           container.get<FindUserBucketsQueryHandler>(userSymbols.findUserBucketsQueryHandler),
+          container.get<UuidService>(coreSymbols.uuidService),
         ),
     );
 
@@ -67,16 +62,6 @@ export class ResourceModule implements DependencyInjectionModule {
       symbols.findResourcesMetadataQueryHandler,
       () =>
         new FindResourcesMetadataQueryHandlerImpl(
-          container.get<ResourceBlobService>(symbols.resourceBlobService),
-          container.get<LoggerService>(coreSymbols.loggerService),
-          container.get<FindUserBucketsQueryHandler>(userSymbols.findUserBucketsQueryHandler),
-        ),
-    );
-
-    container.bind<DownloadResourceQueryHandler>(
-      symbols.downloadResourceQueryHandler,
-      () =>
-        new DownloadResourceQueryHandlerImpl(
           container.get<ResourceBlobService>(symbols.resourceBlobService),
           container.get<LoggerService>(coreSymbols.loggerService),
           container.get<FindUserBucketsQueryHandler>(userSymbols.findUserBucketsQueryHandler),
@@ -132,7 +117,6 @@ export class ResourceModule implements DependencyInjectionModule {
         new ResourceHttpController(
           container.get<DeleteResourceCommandHandler>(symbols.deleteResourceCommandHandler),
           container.get<FindResourcesMetadataQueryHandler>(symbols.findResourcesMetadataQueryHandler),
-          container.get<DownloadResourceQueryHandler>(symbols.downloadResourceQueryHandler),
           container.get<UploadResourcesCommandHandler>(symbols.uploadResourcesCommandHandler),
           container.get<DownloadResourcesQueryHandler>(symbols.downloadResourcesQueryHandler),
           container.get<DownloadVideoPreviewQueryHandler>(symbols.downloadVideoPreviewQueryHandler),

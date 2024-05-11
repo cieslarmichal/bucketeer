@@ -4,6 +4,7 @@ import { type Resource } from '../../entities/resource/resource.js';
 import { type ResourceMetadata } from '../../entities/resource/resourceMetadata.js';
 
 export interface UploadResourcePayload {
+  readonly resourceId: string;
   readonly resourceName: string;
   readonly bucketName: string;
   readonly data: Readable;

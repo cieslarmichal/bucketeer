@@ -10,6 +10,7 @@ import {
   ListBucketsCommand,
   HeadObjectCommand,
 } from '@aws-sdk/client-s3';
+import mime from 'mime';
 import { existsSync, readFileSync } from 'node:fs';
 
 import { type S3Client } from '../../../../libs/s3/clients/s3Client/s3Client.js';
@@ -109,11 +110,13 @@ export class S3TestUtils {
     if (existsSync(filePath)) {
       const objectData = readFileSync(filePath);
 
+      const contentType = mime.getType(objectKey);
+
       const command = new PutObjectCommand({
         Bucket: bucketName,
         Key: objectKey,
         Body: objectData,
-        ContentType: 'application/octet-stream',
+        ContentType: contentType ?? 'application/octet-stream',
         Metadata: {
           actualName: encodeURIComponent(objectKey),
         },

@@ -1,4 +1,4 @@
-export interface ResourceMetadata {
+export interface Resource {
   readonly id: string;
   readonly name: string;
   readonly updatedAt: Date;

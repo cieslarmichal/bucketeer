@@ -5,11 +5,6 @@ import {
   deleteResourcePathParamsDTOSchema,
 } from './schemas/deleteResourceSchema.js';
 import {
-  type DownloadResourcePathParamsDTO,
-  downloadResourcePathParamsDTOSchema,
-  downloadResourceResponseBodyDTOSchema,
-} from './schemas/downloadResourceSchema.js';
-import {
   type DownloadVideoPreviewPathParamsDTO,
   downloadVideoPreviewPathParamsDTOSchema,
   downloadVideoPreviewResponseBodyDTOSchema,
@@ -60,19 +55,17 @@ import { type AccessControlService } from '../../../../authModule/application/se
 import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
 import { type DeleteResourceCommandHandler } from '../../../application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandler.js';
 import { type UploadResourcesCommandHandler } from '../../../application/commandHandlers/uploadResourcesCommandHandler/uploadResourcesCommandHandler.js';
-import { type DownloadResourceQueryHandler } from '../../../application/queryHandlers/downloadResourceQueryHandler/downloadResourceQueryHandler.js';
 import { type DownloadResourcesQueryHandler } from '../../../application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandler.js';
 import { type DownloadVideoPreviewQueryHandler } from '../../../application/queryHandlers/downloadVideoPreviewQueryHandler/downloadVideoPreviewQueryHandler.js';
 import { type FindResourcesMetadataQueryHandler } from '../../../application/queryHandlers/findResourcesMetadataQueryHandler/findResourcesMetadataQueryHandler.js';
 import { type ResourceMetadata } from '../../../domain/entities/resource/resourceMetadata.js';
 
 export class ResourceHttpController implements HttpController {
-  public readonly basePath = '/api/buckets';
+  public readonly basePath = '/buckets';
 
   public constructor(
     private readonly deleteResourceCommandHandler: DeleteResourceCommandHandler,
     private readonly findResourcesMetadataQueryHandler: FindResourcesMetadataQueryHandler,
-    private readonly downloadResourceQueryHandler: DownloadResourceQueryHandler,
     private readonly uploadResourceCommandHandler: UploadResourcesCommandHandler,
     private readonly downloadResourcesQueryHandler: DownloadResourcesQueryHandler,
     private readonly downloadVideoPreviewQueryHandler: DownloadVideoPreviewQueryHandler,
@@ -158,25 +151,6 @@ export class ResourceHttpController implements HttpController {
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
         description: `Export bucket's resources.`,
-      }),
-      new HttpRoute({
-        method: HttpMethodName.get,
-        path: ':bucketName/resources/:resourceId',
-        handler: this.downloadResource.bind(this),
-        schema: {
-          request: {
-            pathParams: downloadResourcePathParamsDTOSchema,
-          },
-          response: {
-            [HttpStatusCode.ok]: {
-              schema: downloadResourceResponseBodyDTOSchema,
-              description: 'Resource downloaded',
-            },
-          },
-        },
-        securityMode: SecurityMode.bearer,
-        tags: ['Resource'],
-        description: 'Download resource',
       }),
       new HttpRoute({
         method: HttpMethodName.get,
@@ -330,32 +304,6 @@ export class ResourceHttpController implements HttpController {
     };
   }
 
-  private async downloadResource(
-    request: HttpRequest<undefined, undefined, DownloadResourcePathParamsDTO>,
-  ): Promise<HttpOkResponse<unknown>> {
-    const { resourceId, bucketName } = request.pathParams;
-
-    const { userId } = await this.accessControlService.verifyBearerToken({
-      authorizationHeader: request.headers['authorization'],
-    });
-
-    const { resource } = await this.downloadResourceQueryHandler.execute({
-      userId,
-      resourceId,
-      bucketName,
-    });
-
-    return {
-      statusCode: HttpStatusCode.ok,
-      body: resource.data,
-      headers: {
-        [HttpHeader.cacheControl]: 'max-age=2592000',
-        [HttpHeader.contentDisposition]: `attachment; filename=${`attachment; filename*=UTF-8''${encodeURIComponent(resource.name)}`}`,
-        [HttpHeader.contentType]: resource.contentType,
-      },
-    };
-  }
-
   private async downloadVideoPreview(
     request: HttpRequest<undefined, undefined, DownloadVideoPreviewPathParamsDTO>,
   ): Promise<HttpOkResponse<unknown>> {
@@ -375,7 +323,7 @@ export class ResourceHttpController implements HttpController {
       statusCode: HttpStatusCode.ok,
       body: preview.data,
       headers: {
-        [HttpHeader.cacheControl]: 'max-age=2592000',
+        [HttpHeader.cacheControl]: 'max-age=86400',
         [HttpHeader.contentDisposition]: `attachment; filename*=UTF-8''${encodeURIComponent(preview.name)}`,
         [HttpHeader.contentType]: preview.contentType,
       },
@@ -409,6 +357,8 @@ export class ResourceHttpController implements HttpController {
       name: resource.name,
       updatedAt: resource.updatedAt,
       contentSize: resource.contentSize,
+      url: resource.url,
+      contentType: resource.contentType,
     };
   }
 }

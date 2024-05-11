@@ -8,11 +8,11 @@ import {
   type ListObjectsV2CommandInput,
 } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { type Readable } from 'node:stream';
 
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type S3Client } from '../../../../../libs/s3/clients/s3Client/s3Client.js';
-import { type UuidService } from '../../../../../libs/uuid/services/uuidService/uuidService.js';
 import { type Resource } from '../../../domain/entities/resource/resource.js';
 import { type ResourceMetadata } from '../../../domain/entities/resource/resourceMetadata.js';
 import {
@@ -27,23 +27,21 @@ import {
 } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
 
 export class ResourceBlobServiceImpl implements ResourceBlobService {
-  public constructor(
-    private readonly s3Client: S3Client,
-    private readonly uuidService: UuidService,
-  ) {}
+  public constructor(private readonly s3Client: S3Client) {}
 
   public async uploadResource(payload: UploadResourcePayload): Promise<void> {
-    const { bucketName, resourceName, data } = payload;
+    const { bucketName, resourceId, resourceName, data, contentType } = payload;
 
     const upload = new Upload({
       client: this.s3Client,
       params: {
         Bucket: bucketName,
-        Key: this.uuidService.generateUuid(),
+        Key: resourceId,
         Body: data,
         Metadata: {
           actualname: encodeURIComponent(resourceName),
         },
+        ContentType: contentType,
       },
     });
 
@@ -99,18 +97,30 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
           result.Contents.map(async (resultEntry) => {
             const { Key, LastModified, Size } = resultEntry;
 
-            const metadataCommand = new HeadObjectCommand({
-              Bucket: bucketName,
-              Key: Key as string,
-            });
-
-            const metadataResult = await this.s3Client.send(metadataCommand);
+            const [url, metadataResult] = await Promise.all([
+              getSignedUrl(
+                this.s3Client,
+                new GetObjectCommand({
+                  Bucket: bucketName,
+                  Key: Key as string,
+                }),
+                { expiresIn: 86400 },
+              ),
+              this.s3Client.send(
+                new HeadObjectCommand({
+                  Bucket: bucketName,
+                  Key: Key as string,
+                }),
+              ),
+            ]);
 
             return {
               id: Key as string,
               name: decodeURIComponent(metadataResult.Metadata?.['actualname'] ?? ''),
               updatedAt: LastModified as Date,
               contentSize: Size as number,
+              contentType: metadataResult.ContentType as string,
+              url,
             };
           }),
         );
