@@ -22,7 +22,7 @@ export class UploadResourcesCommandHandlerImpl implements UploadResourcesCommand
 
     const { buckets } = await this.findUserBucketsQueryHandler.execute({ userId });
 
-    if (!buckets.includes(bucketName)) {
+    if (!buckets.some((bucket) => bucket.name === bucketName)) {
       throw new OperationNotValidError({
         reason: 'Bucket is not assigned to this user.',
         userId,

@@ -13,7 +13,9 @@ export class FindUserBucketsQueryHandlerImpl implements FindUserBucketsQueryHand
 
     const userBuckets = await this.userBucketRepository.findUserBuckets({ userId });
 
-    const buckets = userBuckets.map((bucket) => bucket.getBucketName());
+    const buckets = userBuckets.map((bucket) => ({
+      name: bucket.getBucketName(),
+    }));
 
     return { buckets };
   }

@@ -85,13 +85,13 @@ export class AdminUserHttpController implements HttpController {
           response: {
             [HttpStatusCode.created]: {
               schema: createUserResponseBodyDTOSchema,
-              description: 'User created.',
+              description: 'User created',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['User'],
-        description: 'Create user.',
+        description: 'Create user',
       }),
       new HttpRoute({
         method: HttpMethodName.post,
@@ -105,13 +105,13 @@ export class AdminUserHttpController implements HttpController {
           response: {
             [HttpStatusCode.noContent]: {
               schema: grantBucketAccessResponseBodyDTOSchema,
-              description: 'Bucket access granted.',
+              description: 'Bucket access granted',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['User', 'Bucket'],
-        description: 'Grant bucket access.',
+        description: 'Grant bucket access',
       }),
       new HttpRoute({
         method: HttpMethodName.post,
@@ -125,13 +125,13 @@ export class AdminUserHttpController implements HttpController {
           response: {
             [HttpStatusCode.noContent]: {
               schema: revokeBucketAccessResponseBodyDTOSchema,
-              description: 'Bucket access revoked.',
+              description: 'Bucket access revoked',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['User', 'Bucket'],
-        description: 'Revoke bucket access.',
+        description: 'Revoke bucket access',
       }),
       new HttpRoute({
         method: HttpMethodName.get,
@@ -144,13 +144,13 @@ export class AdminUserHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: findUserResponseBodyDTOSchema,
-              description: 'User found.',
+              description: 'User found',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['User'],
-        description: 'Find user by id.',
+        description: 'Find user by id',
       }),
       new HttpRoute({
         method: HttpMethodName.get,
@@ -162,13 +162,13 @@ export class AdminUserHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: findUsersResponseBodyDTOSchema,
-              description: 'Users found.',
+              description: 'Users found',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['User'],
-        description: 'Find users.',
+        description: 'Find users',
       }),
       new HttpRoute({
         method: HttpMethodName.delete,
@@ -181,13 +181,13 @@ export class AdminUserHttpController implements HttpController {
           response: {
             [HttpStatusCode.noContent]: {
               schema: deleteUserResponseBodyDTOSchema,
-              description: 'User deleted.',
+              description: 'User deleted',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['User'],
-        description: 'Delete user.',
+        description: 'Delete user',
       }),
     ];
   }

@@ -49,6 +49,6 @@ describe('FindUserBucketsQueryHandler', () => {
 
     const { buckets } = await findUserBucketsQueryHandler.execute({ userId: user.id });
 
-    expect(buckets).toEqual([userBucket.bucketName]);
+    expect(buckets).toEqual([{ name: userBucket.bucketName }]);
   });
 });

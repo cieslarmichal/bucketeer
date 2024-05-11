@@ -88,13 +88,13 @@ export class ResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: findUserBucketsResponseBodyDTOSchema,
-              description: 'Buckets found.',
+              description: 'Buckets found',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Bucket'],
-        description: 'Find buckets.',
+        description: 'Find buckets',
       }),
       new HttpRoute({
         method: HttpMethodName.get,
@@ -127,7 +127,7 @@ export class ResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.created]: {
               schema: uploadResourcesResponseBodyDTOSchema,
-              description: 'Resources uploaded.',
+              description: 'Resources uploaded',
             },
           },
         },
@@ -166,13 +166,13 @@ export class ResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: downloadResourceResponseBodyDTOSchema,
-              description: 'Resource downloaded.',
+              description: 'Resource downloaded',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
-        description: 'Download resource.',
+        description: 'Download resource',
       }),
       new HttpRoute({
         method: HttpMethodName.get,
@@ -185,13 +185,13 @@ export class ResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: downloadVideoPreviewResponseBodyDTOSchema,
-              description: 'Video preview downloaded.',
+              description: 'Video preview downloaded',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
-        description: 'Download video preview.',
+        description: 'Download video preview',
       }),
       new HttpRoute({
         method: HttpMethodName.delete,
@@ -204,13 +204,13 @@ export class ResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.noContent]: {
               schema: deleteResourceResponseBodyDTOSchema,
-              description: 'Resource deleted.',
+              description: 'Resource deleted',
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
-        description: 'Delete resource.',
+        description: 'Delete resource',
       }),
     ];
   }
