@@ -113,6 +113,7 @@ export class HttpServer {
       const formattedError = {
         name: error.name,
         message: error.message,
+        context: (error as any)?.context,
       };
 
       if (error instanceof InputNotValidError) {

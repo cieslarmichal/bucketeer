@@ -30,7 +30,7 @@ const createBucketSchema = z.object({
     .string()
     .min(3)
     .max(63)
-    .regex(new RegExp(/^(?!\.\.)([a-z0-9])(?:[a-z0-9.-]*[a-z0-9])?$/, 'g')),
+    .regex(new RegExp(/^(?!.*\.\.)([a-z0-9])(?:[a-z0-9.-]*[a-z0-9])?$/, 'g')),
 });
 
 function Admin(): JSX.Element {
