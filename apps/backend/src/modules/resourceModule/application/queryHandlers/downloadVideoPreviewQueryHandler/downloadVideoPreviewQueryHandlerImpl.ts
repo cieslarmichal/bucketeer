@@ -99,45 +99,41 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
       resourceName: resource.name,
     });
 
-    const previewPath = 'preview.gif';
-
     this.loggerService.debug({
       message: 'Creating video preview...',
       resourceId,
       resourceName: resource.name,
-      previewPath,
       previewType,
     });
 
     let videoPreviewData: Readable;
 
     if (previewType === PreviewType.static) {
-      videoPreviewData = await this.createVideoStaticPreview(resource.data, previewPath);
+      videoPreviewData = await this.createVideoStaticPreview(resource.data);
     } else {
-      videoPreviewData = await this.createVideoDynamicPreview(resource.data, previewPath);
+      videoPreviewData = await this.createVideoDynamicPreview(resource.data);
     }
 
     this.loggerService.debug({
       message: 'Video preview created.',
       resourceId,
       resourceName: resource.name,
-      previewPath,
       previewType,
     });
 
     return {
       preview: {
-        name: previewPath,
-        contentType: 'video/gif',
+        name: 'preview.mp4',
+        contentType: 'video/mp4',
         data: videoPreviewData,
       },
     };
   }
 
-  private async createVideoStaticPreview(videoData: Readable, previewPath: string): Promise<Readable> {
-    const tmpFile = await tmp.file();
+  private async createVideoStaticPreview(videoData: Readable): Promise<Readable> {
+    const temporaryVideoFile = await tmp.file();
 
-    videoData.pipe(fs.createWriteStream(tmpFile.path));
+    videoData.pipe(fs.createWriteStream(temporaryVideoFile.path));
 
     await new Promise<void>((resolve, reject) => {
       videoData.on('end', () => {
@@ -149,10 +145,12 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
       });
     });
 
+    const previewPath = 'preview.jpg';
+
     await new Promise(async (resolve, reject) => {
       ffmpeg()
         .setFfmpegPath(ffmpegPath as unknown as string)
-        .input(tmpFile.path)
+        .input(temporaryVideoFile.path)
         .inputOptions('-y')
         .outputOptions('-q:v 1')
         .output(previewPath)
@@ -161,15 +159,15 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
         .run();
     });
 
-    await tmpFile.cleanup();
+    await temporaryVideoFile.cleanup();
 
     return fs.createReadStream(previewPath);
   }
 
-  private async createVideoDynamicPreview(videoData: Readable, previewPath: string): Promise<Readable> {
-    const tmpFile = await tmp.file();
+  private async createVideoDynamicPreview(videoData: Readable): Promise<Readable> {
+    const temporaryVideoFile = await tmp.file();
 
-    videoData.pipe(fs.createWriteStream(tmpFile.path));
+    videoData.pipe(fs.createWriteStream(temporaryVideoFile.path));
 
     await new Promise<void>((resolve, reject) => {
       videoData.on('end', () => {
@@ -181,23 +179,41 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
       });
     });
 
-    const { duration } = await this.getVideoInfo(tmpFile.path);
+    const { duration } = await this.getVideoInfo(temporaryVideoFile.path);
 
-    const frameIntervalInSeconds = Math.floor(duration / 5);
+    const framesPerVideo = 8;
+
+    const frameIntervalInSeconds = Math.floor(duration / framesPerVideo);
+
+    const framesPath = 'thumb%04d.jpg';
+
+    const previewPath = 'preview.mp4';
 
     await new Promise(async (resolve, reject) => {
       ffmpeg()
         .setFfmpegPath(ffmpegPath as unknown as string)
-        .input(tmpFile.path)
+        .input(temporaryVideoFile.path)
         .inputOptions('-y')
         .outputOptions([`-vf fps=1/${frameIntervalInSeconds}`])
-        .output('thumb%04d.jpg')
+        .output(framesPath)
         .on('end', resolve)
         .on('error', reject)
         .run();
     });
 
-    await tmpFile.cleanup();
+    await new Promise(async (resolve, reject) => {
+      ffmpeg()
+        .setFfmpegPath(ffmpegPath as unknown as string)
+        .input(framesPath)
+        .inputOptions(['-y', '-framerate 1/0.6'])
+        .outputOptions([`-c:v libx264`, `-r 20`, `-pix_fmt yuv420p`])
+        .output(previewPath)
+        .on('end', resolve)
+        .on('error', reject)
+        .run();
+    });
+
+    await temporaryVideoFile.cleanup();
 
     return fs.createReadStream(previewPath);
   }
