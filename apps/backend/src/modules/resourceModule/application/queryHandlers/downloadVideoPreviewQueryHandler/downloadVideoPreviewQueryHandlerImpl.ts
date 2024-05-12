@@ -108,10 +108,22 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
 
     let videoPreviewData: Readable;
 
+    let previewName: string;
+
+    let contentType: string;
+
     if (previewType === PreviewType.static) {
-      videoPreviewData = await this.createVideoStaticPreview(resource.data);
+      previewName = 'preview.jpg';
+
+      contentType = 'image/jpeg';
+
+      videoPreviewData = await this.createVideoStaticPreview(resource.data, resourceId);
     } else {
-      videoPreviewData = await this.createVideoDynamicPreview(resource.data);
+      previewName = 'preview.mp4';
+
+      contentType = 'video/mp4';
+
+      videoPreviewData = await this.createVideoDynamicPreview(resource.data, resourceId);
     }
 
     this.loggerService.debug({
@@ -123,14 +135,14 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
 
     return {
       preview: {
-        name: 'preview.mp4',
-        contentType: 'video/mp4',
+        name: previewName,
+        contentType,
         data: videoPreviewData,
       },
     };
   }
 
-  private async createVideoStaticPreview(videoData: Readable): Promise<Readable> {
+  private async createVideoStaticPreview(videoData: Readable, resourceId: string): Promise<Readable> {
     const temporaryVideoFile = await tmp.file();
 
     videoData.pipe(fs.createWriteStream(temporaryVideoFile.path));
@@ -145,7 +157,7 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
       });
     });
 
-    const previewPath = 'preview.jpg';
+    const previewPath = `${resourceId}-preview.jpg`;
 
     await new Promise(async (resolve, reject) => {
       ffmpeg()
@@ -164,7 +176,7 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
     return fs.createReadStream(previewPath);
   }
 
-  private async createVideoDynamicPreview(videoData: Readable): Promise<Readable> {
+  private async createVideoDynamicPreview(videoData: Readable, resourceId: string): Promise<Readable> {
     const temporaryVideoFile = await tmp.file();
 
     videoData.pipe(fs.createWriteStream(temporaryVideoFile.path));
@@ -185,9 +197,9 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
 
     const frameIntervalInSeconds = Math.floor(duration / framesPerVideo);
 
-    const framesPath = 'thumb%04d.jpg';
+    const framesPath = `${resourceId}-thumb%04d.jpg`;
 
-    const previewPath = 'preview.mp4';
+    const previewPath = `${resourceId}-preview.mp4`;
 
     await new Promise(async (resolve, reject) => {
       ffmpeg()

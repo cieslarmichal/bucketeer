@@ -26,6 +26,6 @@ data/*
 
 **/local.json
 
-preview*
-thumb*
+*preview*
+*thumb*
 
