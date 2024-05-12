@@ -7,6 +7,8 @@ import * as fs from 'node:fs';
 import { type Readable } from 'node:stream';
 import * as tmp from 'tmp-promise';
 
+import { PreviewType } from '@common/contracts';
+
 import {
   type DownloadVideoPreviewQueryHandlerPayload,
   type DownloadVideoPreviewQueryHandlerResult,
@@ -31,7 +33,7 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
   public async execute(
     payload: DownloadVideoPreviewQueryHandlerPayload,
   ): Promise<DownloadVideoPreviewQueryHandlerResult> {
-    const { userId, resourceId, bucketName } = payload;
+    const { userId, resourceId, bucketName, previewType } = payload;
 
     const { buckets } = await this.findUserBucketsQueryHandler.execute({ userId });
 
@@ -89,6 +91,20 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
       });
     }
 
+    const temporaryVideoFile = await tmp.file();
+
+    resource.data.pipe(fs.createWriteStream(temporaryVideoFile.path));
+
+    await new Promise<void>((resolve, reject) => {
+      resource.data.on('end', () => {
+        resolve();
+      });
+
+      resource.data.on('error', (error) => {
+        reject(error);
+      });
+    });
+
     this.loggerService.debug({
       message: 'Video downloaded.',
       userId,
@@ -97,65 +113,114 @@ export class DownloadVideoPreviewQueryHandlerImpl implements DownloadVideoPrevie
       resourceName: resource.name,
     });
 
-    const previewPath = 'preview.gif';
+    const { duration } = await this.getVideoInfo(temporaryVideoFile.path);
+
+    if (duration < 3) {
+      throw new OperationNotValidError({
+        reason: 'Video duration cannot be less than 3 seconds.',
+        userId,
+        bucketName,
+        resourceId,
+        resourceName: resource.name,
+        duration,
+      });
+    }
 
     this.loggerService.debug({
       message: 'Creating video preview...',
       resourceId,
       resourceName: resource.name,
-      previewPath,
+      previewType,
     });
 
-    const videoPreview = await this.createVideoPreview(resource.data, previewPath);
+    let videoPreviewData: Readable;
+
+    let previewName: string;
+
+    let contentType: string;
+
+    if (previewType === PreviewType.static) {
+      previewName = 'preview.jpg';
+
+      contentType = 'image/jpeg';
+
+      videoPreviewData = await this.createVideoStaticPreview(temporaryVideoFile.path, resourceId);
+    } else {
+      previewName = 'preview.mp4';
+
+      contentType = 'video/mp4';
+
+      videoPreviewData = await this.createVideoDynamicPreview(temporaryVideoFile.path, resourceId, duration);
+    }
 
     this.loggerService.debug({
       message: 'Video preview created.',
       resourceId,
       resourceName: resource.name,
-      previewPath,
+      previewType,
     });
+
+    await temporaryVideoFile.cleanup();
 
     return {
       preview: {
-        name: previewPath,
-        contentType: 'video/gif',
-        data: videoPreview,
+        name: previewName,
+        contentType,
+        data: videoPreviewData,
       },
     };
   }
 
-  private async createVideoPreview(videoData: Readable, previewPath: string): Promise<Readable> {
-    const tmpFile = await tmp.file();
-
-    videoData.pipe(fs.createWriteStream(tmpFile.path));
-
-    await new Promise<void>((resolve, reject) => {
-      videoData.on('end', () => {
-        resolve();
-      });
-
-      videoData.on('error', (error) => {
-        reject(error);
-      });
-    });
-
-    const { duration } = await this.getVideoInfo(tmpFile.path);
+  private async createVideoStaticPreview(videoPath: string, resourceId: string): Promise<Readable> {
+    const previewPath = `${resourceId}-preview.jpg`;
 
     await new Promise(async (resolve, reject) => {
       ffmpeg()
         .setFfmpegPath(ffmpegPath as unknown as string)
-        .input(tmpFile.path)
-        .inputOptions('-y')
-        .outputOptions('-q:v 1')
-        .videoFilters(`setpts=N/TB/${duration * 10}`)
-        .fps(1)
+        .input(videoPath)
+        .inputOptions(['-y', '-ss 00:00:01'])
+        .outputOptions('-frames:v 1')
         .output(previewPath)
         .on('end', resolve)
         .on('error', reject)
         .run();
     });
 
-    await tmpFile.cleanup();
+    return fs.createReadStream(previewPath);
+  }
+
+  private async createVideoDynamicPreview(videoPath: string, resourceId: string, duration: number): Promise<Readable> {
+    const framesPerVideo = 8;
+
+    const frameIntervalInSeconds = Math.floor(duration / framesPerVideo);
+
+    const framesPath = `${resourceId}-thumb%04d.jpg`;
+
+    const previewPath = `${resourceId}-preview.mp4`;
+
+    await new Promise(async (resolve, reject) => {
+      ffmpeg()
+        .setFfmpegPath(ffmpegPath as unknown as string)
+        .input(videoPath)
+        .inputOptions('-y')
+        .outputOptions([`-vf fps=1/${frameIntervalInSeconds}`])
+        .output(framesPath)
+        .on('end', resolve)
+        .on('error', reject)
+        .run();
+    });
+
+    await new Promise(async (resolve, reject) => {
+      ffmpeg()
+        .setFfmpegPath(ffmpegPath as unknown as string)
+        .input(framesPath)
+        .inputOptions(['-y', '-framerate 1/0.6'])
+        .outputOptions([`-c:v libx264`, `-r 20`, `-pix_fmt yuv420p`])
+        .output(previewPath)
+        .on('end', resolve)
+        .on('error', reject)
+        .run();
+    });
 
     return fs.createReadStream(previewPath);
   }
