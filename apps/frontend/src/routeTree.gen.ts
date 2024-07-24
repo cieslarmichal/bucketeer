@@ -16,6 +16,8 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as LoginIndexImport } from './routes/login/index'
 import { Route as DashboardIndexImport } from './routes/dashboard/index'
 import { Route as AdminIndexImport } from './routes/admin/index'
+import { Route as AdminUserImport } from './routes/admin/user'
+import { Route as AdminBucketImport } from './routes/admin/bucket'
 
 // Create Virtual Routes
 
@@ -49,6 +51,16 @@ const AdminIndexRoute = AdminIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AdminUserRoute = AdminUserImport.update({
+  path: '/admin/user',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const AdminBucketRoute = AdminBucketImport.update({
+  path: '/admin/bucket',
+  getParentRoute: () => rootRoute,
+} as any)
+
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -65,6 +77,20 @@ declare module '@tanstack/react-router' {
       path: '/about'
       fullPath: '/about'
       preLoaderRoute: typeof AboutLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/admin/bucket': {
+      id: '/admin/bucket'
+      path: '/admin/bucket'
+      fullPath: '/admin/bucket'
+      preLoaderRoute: typeof AdminBucketImport
+      parentRoute: typeof rootRoute
+    }
+    '/admin/user': {
+      id: '/admin/user'
+      path: '/admin/user'
+      fullPath: '/admin/user'
+      preLoaderRoute: typeof AdminUserImport
       parentRoute: typeof rootRoute
     }
     '/admin/': {
@@ -96,6 +122,8 @@ declare module '@tanstack/react-router' {
 export const routeTree = rootRoute.addChildren({
   IndexLazyRoute,
   AboutLazyRoute,
+  AdminBucketRoute,
+  AdminUserRoute,
   AdminIndexRoute,
   DashboardIndexRoute,
   LoginIndexRoute,
@@ -111,6 +139,8 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/",
         "/about",
+        "/admin/bucket",
+        "/admin/user",
         "/admin/",
         "/dashboard/",
         "/login/"
@@ -121,6 +151,12 @@ export const routeTree = rootRoute.addChildren({
     },
     "/about": {
       "filePath": "about.lazy.tsx"
+    },
+    "/admin/bucket": {
+      "filePath": "admin/bucket.tsx"
+    },
+    "/admin/user": {
+      "filePath": "admin/user.tsx"
     },
     "/admin/": {
       "filePath": "admin/index.tsx"

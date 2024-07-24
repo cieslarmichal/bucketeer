@@ -32,6 +32,8 @@ interface DataTableProps<TData, TValue> {
   pageCount?: number;
   onNextPage?: () => Promise<void> | void;
   onPreviousPage?: () => Promise<void> | void;
+  filterLabel?: string;
+  includeColumnsSelector?: boolean;
 }
 
 export function DataTable<TData, TValue>({
@@ -42,6 +44,8 @@ export function DataTable<TData, TValue>({
   pageCount,
   onNextPage,
   onPreviousPage,
+  filterLabel = 'Filter file names...',
+  includeColumnsSelector = false,
 }: DataTableProps<TData, TValue>): JSX.Element {
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -83,49 +87,49 @@ export function DataTable<TData, TValue>({
     rowCount,
   });
 
-  console.log(pageIndex);
-
   return (
     <div className="w-full max-w-[40rem] md:max-w-screen-xl md:min-w-[50rem]">
       <div className="p-4 w-full">
-        <div className="flex items-center pb-4">
-          <Input
-            placeholder="Filter file names..."
-            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-            onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
-            className="max-w-sm"
-          />
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="ml-auto"
+        {includeColumnsSelector && (
+          <div className="flex items-center pb-4">
+            <Input
+              placeholder={filterLabel}
+              value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+              onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
+              className="max-w-sm"
+            />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="ml-auto"
+                >
+                  Columns
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="bg-primary-foreground"
+                align="end"
               >
-                Columns
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="bg-primary-foreground"
-              align="end"
-            >
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
