@@ -4,13 +4,13 @@ import { useMemo, useState } from 'react';
 import { z } from 'zod';
 
 import { findBucketsQueryOptions } from '../../modules/bucket/api/user/queries/findBuckets/findBucketsQueryOptions';
-import { columns } from '../../modules/common/components/dataTable/columns/columns';
 import { DataTable } from '../../modules/common/components/dataTable/dataTable';
 import { requireAuth } from '../../modules/core/auth/requireAuth';
 import { type AppRouterContext } from '../../modules/core/router/routerContext';
 import { useUserStore } from '../../modules/core/stores/userStore/userStore';
 import { useUserTokensStore } from '../../modules/core/stores/userTokens/userTokens';
 import { findBucketResourcesQueryOptions } from '../../modules/resource/api/user/queries/findBucketResources/findBucketResourcesQueryOptions';
+import { imageTableColumns } from '../../modules/resource/components/imageTableColumns/imageTableColumns';
 
 const searchSchema = z.object({
   page: z.number().default(0),
@@ -95,7 +95,7 @@ function Dashboard(): JSX.Element {
       {isBucketsFetched && !isResourcesFetched && <div>Loading</div>}
       {isBucketsFetched && isResourcesFetched && (
         <DataTable
-          columns={columns}
+          columns={imageTableColumns}
           data={resourcesData?.data ?? []}
           pageIndex={page}
           pageSize={pageSize}

@@ -1,5 +1,6 @@
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/solid';
 import { Eye } from 'lucide-react';
+import { type ReactNode, useDeferredValue, useEffect, useState } from 'react';
 
 import { Dialog, DialogContent, DialogTrigger } from '../../../../../@/components/ui/dialog';
 
@@ -14,6 +15,7 @@ interface ImageProps {
   onClick: () => void;
   onNext: () => void;
   onPrevious: () => void;
+  onClose: () => void;
   className?: string | undefined;
 }
 
@@ -24,12 +26,29 @@ export function Image({
   onClick,
   onNext,
   onPrevious,
+  onClose,
   source,
   className,
   previewImageSrc,
 }: ImageProps): JSX.Element {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (open === false) {
+      onClose();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  const onOpenChange = (val: boolean): void => {
+    setOpen(val);
+  };
+
   return (
-    <Dialog>
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+    >
       <DialogTrigger asChild>
         <div className="w-full h-full relative group">
           <img
@@ -45,7 +64,10 @@ export function Image({
           </div>
         </div>
       </DialogTrigger>
-      <DialogContent className="p-0 m-0 border-none sm:max-w-4xl ">
+      <DialogContent
+        excludeCloseIcon={true}
+        className="p-0 m-0 border-none sm:max-w-4xl "
+      >
         <div className="relative">
           <img
             alt={alt}
@@ -75,5 +97,40 @@ export function Image({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+export interface PreviewableResource {
+  url: string;
+  name: string;
+}
+
+interface PopupGalleryProps {
+  previewResourceIndex: number;
+  resources: PreviewableResource[];
+}
+
+export function PopupGallery({
+  resources,
+  previewResourceIndex: originalPreviewResourceIndex,
+}: PopupGalleryProps): ReactNode {
+  const [previewResourceIndex, setPreviewResourceIndex] = useState(originalPreviewResourceIndex);
+
+  const deferredIndex = useDeferredValue(previewResourceIndex);
+
+  return (
+    <div className="h-20 w-20">
+      <Image
+        source={resources[originalPreviewResourceIndex].url}
+        alt={resources[originalPreviewResourceIndex].name}
+        onClick={() => console.log('clicked')}
+        onPrevious={() => setPreviewResourceIndex(previewResourceIndex - 1)}
+        onNext={() => setPreviewResourceIndex(previewResourceIndex + 1)}
+        previewImageSrc={resources[deferredIndex].url ?? ''}
+        hasPrevious={previewResourceIndex - 1 >= 0}
+        hasNext={resources.length > previewResourceIndex + 1}
+        onClose={() => setPreviewResourceIndex(originalPreviewResourceIndex)}
+      />
+    </div>
   );
 }
