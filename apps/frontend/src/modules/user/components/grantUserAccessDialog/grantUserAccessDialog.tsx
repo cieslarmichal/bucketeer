@@ -10,7 +10,7 @@ import { Button } from '../../../../../@/components/ui/button';
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from '../../../../../@/components/ui/command';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../../../@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../../../@/components/ui/form';
-import { Popover, PopoverContent, PopoverTrigger } from '../../../../../@/components/ui/popover';
+import { DialogPopoverContent, Popover, PopoverTrigger } from '../../../../../@/components/ui/popover';
 import { cn } from '../../../../../@/lib/utils';
 import { useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
 import { useGrantBucketAccessMutation } from '../../api/admin/mutations/grantUserBucketAccessMutation/grantUserBucketAccessMutation';
@@ -79,6 +79,16 @@ export const GrantUserAccessDialog = ({ bucketName }: GrantUserAccessDialog): JS
 
   const [open, setOpen] = useState(false);
 
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  const onOpenChange = (val: boolean): void => {
+    setOpen(val);
+
+    if (val === false) {
+      setPopoverOpen(false);
+    }
+  };
+
   const grantBucketAccessForm = useForm({
     resolver: zodResolver(grantBucketAccessSchema),
     values: {
@@ -103,7 +113,7 @@ export const GrantUserAccessDialog = ({ bucketName }: GrantUserAccessDialog): JS
   return (
     <Dialog
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={onOpenChange}
     >
       <DialogTrigger asChild>
         <Button>Grant access</Button>
@@ -126,7 +136,11 @@ export const GrantUserAccessDialog = ({ bucketName }: GrantUserAccessDialog): JS
                 <FormItem>
                   <FormLabel>User</FormLabel>
                   <FormControl>
-                    <Popover>
+                    <Popover
+                      open={popoverOpen}
+                      onOpenChange={setPopoverOpen}
+                      modal={false}
+                    >
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -139,7 +153,7 @@ export const GrantUserAccessDialog = ({ bucketName }: GrantUserAccessDialog): JS
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent>
+                      <DialogPopoverContent>
                         <Command>
                           <CommandInput
                             placeholder="Find a user"
@@ -155,10 +169,6 @@ export const GrantUserAccessDialog = ({ bucketName }: GrantUserAccessDialog): JS
                                 key={`user-${user}-${index}`}
                                 value={user.id}
                                 onSelect={() => {
-                                  console.log(grantBucketAccessForm.getValues());
-
-                                  console.log(grantBucketAccessForm.formState.errors);
-
                                   grantBucketAccessForm.setValue('userId', user.id);
                                 }}
                               >
@@ -170,7 +180,7 @@ export const GrantUserAccessDialog = ({ bucketName }: GrantUserAccessDialog): JS
                             ))}
                           </CommandList>
                         </Command>
-                      </PopoverContent>
+                      </DialogPopoverContent>
                     </Popover>
                   </FormControl>
                 </FormItem>

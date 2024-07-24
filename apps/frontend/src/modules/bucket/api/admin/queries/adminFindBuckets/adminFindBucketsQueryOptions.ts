@@ -2,13 +2,13 @@ import { type UseQueryOptions, queryOptions } from '@tanstack/react-query';
 
 import { type FindBucketsResponseBody } from '@common/contracts';
 
-import { adminFindBuckets } from './adminFindBuckets';
+import { adminFindBuckets, type AdminFindBucketsPayload } from './adminFindBuckets';
 import { BucketApiQueryKeys } from '../../../bucketApiQueryKeys';
 
 export const adminFindBucketsQueryOptions = (
-  accessToken: string,
+  payload: AdminFindBucketsPayload,
 ): UseQueryOptions<FindBucketsResponseBody, Error, FindBucketsResponseBody, ['adminFindBuckets']> =>
   queryOptions({
     queryKey: [BucketApiQueryKeys.adminFindBuckets],
-    queryFn: () => adminFindBuckets(accessToken),
+    queryFn: () => adminFindBuckets(payload),
   });

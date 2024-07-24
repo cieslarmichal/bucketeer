@@ -2,10 +2,10 @@ import { RouterProvider } from '@tanstack/react-router';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
+import { CookieService } from './modules/common/services/cookieService/cookieService';
 import { createAppRouter } from './modules/core/router/router';
 import { useUserStore } from './modules/core/stores/userStore/userStore';
 import { useUserTokensStore } from './modules/core/stores/userTokens/userTokens';
-import { CookieService } from './modules/common/services/cookieService/cookieService';
 
 // Create a new router instance
 const router = createAppRouter();
@@ -36,6 +36,16 @@ function WrappedApp(): JSX.Element {
   const refreshToken = useUserTokensStore((state) => state.refreshToken);
 
   const isLoggedIn = accessToken !== null && refreshToken !== null;
+
+  const userDataCookie = CookieService.getUserDataCookie();
+
+  const setUserData = useUserStore((state) => state.setUser);
+
+  if (userDataCookie) {
+    const userData = JSON.parse(userDataCookie);
+
+    setUserData(userData);
+  }
 
   const userRole = useUserStore((state) => state.user.role);
 

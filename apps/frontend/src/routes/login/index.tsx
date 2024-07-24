@@ -12,6 +12,7 @@ import { CookieService } from '../../modules/common/services/cookieService/cooki
 import { type AppRouterContext } from '../../modules/core/router/routerContext';
 import { useUserTokensStore } from '../../modules/core/stores/userTokens/userTokens';
 import { useLoginUserMutation } from '../../modules/user/api/user/mutations/loginMutation/loginMutation';
+import { useFindMeQuery } from '../../modules/user/api/user/queries/findMeQuery/findMeQuery';
 
 export const Route = createFileRoute('/login/')({
   component: Login,
@@ -33,6 +34,12 @@ const loginFormSchema = z.object({
 
 function Login(): JSX.Element {
   const navigate = useNavigate();
+
+  const accessToken = useUserTokensStore((state) => state.accessToken);
+
+  const { refetch: refetchUserData } = useFindMeQuery({
+    accessToken: accessToken as string,
+  });
 
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
@@ -67,6 +74,10 @@ function Login(): JSX.Element {
         refreshToken: result.refreshToken,
         expiresIn: result.expiresIn,
       });
+
+      const userData = await refetchUserData({});
+
+      CookieService.setUserDataCookie(JSON.stringify(userData.data));
 
       navigate({
         to: '/',

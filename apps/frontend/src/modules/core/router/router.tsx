@@ -7,6 +7,7 @@ import { type RefreshUserTokensResponseBody } from '@common/contracts';
 
 import { routeTree } from '../../../routeTree.gen';
 import { ApiError } from '../../common/errors/apiError';
+import { CookieService } from '../../common/services/cookieService/cookieService';
 import { HttpService } from '../../common/services/httpService/httpService';
 import { UserApiError } from '../../user/api/errors/userApiError';
 import { useUserTokensStore } from '../stores/userTokens/userTokens';
@@ -78,6 +79,8 @@ export function createAppRouter() {
 
             if (res) {
               store.setTokens(res);
+
+              CookieService.setUserTokensCookie(res);
             }
           } catch (error) {
             store.removeTokens();
