@@ -14,17 +14,17 @@ import {
   AlertDialogTrigger,
 } from '../../../@/components/ui/alert-dialog';
 import { Button } from '../../../@/components/ui/button';
-import { adminFindBucketsQueryOptions } from '../../api/bucket/queries/admin/adminFindBuckets/adminFindBucketsQueryOptions';
-import { useDeleteUserMutation } from '../../api/user/admin/mutations/deleteUserMutation/deleteUserMutation';
-import { adminFindUsersQueryOptions } from '../../api/user/admin/queries/findUsersQuery/findUsersQueryOptions';
-import { CreateBucketDialog } from '../../components/createBucketDialog/createBucketDialog';
-import { CreateUserDialog } from '../../components/createUserDialog/createUserDialog';
-import { DeleteBucketDialog } from '../../components/deleteBucketDialog/deleteBucketDialog';
-import { GrantUserAccessDialog } from '../../components/grantUserAccessDialog/grantUserAccessDialog';
-import { ManageUserAccessesDialog } from '../../components/manageUserAccessesDialog/manageUserAccessesDialog';
-import { requireAdmin } from '../../core/auth/requireAdmin';
-import { type AppRouterContext } from '../../core/router/routerContext';
-import { useUserTokensStore } from '../../core/stores/userTokens/userTokens';
+import { adminFindBucketsQueryOptions } from '../../modules/bucket/api/admin/queries/adminFindBuckets/adminFindBucketsQueryOptions';
+import { CreateBucketDialog } from '../../modules/bucket/components/createBucketDialog/createBucketDialog';
+import { DeleteBucketDialog } from '../../modules/bucket/components/deleteBucketDialog/deleteBucketDialog';
+import { requireAdmin } from '../../modules/core/auth/requireAdmin';
+import { type AppRouterContext } from '../../modules/core/router/routerContext';
+import { useUserTokensStore } from '../../modules/core/stores/userTokens/userTokens';
+import { useDeleteUserMutation } from '../../modules/user/api/admin/mutations/deleteUserMutation/deleteUserMutation';
+import { adminFindUsersQueryOptions } from '../../modules/user/api/admin/queries/findUsersQuery/findUsersQueryOptions';
+import { CreateUserDialog } from '../../modules/user/components/createUserDialog/createUserDialog';
+import { GrantUserAccessDialog } from '../../modules/user/components/grantUserAccessDialog/grantUserAccessDialog';
+import { ManageUserAccessesDialog } from '../../modules/user/components/manageUserAccessesDialog/manageUserAccessesDialog';
 
 export const Route = createFileRoute('/admin/')({
   component: Admin,

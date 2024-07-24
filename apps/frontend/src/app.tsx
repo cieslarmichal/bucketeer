@@ -2,10 +2,10 @@ import { RouterProvider } from '@tanstack/react-router';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import { createAppRouter } from './core/router/router';
-import { useUserStore } from './core/stores/userStore/userStore';
-import { useUserTokensStore } from './core/stores/userTokens/userTokens';
-import { CookieService } from './services/cookieService/cookieService';
+import { createAppRouter } from './modules/core/router/router';
+import { useUserStore } from './modules/core/stores/userStore/userStore';
+import { useUserTokensStore } from './modules/core/stores/userTokens/userTokens';
+import { CookieService } from './modules/common/services/cookieService/cookieService';
 
 // Create a new router instance
 const router = createAppRouter();

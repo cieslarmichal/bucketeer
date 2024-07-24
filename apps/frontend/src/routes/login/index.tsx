@@ -7,11 +7,11 @@ import { z } from 'zod';
 import { Button } from '../../../@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../../@/components/ui/form';
 import { Input } from '../../../@/components/ui/input';
-import { useLoginUserMutation } from '../../api/user/all/mutations/loginMutation/loginMutation';
-import { ApiError } from '../../common/errors/apiError';
-import { type AppRouterContext } from '../../core/router/routerContext';
-import { useUserTokensStore } from '../../core/stores/userTokens/userTokens';
-import { CookieService } from '../../services/cookieService/cookieService';
+import { ApiError } from '../../modules/common/errors/apiError';
+import { CookieService } from '../../modules/common/services/cookieService/cookieService';
+import { type AppRouterContext } from '../../modules/core/router/routerContext';
+import { useUserTokensStore } from '../../modules/core/stores/userTokens/userTokens';
+import { useLoginUserMutation } from '../../modules/user/api/user/mutations/loginMutation/loginMutation';
 
 export const Route = createFileRoute('/login/')({
   component: Login,
