@@ -7,7 +7,7 @@ import { UserApiQueryKeys } from '../../../userApiQueryKeys';
 
 export const adminFindUsersQueryOptions = (
   payload: AdminFindUsersPayload,
-): UseQueryOptions<FindUsersResponseBody, Error, FindUsersResponseBody, [typeof UserApiQueryKeys]> =>
+): UseQueryOptions<FindUsersResponseBody, Error, FindUsersResponseBody, ['findUsers']> =>
   queryOptions({
     queryKey: [UserApiQueryKeys.findUsers],
     queryFn: () => adminFindUsers(payload),
