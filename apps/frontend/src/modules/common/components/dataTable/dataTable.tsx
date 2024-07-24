@@ -183,7 +183,7 @@ export function DataTable<TData, TValue>({
           size="sm"
           className="py-4 px-2"
           onClick={async () => {
-            if (onPreviousPage && pageIndex) {
+            if (onPreviousPage && pageIndex !== undefined) {
               await onPreviousPage();
             }
 
@@ -198,7 +198,7 @@ export function DataTable<TData, TValue>({
           size="sm"
           className="py-4 px-2"
           onClick={async () => {
-            if (onNextPage && pageIndex) {
+            if (onNextPage && pageIndex !== undefined) {
               await onNextPage();
             }
 

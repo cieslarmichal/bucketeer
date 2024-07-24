@@ -16,7 +16,7 @@ export const findBucketResources = async (payload: FindBucketResourcesPayload): 
   const queryParams: Record<string, string> = {};
 
   if (page) {
-    queryParams.page = `${page}`;
+    queryParams.page = `${page + 1}`;
   }
 
   if (pageSize) {

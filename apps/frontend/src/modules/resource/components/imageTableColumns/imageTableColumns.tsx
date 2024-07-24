@@ -4,8 +4,8 @@ import prettyBytes from 'pretty-bytes';
 
 import { type Resource } from '@common/contracts';
 
-import { cn } from '../../../../../../@/lib/utils';
-import { Image } from '../../image/image';
+import { cn } from '../../../../../@/lib/utils';
+import { PopupGallery } from '../../../common/components/popupGallery/popupGallery';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -27,7 +27,7 @@ function Header({ children, className }: HeaderProps): JSX.Element {
   return <div className={cn('w-full h-full flex items-center', className)}>{children}</div>;
 }
 
-export const columns: ColumnDef<Resource>[] = [
+export const imageTableColumns: ColumnDef<Resource>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -72,15 +72,14 @@ export const columns: ColumnDef<Resource>[] = [
   {
     header: () => <Header>Preview</Header>,
     accessorKey: 'url',
-    cell: ({ row }): JSX.Element => {
+    cell: ({ row, table }): JSX.Element => {
+      const rowModel = table.getRowModel();
+
       return (
-        <div className="h-20 w-20">
-          <Image
-            source={row.original.url}
-            alt={row.original.name}
-            onClick={() => console.log('clicked')}
-          />
-        </div>
+        <PopupGallery
+          previewResourceIndex={row.index}
+          resources={rowModel.rows.map((row) => row.original)}
+        />
       );
     },
   },
