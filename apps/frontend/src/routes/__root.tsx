@@ -2,11 +2,11 @@ import { createRootRoute, Link, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 import { useEffect } from 'react';
 
-import { useLogoutUserMutation } from '../api/user/all/mutations/logoutMutation/logoutMutation';
-import { useFindMeQuery } from '../api/user/all/queries/findMeQuery/findMe';
-import { useUserStore } from '../core/stores/userStore/userStore';
-import { useUserTokensStore } from '../core/stores/userTokens/userTokens';
-import { CookieService } from '../services/cookieService/cookieService';
+import { useUserStore } from '../modules/core/stores/userStore/userStore';
+import { useUserTokensStore } from '../modules/core/stores/userTokens/userTokens';
+import { useLogoutUserMutation } from '../modules/user/api/user/mutations/logoutMutation/logoutMutation';
+import { useFindMeQuery } from '../modules/user/api/user/queries/findMeQuery/findMeQuery';
+import { CookieService } from '../modules/common/services/cookieService/cookieService';
 
 import { ModeToggle } from '@/components/mode-toggle';
 import { ThemeProvider } from '@/components/theme-provider';
