@@ -95,7 +95,7 @@ export class UserHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: logoutUserResponseBodyDTOSchema,
-              description: `User logged out.`,
+              description: 'User logged out',
             },
           },
         },
