@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention */
-import { CreateBucketCommand, ListBucketsCommand } from '@aws-sdk/client-s3';
+import { BucketAlreadyExists, CreateBucketCommand, ListBucketsCommand } from '@aws-sdk/client-s3';
 
 import {
   type CreateBucketCommandHandlerResult,
@@ -23,7 +23,7 @@ export class CreateBucketCommandHandlerImpl implements CreateBucketCommandHandle
 
     if (result.Buckets?.find((bucket) => bucket.Name === bucketName)) {
       throw new OperationNotValidError({
-        reason: 'Bucket already  exists.',
+        reason: 'Bucket already exists.',
         bucketName,
       });
     }
@@ -33,7 +33,22 @@ export class CreateBucketCommandHandlerImpl implements CreateBucketCommandHandle
       bucketName,
     });
 
-    await this.s3Client.send(new CreateBucketCommand({ Bucket: bucketName }));
+    try {
+      await this.s3Client.send(new CreateBucketCommand({ Bucket: bucketName }));
+    } catch (error) {
+      if (error instanceof BucketAlreadyExists) {
+        throw new OperationNotValidError({
+          reason: 'Bucket already exists.',
+          bucketName,
+        });
+      }
+
+      throw new OperationNotValidError({
+        reason: 'Error creating bucket.',
+        bucketName,
+        error,
+      });
+    }
 
     this.loggerService.debug({
       message: 'Bucket created.',

@@ -9,6 +9,7 @@ import { ResourceNotFoundError } from '../../../../../common/errors/common/resou
 import { type SqliteDatabaseClient } from '../../../../../core/database/sqliteDatabaseClient/sqliteDatabaseClient.js';
 import { coreSymbols } from '../../../../../core/symbols.js';
 import { type DependencyInjectionContainer } from '../../../../../libs/dependencyInjection/dependencyInjectionContainer.js';
+import { ForbiddenAccessError } from '../../../../authModule/application/errors/forbiddenAccessError.js';
 import { type UserBucketTestUtils } from '../../../../userModule/tests/utils/userBucketTestUtils/userBucketTestUtils.js';
 import { type UserTestUtils } from '../../../../userModule/tests/utils/userTestUtils/userTestUtils.js';
 import { symbols } from '../../../symbols.js';
@@ -95,7 +96,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
         bucketName,
       });
     } catch (error) {
-      expect(error instanceof ResourceNotFoundError);
+      expect(error instanceof ForbiddenAccessError);
 
       return;
     }

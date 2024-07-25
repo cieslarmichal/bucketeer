@@ -87,7 +87,10 @@ describe('UserBucketRepositoryImpl', () => {
 
       const existingUserBucket = await userBucketTestUtils.createAndPersist({ input: { userId: user.id } });
 
-      await userBucketRepository.deleteUserBucket({ bucketName: existingUserBucket.bucketName });
+      await userBucketRepository.deleteUserBucket({
+        bucketName: existingUserBucket.bucketName,
+        userId: user.id,
+      });
 
       const foundUserBucket = await userBucketTestUtils.findUserBucket({ bucketName: existingUserBucket.bucketName });
 

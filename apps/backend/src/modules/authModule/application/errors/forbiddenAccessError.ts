@@ -2,6 +2,7 @@ import { ApplicationError } from '../../../../common/errors/base/applicationErro
 
 interface Context {
   readonly reason: string;
+  readonly [key: string]: unknown;
 }
 
 export class ForbiddenAccessError extends ApplicationError<Context> {

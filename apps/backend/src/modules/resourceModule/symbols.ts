@@ -19,4 +19,5 @@ export const symbols = {
 export const resourceSymbols = {
   resourceHttpController: symbols.resourceHttpController,
   adminResourceHttpController: symbols.adminResourceHttpController,
+  resourceBlobService: symbols.resourceBlobService,
 };

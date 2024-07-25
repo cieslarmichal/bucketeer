@@ -11,6 +11,7 @@ export interface FindUserBucketsPayload {
 
 export interface DeleteUserBucketPayload {
   readonly bucketName: string;
+  readonly userId: string;
 }
 
 export interface UserBucketRepository {

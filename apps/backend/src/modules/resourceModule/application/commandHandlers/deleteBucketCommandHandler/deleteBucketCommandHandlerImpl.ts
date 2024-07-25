@@ -20,12 +20,6 @@ export class DeleteBucketCommandHandlerImpl implements DeleteBucketCommandHandle
 
     const result = await this.s3Client.send(new ListBucketsCommand({}));
 
-    console.log(
-      result,
-      result.Buckets?.find((bucket) => bucket.Name === bucketName),
-      bucketName,
-    );
-
     if (!result.Buckets?.find((bucket) => bucket.Name === bucketName)) {
       throw new OperationNotValidError({
         reason: 'Bucket does not exist.',
