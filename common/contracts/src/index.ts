@@ -12,6 +12,8 @@ export * from './schemas/user/deleteUser.js';
 
 export * from './schemas/user/userRole.js';
 
+export * from './schemas/resource/bucket.js';
+
 export * from './schemas/user/refreshUserTokens.js';
 
 export * from './schemas/user/grantBucketAccess.js';
@@ -39,3 +41,5 @@ export * from './schemas/resource/downloadVideoPreview.js';
 export * from './schemas/resource/uploadResources.js';
 
 export * from './schemas/resource/previewType.js';
+
+export * from './schemas/resource/resource.js';
