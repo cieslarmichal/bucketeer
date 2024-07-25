@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { TypeClone } from '@sinclair/typebox';
 import { type FastifyInstance, type FastifyReply, type FastifyRequest, type FastifySchema } from 'fastify';
 import { createWriteStream } from 'node:fs';
 import { pipeline } from 'node:stream';
@@ -261,7 +260,10 @@ export class HttpRouter {
 
       return {
         ...agg,
-        [statusCode]: TypeClone.Type(schema, { description }),
+        [statusCode]: {
+          ...schema,
+          description,
+        },
       };
     }, {});
 
