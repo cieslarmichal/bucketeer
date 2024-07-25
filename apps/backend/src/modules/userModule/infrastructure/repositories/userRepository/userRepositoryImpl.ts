@@ -85,6 +85,8 @@ export class UserRepositoryImpl implements UserRepository {
         .where(whereCondition)
         .first();
     } catch (error) {
+      console.log(error);
+
       throw new RepositoryError({
         entity: 'User',
         operation: 'find',

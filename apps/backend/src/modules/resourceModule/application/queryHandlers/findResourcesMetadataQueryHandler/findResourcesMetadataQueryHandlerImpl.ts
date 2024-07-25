@@ -3,8 +3,8 @@ import {
   type FindResourcesMetadataQueryHandlerPayload,
   type FindResourcesMetadataQueryHandlerResult,
 } from './findResourcesMetadataQueryHandler.js';
-import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type LoggerService } from '../../../../../libs/logger/services/loggerService/loggerService.js';
+import { ForbiddenAccessError } from '../../../../authModule/application/errors/forbiddenAccessError.js';
 import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
 import { type ResourceBlobService } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
 
@@ -23,10 +23,11 @@ export class FindResourcesMetadataQueryHandlerImpl implements FindResourcesMetad
     const { buckets } = await this.findUserBucketsQueryHandler.execute({ userId });
 
     if (!buckets.some((bucket) => bucket.name === bucketName)) {
-      throw new OperationNotValidError({
-        reason: 'Bucket does not exist.',
+      throw new ForbiddenAccessError({
+        reason: 'User does not have access to this bucket.',
         userId,
         bucketName,
+        userBuckets: buckets,
       });
     }
 

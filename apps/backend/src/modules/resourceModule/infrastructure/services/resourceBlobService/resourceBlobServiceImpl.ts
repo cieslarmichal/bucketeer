@@ -4,6 +4,7 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
+  ListBucketsCommand,
   ListObjectsV2Command,
   type ListObjectsV2CommandInput,
 } from '@aws-sdk/client-s3';
@@ -161,6 +162,14 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
     } catch (error) {
       return false;
     }
+  }
+
+  public async bucketExists(payload: { bucketName: string }): Promise<boolean> {
+    const { bucketName } = payload;
+
+    const result = await this.s3Client.send(new ListBucketsCommand({}));
+
+    return result.Buckets?.find((bucket) => bucket.Name === bucketName) !== undefined;
   }
 
   public async deleteResource(payload: DeleteResourcePayload): Promise<void> {

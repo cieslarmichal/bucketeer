@@ -36,6 +36,10 @@ export interface ResourceExistsPayload {
   readonly bucketName: string;
 }
 
+export interface BucketExistsPayload {
+  readonly bucketName: string;
+}
+
 export interface DeleteResourcePayload {
   readonly resourceId: string;
   readonly bucketName: string;
@@ -47,5 +51,6 @@ export interface ResourceBlobService {
   getResourcesMetadata(payload: GetResourcesMetadataPayload): Promise<GetResourcesMetadataResult>;
   getResourcesIds(payload: GetResourcesIdsPayload): Promise<string[]>;
   resourceExists(payload: ResourceExistsPayload): Promise<boolean>;
+  bucketExists(payload: BucketExistsPayload): Promise<boolean>;
   deleteResource(payload: DeleteResourcePayload): Promise<void>;
 }

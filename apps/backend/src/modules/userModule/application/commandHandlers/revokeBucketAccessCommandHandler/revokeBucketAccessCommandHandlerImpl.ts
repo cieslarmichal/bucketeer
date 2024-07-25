@@ -4,6 +4,7 @@ import {
 } from './revokeBucketAccessCommandHandler.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type LoggerService } from '../../../../../libs/logger/services/loggerService/loggerService.js';
+import { type ResourceBlobService } from '../../../../resourceModule/domain/services/resourceBlobService/resourceBlobService.js';
 import { type UserBucketRepository } from '../../../domain/repositories/userBucketRepository/userBucketRepository.js';
 import { type UserRepository } from '../../../domain/repositories/userRepository/userRepository.js';
 
@@ -12,6 +13,7 @@ export class RevokeBucketAccessCommandHandlerImpl implements RevokeBucketAccessC
     private readonly userRepository: UserRepository,
     private readonly userBucketRepository: UserBucketRepository,
     private readonly loggerService: LoggerService,
+    private readonly resourceBlobService: ResourceBlobService,
   ) {}
 
   public async execute(payload: RevokeBucketAccessCommandHandlerPayload): Promise<void> {
@@ -22,6 +24,15 @@ export class RevokeBucketAccessCommandHandlerImpl implements RevokeBucketAccessC
       userId,
       bucketName,
     });
+
+    const bucketExists = await this.resourceBlobService.bucketExists({ bucketName });
+
+    if (!bucketExists) {
+      throw new OperationNotValidError({
+        reason: 'Bucket does not exist.',
+        bucketName,
+      });
+    }
 
     const existingUser = await this.userRepository.findUser({ id: userId });
 
@@ -44,7 +55,10 @@ export class RevokeBucketAccessCommandHandlerImpl implements RevokeBucketAccessC
       return;
     }
 
-    await this.userBucketRepository.deleteUserBucket({ bucketName });
+    await this.userBucketRepository.deleteUserBucket({
+      bucketName,
+      userId,
+    });
 
     this.loggerService.debug({
       message: 'Bucket access revoked.',

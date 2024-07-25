@@ -47,6 +47,8 @@ import { type UuidService } from '../../libs/uuid/services/uuidService/uuidServi
 import { type AccessControlService } from '../authModule/application/services/accessControlService/accessControlService.js';
 import { type TokenService } from '../authModule/application/services/tokenService/tokenService.js';
 import { authSymbols } from '../authModule/symbols.js';
+import { type ResourceBlobService } from '../resourceModule/domain/services/resourceBlobService/resourceBlobService.js';
+import { resourceSymbols } from '../resourceModule/symbols.js';
 
 export class UserModule implements DependencyInjectionModule {
   public declareBindings(container: DependencyInjectionContainer): void {
@@ -115,6 +117,7 @@ export class UserModule implements DependencyInjectionModule {
           container.get<UserRepository>(symbols.userRepository),
           container.get<UserBucketRepository>(symbols.userBucketRepository),
           container.get<LoggerService>(coreSymbols.loggerService),
+          container.get<ResourceBlobService>(resourceSymbols.resourceBlobService),
         ),
     );
 
@@ -125,6 +128,7 @@ export class UserModule implements DependencyInjectionModule {
           container.get<UserRepository>(symbols.userRepository),
           container.get<UserBucketRepository>(symbols.userBucketRepository),
           container.get<LoggerService>(coreSymbols.loggerService),
+          container.get<ResourceBlobService>(resourceSymbols.resourceBlobService),
         ),
     );
 

@@ -68,10 +68,13 @@ export class UserBucketRepositoryImpl implements UserBucketRepository {
   }
 
   public async deleteUserBucket(payload: DeleteUserBucketPayload): Promise<void> {
-    const { bucketName } = payload;
+    const { bucketName, userId } = payload;
 
     try {
-      await this.sqliteDatabaseClient<UserBucketRawEntity>(this.userBucketTable.name).delete().where({ bucketName });
+      await this.sqliteDatabaseClient<UserBucketRawEntity>(this.userBucketTable.name).delete().where({
+        bucketName,
+        userId,
+      });
     } catch (error) {
       throw new RepositoryError({
         entity: 'UserBucket',
