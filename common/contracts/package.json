@@ -13,9 +13,9 @@
     "build:dev": "tsc --build tsconfig.json"
   },
   "volta": {
-    "node": "20.12.2"
+    "node": "20.14.0"
   },
   "engines": {
-    "node": "20.12.2"
+    "node": "20.14.0"
   }
 }

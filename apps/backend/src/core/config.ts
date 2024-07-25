@@ -1,6 +1,5 @@
 import { type Static, Type } from '@sinclair/typebox';
-import { Value } from '@sinclair/typebox/value';
-import { TransformDecodeCheckError } from '@sinclair/typebox/value/transform';
+import { Value, TransformDecodeCheckError } from '@sinclair/typebox/value';
 import config from 'config';
 
 import { ConfigurationError } from '../common/errors/common/configurationError.js';
