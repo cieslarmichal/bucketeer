@@ -107,13 +107,13 @@ export class ResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: findResourcesResponseBodyDTOSchema,
-              description: `Bucket's resources metadata found.`,
+              description: "Bucket's resources metadata found",
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
-        description: `Find bucket's resources metadata.`,
+        description: "Find bucket's resources metadata",
       }),
       new HttpRoute({
         method: HttpMethodName.post,
@@ -132,7 +132,7 @@ export class ResourceHttpController implements HttpController {
         },
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
-        description: `Upload Resources.`,
+        description: 'Upload Resources',
       }),
       new HttpRoute({
         method: HttpMethodName.post,
@@ -146,13 +146,13 @@ export class ResourceHttpController implements HttpController {
           response: {
             [HttpStatusCode.ok]: {
               schema: exportResourcesResponseBodyDTOSchema,
-              description: `Bucket's resources exported.`,
+              description: "Bucket's resources exported",
             },
           },
         },
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
-        description: `Export bucket's resources.`,
+        description: "Export bucket's resources",
       }),
       new HttpRoute({
         method: HttpMethodName.get,
