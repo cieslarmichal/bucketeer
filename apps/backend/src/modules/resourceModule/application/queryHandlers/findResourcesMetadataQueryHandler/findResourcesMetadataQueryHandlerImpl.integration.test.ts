@@ -1,6 +1,8 @@
 import path from 'path';
 import { expect, describe, it, beforeEach, afterEach } from 'vitest';
 
+import { UserRole } from '@common/contracts';
+
 import { type FindResourcesMetadataQueryHandler } from './findResourcesMetadataQueryHandler.js';
 import { testSymbols } from '../../../../../../tests/container/symbols.js';
 import { TestContainer } from '../../../../../../tests/container/testContainer.js';
@@ -72,6 +74,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     try {
       await queryHandler.execute({
         userId,
+        userRole: UserRole.user,
         page: 1,
         pageSize: 10,
         bucketName,
@@ -91,6 +94,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     try {
       await queryHandler.execute({
         userId: user.id,
+        userRole: UserRole.user,
         page: 1,
         pageSize: 10,
         bucketName,
@@ -120,6 +124,7 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
 
     const { resourcesMetadata, totalPages } = await queryHandler.execute({
       userId: user.id,
+      userRole: UserRole.user,
       page: 1,
       pageSize: 10,
       bucketName,

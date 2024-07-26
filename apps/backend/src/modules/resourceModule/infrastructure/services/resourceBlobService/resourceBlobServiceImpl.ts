@@ -77,6 +77,8 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
 
     let continuationToken: string | undefined = undefined;
 
+    const bucketPreviewsName = `${bucketName}-previews`;
+
     do {
       const commandInput: ListObjectsV2CommandInput = {
         Bucket: bucketName,
@@ -98,11 +100,19 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
           result.Contents.map(async (resultEntry) => {
             const { Key, LastModified, Size } = resultEntry;
 
-            const [url, metadataResult] = await Promise.all([
+            const [url, previewUrl, metadataResult] = await Promise.all([
               getSignedUrl(
                 this.s3Client,
                 new GetObjectCommand({
                   Bucket: bucketName,
+                  Key: Key as string,
+                }),
+                { expiresIn: 86400 },
+              ),
+              getSignedUrl(
+                this.s3Client,
+                new GetObjectCommand({
+                  Bucket: bucketPreviewsName,
                   Key: Key as string,
                 }),
                 { expiresIn: 86400 },
@@ -122,6 +132,7 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
               contentSize: Size as number,
               contentType: metadataResult.ContentType as string,
               url,
+              previewUrl,
             };
           }),
         );

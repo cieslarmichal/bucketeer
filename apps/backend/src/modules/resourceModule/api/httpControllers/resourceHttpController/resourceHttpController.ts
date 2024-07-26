@@ -221,7 +221,7 @@ export class ResourceHttpController implements HttpController {
   private async findResources(
     request: HttpRequest<undefined, FindResourcesQueryParamsDTO, FindResourcesPathParamsDTO>,
   ): Promise<HttpOkResponse<FindResourcesResponseBodyDTO>> {
-    const { userId } = await this.accessControlService.verifyBearerToken({
+    const { userId, role } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
     });
 
@@ -231,6 +231,7 @@ export class ResourceHttpController implements HttpController {
 
     const { resourcesMetadata, totalPages } = await this.findResourcesMetadataQueryHandler.execute({
       userId,
+      userRole: role,
       page,
       pageSize,
       bucketName,
@@ -365,6 +366,7 @@ export class ResourceHttpController implements HttpController {
       contentSize: resource.contentSize,
       url: resource.url,
       contentType: resource.contentType,
+      previewUrl: resource.previewUrl,
     };
   }
 }

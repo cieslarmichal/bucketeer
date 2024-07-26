@@ -1,3 +1,5 @@
+import { UserRole } from '@common/contracts';
+
 import {
   type FindResourcesMetadataQueryHandler,
   type FindResourcesMetadataQueryHandlerPayload,
@@ -18,11 +20,11 @@ export class FindResourcesMetadataQueryHandlerImpl implements FindResourcesMetad
   public async execute(
     payload: FindResourcesMetadataQueryHandlerPayload,
   ): Promise<FindResourcesMetadataQueryHandlerResult> {
-    const { userId, page, pageSize, bucketName } = payload;
+    const { userId, page, pageSize, bucketName, userRole } = payload;
 
     const { buckets } = await this.findUserBucketsQueryHandler.execute({ userId });
 
-    if (!buckets.some((bucket) => bucket.name === bucketName)) {
+    if (!buckets.some((bucket) => bucket.name === bucketName) && userRole === UserRole.user) {
       throw new ForbiddenAccessError({
         reason: 'User does not have access to this bucket.',
         userId,

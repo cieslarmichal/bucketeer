@@ -1,8 +1,11 @@
+import { type UserRole } from '@common/contracts';
+
 import { type QueryHandler } from '../../../../../common/types/queryHandler.js';
 import { type ResourceMetadata } from '../../../domain/entities/resource/resourceMetadata.js';
 
 export interface FindResourcesMetadataQueryHandlerPayload {
   readonly userId: string;
+  readonly userRole: UserRole;
   readonly page: number;
   readonly pageSize: number;
   readonly bucketName: string;

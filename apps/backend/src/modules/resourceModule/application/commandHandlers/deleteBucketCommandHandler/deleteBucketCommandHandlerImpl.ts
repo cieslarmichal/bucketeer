@@ -27,16 +27,22 @@ export class DeleteBucketCommandHandlerImpl implements DeleteBucketCommandHandle
       });
     }
 
+    const bucketPreviewsName = `${bucketName}-previews`;
+
     this.loggerService.debug({
-      message: 'Deleting Bucket...',
+      message: 'Deleting Buckets...',
       bucketName,
+      bucketPreviewsName,
     });
 
     await this.s3Client.send(new DeleteBucketCommand({ Bucket: bucketName }));
 
+    await this.s3Client.send(new DeleteBucketCommand({ Bucket: bucketPreviewsName }));
+
     this.loggerService.debug({
-      message: 'Bucket deleted.',
+      message: 'Buckets deleted.',
       bucketName,
+      bucketPreviewsName,
     });
   }
 }

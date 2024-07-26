@@ -5,4 +5,5 @@ export interface ResourceMetadata {
   readonly contentSize: number;
   readonly contentType: string;
   readonly url: string;
+  readonly previewUrl: string;
 }
