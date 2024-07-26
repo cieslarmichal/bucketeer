@@ -35,6 +35,8 @@ describe('CreateBucketCommandHandler', () => {
 
     expect(createdBuckets.includes(bucketName1)).toBe(true);
 
+    expect(createdBuckets.includes(`${bucketName1}-previews`)).toBe(true);
+
     expect(bucket.name).toBe(bucketName1);
   });
 

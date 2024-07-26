@@ -69,6 +69,8 @@ export class UploadResourcesCommandHandlerImpl implements UploadResourcesCommand
       });
     }
 
+    const bucketPreviewsName = `${bucketName}-previews`;
+
     await Promise.all(
       files.map(async (file) => {
         const { name: resourceName, filePath } = file;
@@ -111,8 +113,8 @@ export class UploadResourcesCommandHandlerImpl implements UploadResourcesCommand
 
           await Promise.all([
             this.resourceBlobSerice.uploadResource({
-              resourceId: `${resourceId}-preview`,
-              bucketName,
+              resourceId,
+              bucketName: bucketPreviewsName,
               resourceName: resourceName.replace(/\.[^/.]+$/, '-preview.jpeg'),
               data: imagePreviewStream,
               contentType: 'image/jpeg',
@@ -130,8 +132,8 @@ export class UploadResourcesCommandHandlerImpl implements UploadResourcesCommand
 
           await Promise.all([
             this.resourceBlobSerice.uploadResource({
-              resourceId: `${resourceId}-preview`,
-              bucketName,
+              resourceId,
+              bucketName: bucketPreviewsName,
               resourceName: resourceName.replace(/\.[^/.]+$/, '-preview.mp4'),
               data: videoPreviewStream,
               contentType: 'video/mp4',

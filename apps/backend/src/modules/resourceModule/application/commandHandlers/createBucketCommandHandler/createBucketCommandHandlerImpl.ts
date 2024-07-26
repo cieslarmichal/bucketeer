@@ -28,18 +28,24 @@ export class CreateBucketCommandHandlerImpl implements CreateBucketCommandHandle
       });
     }
 
+    const bucketPreviewsName = `${bucketName}-previews`;
+
     this.loggerService.debug({
-      message: 'Creating Bucket...',
+      message: 'Creating Buckets...',
       bucketName,
+      bucketPreviewsName,
     });
 
     try {
       await this.s3Client.send(new CreateBucketCommand({ Bucket: bucketName }));
+
+      await this.s3Client.send(new CreateBucketCommand({ Bucket: bucketPreviewsName }));
     } catch (error) {
       if (error instanceof BucketAlreadyExists) {
         throw new OperationNotValidError({
           reason: 'Bucket already exists.',
           bucketName,
+          bucketPreviewsName,
         });
       }
 
@@ -51,7 +57,7 @@ export class CreateBucketCommandHandlerImpl implements CreateBucketCommandHandle
     }
 
     this.loggerService.debug({
-      message: 'Bucket created.',
+      message: 'Buckets created.',
       bucketName,
     });
 
