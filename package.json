@@ -40,6 +40,8 @@
     "apps/*",
     "common/*"
   ],
-  "packageManager": "npm@10.8.2"
-
+  "packageManager": "npm@10.8.2",
+  "dependencies": {
+    "sharp": "0.33.4"
+  }
 }
