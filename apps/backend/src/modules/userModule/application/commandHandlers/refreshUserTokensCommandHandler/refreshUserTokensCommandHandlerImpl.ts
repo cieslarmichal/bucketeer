@@ -73,7 +73,10 @@ export class RefreshUserTokensCommandHandlerImpl implements RefreshUserTokensCom
     const accessTokenExpiresIn = this.config.token.access.expiresIn;
 
     const accessToken = this.tokenService.createToken({
-      data: { userId },
+      data: {
+        userId: user.getId(),
+        role: user.getRole(),
+      },
       expiresIn: accessTokenExpiresIn,
     });
 
