@@ -14,7 +14,11 @@ describe('CreateBucketCommandHandler', () => {
 
   const bucketName1 = 'resources1';
 
+  const bucketNamePreviews1 = `${bucketName1}-previews`;
+
   const bucketName2 = 'resources2';
+
+  const bucketNamePreviews2 = `${bucketName2}-previews`;
 
   beforeEach(async () => {
     const container = TestContainer.create();
@@ -25,7 +29,12 @@ describe('CreateBucketCommandHandler', () => {
   });
 
   afterEach(async () => {
-    await Promise.all([s3TestUtils.deleteBucket(bucketName1), s3TestUtils.deleteBucket(bucketName2)]);
+    await Promise.all([
+      s3TestUtils.deleteBucket(bucketName1),
+      s3TestUtils.deleteBucket(bucketNamePreviews1),
+      s3TestUtils.deleteBucket(bucketName2),
+      s3TestUtils.deleteBucket(bucketNamePreviews2),
+    ]);
   });
 
   it('create a bucket', async () => {
