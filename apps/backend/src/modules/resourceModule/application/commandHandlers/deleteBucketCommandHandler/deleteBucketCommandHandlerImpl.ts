@@ -18,16 +18,18 @@ export class DeleteBucketCommandHandlerImpl implements DeleteBucketCommandHandle
   public async execute(payload: DeleteBucketCommandHandlerPayload): Promise<void> {
     const { bucketName } = payload;
 
+    const bucketPreviewsName = `${bucketName}-previews`;
+
     const result = await this.s3Client.send(new ListBucketsCommand({}));
 
-    if (!result.Buckets?.find((bucket) => bucket.Name === bucketName)) {
-      throw new OperationNotValidError({
-        reason: 'Bucket does not exist.',
-        bucketName,
-      });
-    }
-
-    const bucketPreviewsName = `${bucketName}-previews`;
+    [bucketName, bucketPreviewsName].forEach((bucketName) => {
+      if (!result.Buckets?.find((bucket) => bucket.Name === bucketName)) {
+        throw new OperationNotValidError({
+          reason: 'Bucket does not exist.',
+          bucketName,
+        });
+      }
+    });
 
     this.loggerService.debug({
       message: 'Deleting Buckets...',
