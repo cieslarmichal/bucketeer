@@ -1,6 +1,6 @@
 {
   "admin": {
-    "email": "admin@misyma.com",
+    "email": "admin@bucketeer.com",
     "password": "AdminPassword123"
   },
   "databasePath": "data/dev.db",

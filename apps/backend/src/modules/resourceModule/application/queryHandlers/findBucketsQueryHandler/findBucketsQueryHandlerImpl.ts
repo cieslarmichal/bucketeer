@@ -22,13 +22,15 @@ export class FindBucketsQueryHandlerImpl implements FindBucketsQueryHandler {
       };
     }
 
-    const buckets = result.Buckets.slice((page - 1) * pageSize, page * pageSize).map((bucket) => ({
+    const nonPreviewsBuckets = result.Buckets.filter((bucket) => !bucket.Name?.endsWith('-previews'));
+
+    const paginatedBuckets = nonPreviewsBuckets.slice((page - 1) * pageSize, page * pageSize).map((bucket) => ({
       name: bucket.Name as string,
     }));
 
     return {
-      buckets,
-      totalPages: Math.ceil(result.Buckets.length / pageSize),
+      buckets: paginatedBuckets,
+      totalPages: Math.ceil(nonPreviewsBuckets.length / pageSize),
     };
   }
 }

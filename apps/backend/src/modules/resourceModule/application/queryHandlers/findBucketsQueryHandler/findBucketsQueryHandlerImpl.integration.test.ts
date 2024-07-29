@@ -17,6 +17,8 @@ describe('FindBucketsQueryHandler', () => {
 
   const bucketName3 = 'resources3';
 
+  const bucketName4 = 'resources3-previews';
+
   beforeEach(async () => {
     const container = TestContainer.create();
 
@@ -28,6 +30,7 @@ describe('FindBucketsQueryHandler', () => {
       s3TestUtils.createBucket(bucketName1),
       s3TestUtils.createBucket(bucketName2),
       s3TestUtils.createBucket(bucketName3),
+      s3TestUtils.createBucket(bucketName4),
     ]);
   });
 
@@ -36,6 +39,7 @@ describe('FindBucketsQueryHandler', () => {
       s3TestUtils.deleteBucket(bucketName1),
       s3TestUtils.deleteBucket(bucketName2),
       s3TestUtils.deleteBucket(bucketName3),
+      s3TestUtils.deleteBucket(bucketName4),
     ]);
   });
 
