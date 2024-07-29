@@ -26,6 +26,8 @@ export interface FileInputProps extends React.InputHTMLAttributes<HTMLInputEleme
 
 const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
   ({ className, containerClassName, fileName, type, ...props }, ref) => {
+    const filesNames = fileName.split(',');
+
     return (
       <div
         className={cn(
@@ -39,7 +41,7 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
          border
          border-input
          ring-offset-background
-         h-24
+          h-32
          w-60 sm:w-96
          relative`,
           containerClassName,
@@ -48,7 +50,7 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
         <input
           type={type}
           className={cn(
-            'w-60 sm:w-96 flex h-24 px-3 py-2 rounded-md text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 bg-none bg-[unset] focus:border-none outline-none cursor-pointer',
+            'w-60 sm:w-96 flex h-32 px-3 py-2 rounded-md text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50 bg-none bg-[unset] focus:border-none outline-none cursor-pointer',
             className,
           )}
           ref={ref}
@@ -56,13 +58,13 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
         />
         <div
           className={cn(
-            'w-60 sm:w-96 absolute h-24 px-2 items-center flex justify-between pointer-events-none',
+            'w-60 sm:w-96 absolute h-32 px-2 items-center flex justify-between pointer-events-none',
             containerClassName,
           )}
         >
           {/* todo: add scroll area here to display lots of files */}
           <div className="flex flex-col gap-2 justify-start w-full h-full pt-2">
-            {fileName.split(',').map((name, index) => (
+            {filesNames.slice(0, 3).map((name, index) => (
               <p
                 key={`${index}-${name}`}
                 className="text-sm truncate "
@@ -70,6 +72,7 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
                 {name}
               </p>
             ))}
+            {filesNames.length > 3 && <p className="text-sm">...and {filesNames.length - 3} more.</p>}
           </div>
           <div className="px-2">
             <PlusCircleIcon className={cn('h-6 w-6 text-primary pointer-events-none')}></PlusCircleIcon>
