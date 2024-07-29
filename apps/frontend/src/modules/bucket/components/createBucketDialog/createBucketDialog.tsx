@@ -49,6 +49,8 @@ export const CreateBucketDialog = ({ dialogOpen, onOpenChange }: CreateBucketDia
       bucketName: payload.bucketName.toLowerCase(),
     });
 
+    // todo: add buckets invalidation
+
     onOpenChange(false);
 
     createBucketForm.reset();

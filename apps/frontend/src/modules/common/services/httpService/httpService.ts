@@ -9,6 +9,7 @@ type RequestPayload = {
    * Currently only supports 'application/json' and 'text/plain'.
    */
   body?: Record<string, unknown>;
+  type?: 'json' | 'octet-stream';
 };
 
 type GetRequestPayload = Omit<RequestPayload, 'body'>;
@@ -75,16 +76,40 @@ export class HttpService {
   }
 
   public static async post<T = unknown>(payload: RequestPayload): Promise<HttpResponse<T>> {
-    const { url, headers, body } = payload;
+    const { url, headers, body, type = 'json' } = payload;
+
+    let requestBody: unknown;
+
+    let contentType = '';
+
+    if (type === 'json') {
+      requestBody = JSON.stringify(body);
+
+      contentType = 'application/json';
+    } else if (type === 'octet-stream') {
+      const formData = new FormData();
+
+      for (const file of body as unknown as File[]) {
+        formData.append('attachedFiles', file as unknown as Blob, file.name);
+      }
+
+      requestBody = formData;
+
+      contentType = '';
+    }
 
     const response = await fetch(`${this.baseUrl}${url}`, {
       headers: {
         ...headers,
         Accept: 'application/json',
-        'Content-Type': 'application/json',
+        ...(contentType
+          ? {
+              'Content-Type': contentType,
+            }
+          : {}),
       },
       method: 'POST',
-      body: JSON.stringify(body),
+      body: requestBody as BodyInit,
     });
 
     const responseBodyText = await response.text();

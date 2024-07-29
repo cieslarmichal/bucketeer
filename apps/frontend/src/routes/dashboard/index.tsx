@@ -10,6 +10,7 @@ import { type AppRouterContext } from '../../modules/core/router/routerContext';
 import { useUserStore } from '../../modules/core/stores/userStore/userStore';
 import { useUserTokensStore } from '../../modules/core/stores/userTokens/userTokens';
 import { findBucketResourcesQueryOptions } from '../../modules/resource/api/user/queries/findBucketResources/findBucketResourcesQueryOptions';
+import { CreateResourceModal } from '../../modules/resource/components/createResourceModal/createResourceModal';
 import { imageTableColumns } from '../../modules/resource/components/imageTableColumns/imageTableColumns';
 
 const searchSchema = z.object({
@@ -76,22 +77,25 @@ function Dashboard(): JSX.Element {
 
   return (
     <div className="w-full flex flex-col items-center justify-center p-4">
-      <select
-        onInput={(e) => {
-          navigate({
-            search: (prev) => ({ ...prev, bucketName: e.currentTarget.value }),
-          });
-        }}
-      >
-        {bucketsData?.data?.map((option) => (
-          <option
-            key={option.name}
-            value={option.name}
-          >
-            {option.name}
-          </option>
-        ))}
-      </select>
+      <div className="flex gap-2">
+        <select
+          onInput={(e) => {
+            navigate({
+              search: (prev) => ({ ...prev, bucketName: e.currentTarget.value }),
+            });
+          }}
+        >
+          {bucketsData?.data?.map((option) => (
+            <option
+              key={option.name}
+              value={option.name}
+            >
+              {option.name}
+            </option>
+          ))}
+        </select>
+        <CreateResourceModal bucketName={bucketName}></CreateResourceModal>
+      </div>
       {isBucketsFetched && !isResourcesFetched && <div>Loading</div>}
       {isBucketsFetched && isResourcesFetched && (
         <DataTable
