@@ -54,8 +54,23 @@ const FileInput = React.forwardRef<HTMLInputElement, FileInputProps>(
           ref={ref}
           {...props}
         />
-        <div className={cn('w-60 sm:w-96 absolute h-24 px-2 items-center flex justify-between pointer-events-none')}>
-          <p className="text-sm truncate">{fileName}</p>
+        <div
+          className={cn(
+            'w-60 sm:w-96 absolute h-24 px-2 items-center flex justify-between pointer-events-none',
+            containerClassName,
+          )}
+        >
+          {/* todo: add scroll area here to display lots of files */}
+          <div className="flex flex-col gap-2 justify-start w-full h-full pt-2">
+            {fileName.split(',').map((name, index) => (
+              <p
+                key={`${index}-${name}`}
+                className="text-sm truncate "
+              >
+                {name}
+              </p>
+            ))}
+          </div>
           <div className="px-2">
             <PlusCircleIcon className={cn('h-6 w-6 text-primary pointer-events-none')}></PlusCircleIcon>
           </div>

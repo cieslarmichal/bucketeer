@@ -7,7 +7,7 @@ import { type BaseApiError } from '../../../../common/services/httpService/types
 
 export interface CreateResourcesPayload extends UploadResourcesPathParams {
   accessToken: string;
-  files: FileList;
+  files: File[];
 }
 
 export const useCreateResourcesMutation = (

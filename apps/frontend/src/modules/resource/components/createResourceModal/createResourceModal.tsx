@@ -1,4 +1,5 @@
 import { ArrowUpOnSquareIcon } from '@heroicons/react/20/solid';
+import { useQueryClient } from '@tanstack/react-query';
 import { type FC, useEffect, useRef, useState } from 'react';
 
 import { Button } from '../../../../../@/components/ui/button';
@@ -11,8 +12,17 @@ interface CreateResourceModalProps {
   bucketName: string;
 }
 
+const acceptedImageAndVideoFormats =
+  '.jpg,.jpeg,.tiff,.webp,.raw,.png,.mp4,.mov,.avi,.mkv,.wmv,.flv,.webm,.mpeg,.mpg,.3gp,.ogg,.ts,.m4v,.m2ts,.vob,.rm,.rmvb,.divx,.asf,.swf,.f4v' as string;
+
+const allowedFormats = acceptedImageAndVideoFormats.replaceAll('.', '/').split(',');
+
+allowedFormats.push('audio/');
+
 export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }) => {
-  const [files, setFiles] = useState<FileList | null>(null);
+  const queryClient = useQueryClient();
+
+  const [files, setFiles] = useState<File[]>([]);
 
   const [fileName, setFileName] = useState('');
 
@@ -27,7 +37,7 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
   useEffect(() => {
     let dataTransfer: DataTransfer | undefined;
 
-    if (files) {
+    if (files.length > 0) {
       dataTransfer = new DataTransfer();
 
       const fileNameStringsArray = [];
@@ -38,11 +48,17 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
         fileNameStringsArray.push(file.name);
       }
 
-      setFileName(fileNameStringsArray.join(', '));
+      setFileName(fileNameStringsArray.join(','));
 
       if (fileInputRef.current) {
         fileInputRef.current.files = dataTransfer.files;
       }
+    }
+
+    if (fileInputRef.current && files.length === 0) {
+      fileInputRef.current.files = new DataTransfer().files;
+
+      setFileName('');
     }
 
     return (): void => {
@@ -65,15 +81,33 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
       files,
     });
 
-    setFiles(null);
+    await queryClient.invalidateQueries({
+      predicate: (query) => query.queryKey[0] === 'findBucketResources' && query.queryKey[1] === bucketName,
+    });
+
+    setFiles([]);
+
+    setFileName('');
 
     setOpen(false);
+  };
+
+  const isAllowedFormat = (type: string): boolean => {
+    return allowedFormats.find((item) => type.includes(item)) ? true : false;
   };
 
   return (
     <Dialog
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(value) => {
+        setOpen(value);
+
+        if (value === false) {
+          setFiles([]);
+
+          setFileName('');
+        }
+      }}
     >
       <DialogTrigger asChild>
         <Button>
@@ -84,13 +118,29 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
       <DialogContent>
         <DialogTitle>Add a file to your bucket :)</DialogTitle>
         <FileInput
+          className="sm:w-full w-full"
+          containerClassName="sm:w-full w-full"
           ref={fileInputRef}
           onChange={(event) => {
             const files = event.target?.files;
 
-            setFiles(files ? files : null);
+            if (!files) {
+              return;
+            }
+
+            const validFiles = [];
+
+            for (const file of files) {
+              const isOneOfAllowedFormats = isAllowedFormat(file.type);
+
+              if (isOneOfAllowedFormats) {
+                validFiles.push(file);
+              }
+            }
+
+            setFiles(validFiles.length > 0 ? validFiles : []);
           }}
-          accept="image/*,video/*,audio/*"
+          accept={'audio/*' + acceptedImageAndVideoFormats}
           type="file"
           multiple={true}
           fileName={fileName}
