@@ -7,7 +7,10 @@ export const resourceMetadataDTOSchema = Type.Object({
   contentSize: Type.Number(),
   contentType: Type.String(),
   url: Type.String(),
-  previewUrl: Type.String(),
+  preview: Type.Object({
+    url: Type.String(),
+    contentType: Type.String(),
+  }),
 });
 
 export type ResourceMetadataDTO = Static<typeof resourceMetadataDTOSchema>;

@@ -5,4 +5,8 @@ export interface Resource {
   readonly contentSize: number;
   readonly contentType: string;
   readonly url: string;
+  readonly preview: {
+    readonly url: string;
+    readonly contentType: string;
+  };
 }
