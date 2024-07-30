@@ -8,6 +8,7 @@ import { type BaseApiError } from '../../../../common/services/httpService/types
 export interface CreateResourcesPayload extends UploadResourcesPathParams {
   accessToken: string;
   files: File[];
+  signal?: AbortSignal;
 }
 
 export const useCreateResourcesMutation = (
@@ -23,6 +24,7 @@ export const useCreateResourcesMutation = (
         Authorization: `Bearer ${payload.accessToken}`,
       },
       type: 'octet-stream',
+      signal: payload.signal,
     });
 
     if (!response.success) {

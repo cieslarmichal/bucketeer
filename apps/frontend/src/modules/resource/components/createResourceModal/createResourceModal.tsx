@@ -13,8 +13,14 @@ interface CreateResourceModalProps {
   bucketName: string;
 }
 
+const MAX_CHUNK_SIZE = 100_000_000; // ~100MB
+
+const MAX_FILE_SIZE = Number(import.meta.env['VITE_MAX_FILE_SIZE']);
+
+const FILE_UPLOAD_TIMEOUT = Number(import.meta.env['VITE_MAX_FILE_UPLOAD_TIMEOUT']);
+
 const acceptedImageAndVideoFormats =
-  '.jpg,.jpeg,.tiff,.webp,.raw,.png,.mp4,.mov,.avi,.mkv,.wmv,.flv,.webm,.mpeg,.mpg,.3gp,.ogg,.ts,.m4v,.m2ts,.vob,.rm,.rmvb,.divx,.asf,.swf,.f4v' as string;
+  'audio/,video/quicktime,video/x-msvideo,video/x-ms-wmv,.jpg,.jpeg,.tiff,.webp,.raw,.png,.mp4,.mov,.avi,.mkv,.wmv,.flv,.webm,.mpeg,.mpg,.3gp,.ogg,.ts,.m4v,.m2ts,.vob,.rm,.rmvb,.divx,.asf,.swf,.f4v' as string;
 
 const allowedFormats = acceptedImageAndVideoFormats.replaceAll('.', '/').split(',');
 
@@ -24,6 +30,8 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
   const queryClient = useQueryClient();
 
   const [files, setFiles] = useState<File[]>([]);
+
+  const abortController = useRef(new AbortController());
 
   const [fileName, setFileName] = useState('');
 
@@ -69,8 +77,6 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
     };
   }, [files]);
 
-  console.log(isPending);
-
   const onUpload = async (): Promise<void> => {
     if (!files) {
       setOpen(false);
@@ -78,11 +84,78 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
       return;
     }
 
-    await mutateAsync({
-      accessToken: accessToken as string,
-      bucketName,
-      files,
-    });
+    let runningTotalSize = 0;
+
+    const filesCount = files.length;
+
+    let filesToSend: File[] = [];
+
+    for (let i = 0; i < filesCount; i += 1) {
+      const fileSize = files[i].size;
+
+      runningTotalSize += fileSize;
+
+      abortController.current.signal.addEventListener('abort', () => {
+        setFiles([]);
+
+        runningTotalSize = 0;
+      });
+
+      if (fileSize > MAX_CHUNK_SIZE) {
+        const timeout = setTimeout(() => {
+          abortController.current.abort();
+        }, FILE_UPLOAD_TIMEOUT);
+
+        await mutateAsync({
+          accessToken: accessToken as string,
+          bucketName,
+          files: [files[i] as File],
+          signal: abortController.current.signal,
+        });
+
+        clearTimeout(timeout);
+
+        continue;
+      }
+
+      filesToSend.push(files[i] as unknown as File);
+
+      if (runningTotalSize >= MAX_CHUNK_SIZE) {
+        const timeout = setTimeout(() => {
+          abortController.current.abort();
+        }, FILE_UPLOAD_TIMEOUT);
+
+        await mutateAsync({
+          accessToken: accessToken as string,
+          bucketName,
+          files: filesToSend,
+          signal: abortController.current.signal,
+        });
+
+        clearTimeout(timeout);
+
+        filesToSend = [];
+
+        runningTotalSize = 0;
+      }
+
+      if (i === files.length - 1) {
+        const timeout = setTimeout(() => {
+          abortController.current.abort();
+        }, FILE_UPLOAD_TIMEOUT);
+
+        await mutateAsync({
+          accessToken: accessToken as string,
+          bucketName,
+          files,
+          signal: abortController.current.signal,
+        });
+
+        clearTimeout(timeout);
+
+        filesToSend = [];
+      }
+    }
 
     await queryClient.invalidateQueries({
       predicate: (query) => query.queryKey[0] === 'findBucketResources' && query.queryKey[1] === bucketName,
@@ -109,6 +182,8 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
           setFiles([]);
 
           setFileName('');
+
+          abortController.current = new AbortController();
         }
       }}
     >
@@ -137,7 +212,7 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
               for (const file of files) {
                 const isOneOfAllowedFormats = isAllowedFormat(file.type);
 
-                if (isOneOfAllowedFormats) {
+                if (isOneOfAllowedFormats && file.size <= MAX_FILE_SIZE) {
                   validFiles.push(file);
                 }
               }
@@ -150,14 +225,14 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
               for (const file of files) {
                 const isOneOfAllowedFormats = isAllowedFormat(file.type);
 
-                if (isOneOfAllowedFormats) {
+                if (isOneOfAllowedFormats && file.size <= MAX_FILE_SIZE) {
                   validFiles.push(file);
                 }
               }
 
               setFiles(validFiles.length > 0 ? validFiles : []);
             }}
-            accept={'audio/*' + acceptedImageAndVideoFormats}
+            accept={'audio/*,video/quicktime,video/x-msvideo,video/x-ms-wmv' + ',' + acceptedImageAndVideoFormats}
             type="file"
             multiple={true}
             fileName={fileName}

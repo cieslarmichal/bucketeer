@@ -10,6 +10,7 @@ type RequestPayload = {
    */
   body?: Record<string, unknown>;
   type?: 'json' | 'octet-stream';
+  signal?: AbortSignal;
 };
 
 type GetRequestPayload = Omit<RequestPayload, 'body'>;
@@ -76,7 +77,7 @@ export class HttpService {
   }
 
   public static async post<T = unknown>(payload: RequestPayload): Promise<HttpResponse<T>> {
-    const { url, headers, body, type = 'json' } = payload;
+    const { url, headers, body, type = 'json', signal } = payload;
 
     let requestBody: unknown;
 
@@ -110,6 +111,7 @@ export class HttpService {
       },
       method: 'POST',
       body: requestBody as BodyInit,
+      signal,
     });
 
     const responseBodyText = await response.text();
