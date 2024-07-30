@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -10,6 +10,7 @@ import { Input } from '../../../../../@/components/ui/input';
 import { useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
 import { useCreateBucketMutation } from '../../api/admin/mutations/createBucketMutation/createBucketMutation';
 import { adminFindBucketsQueryOptions } from '../../api/admin/queries/adminFindBuckets/adminFindBucketsQueryOptions';
+import { BucketApiQueryKeys } from '../../api/bucketApiQueryKeys';
 
 const bucketSchema = z
   .string()
@@ -29,6 +30,8 @@ interface CreateBucketDialogProps {
 export const CreateBucketDialog = ({ dialogOpen, onOpenChange }: CreateBucketDialogProps): JSX.Element => {
   const accessToken = useUserTokensStore.getState().accessToken;
 
+  const queryClient = useQueryClient();
+
   const createBucketForm = useForm({
     resolver: zodResolver(createBucketSchema),
     values: {
@@ -38,7 +41,9 @@ export const CreateBucketDialog = ({ dialogOpen, onOpenChange }: CreateBucketDia
   });
 
   const { refetch: refetchBuckets } = useQuery({
-    ...adminFindBucketsQueryOptions(accessToken as string),
+    ...adminFindBucketsQueryOptions({
+      accessToken: accessToken as string,
+    }),
   });
 
   const { mutateAsync: createBucketMutation } = useCreateBucketMutation({});
@@ -56,6 +61,10 @@ export const CreateBucketDialog = ({ dialogOpen, onOpenChange }: CreateBucketDia
     createBucketForm.reset();
 
     await refetchBuckets();
+
+    await queryClient.invalidateQueries({
+      predicate: (query) => query.queryKey[0] === BucketApiQueryKeys.adminFindBuckets,
+    });
   };
 
   return (

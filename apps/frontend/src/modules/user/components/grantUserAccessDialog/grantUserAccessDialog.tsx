@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CommandLoading } from 'cmdk';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { useState } from 'react';
@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../../../@/components/ui/form';
 import { DialogPopoverContent, Popover, PopoverTrigger } from '../../../../../@/components/ui/popover';
 import { cn } from '../../../../../@/lib/utils';
+import { BucketApiQueryKeys } from '../../../bucket/api/bucketApiQueryKeys';
 import { useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
 import { useGrantBucketAccessMutation } from '../../api/admin/mutations/grantUserBucketAccessMutation/grantUserBucketAccessMutation';
 import { adminFindUsersQueryOptions } from '../../api/admin/queries/findUsersQuery/findUsersQueryOptions';
@@ -34,6 +35,8 @@ const grantBucketAccessSchema = z.object({
 const GrantAccessButton = ({ name, form, setDialogOpen }: GrantAccessButtonProps): JSX.Element => {
   const accessToken = useUserTokensStore.getState().accessToken;
 
+  const queryClient = useQueryClient();
+
   const [bucketName] = useState(name);
 
   const { mutateAsync: grantBucketAccessMutation } = useGrantBucketAccessMutation({});
@@ -54,6 +57,10 @@ const GrantAccessButton = ({ name, form, setDialogOpen }: GrantAccessButtonProps
     setDialogOpen(false);
 
     form.reset();
+
+    await queryClient.invalidateQueries({
+      predicate: (query) => query.queryKey[0] === BucketApiQueryKeys.findBuckets,
+    });
   };
 
   return (
