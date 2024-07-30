@@ -49,14 +49,30 @@ export class UserBucketRepositoryImpl implements UserBucketRepository {
   }
 
   public async findUserBuckets(payload: FindUserBucketsPayload): Promise<UserBucket[]> {
-    const { userId } = payload;
+    const { userId, bucketName } = payload;
 
     let rawEntities: UserBucketRawEntity[];
+
+    let whereClause = {};
+
+    if (userId) {
+      whereClause = {
+        ...whereClause,
+        userId,
+      };
+    }
+
+    if (bucketName) {
+      whereClause = {
+        ...whereClause,
+        bucketName,
+      };
+    }
 
     try {
       rawEntities = await this.sqliteDatabaseClient<UserBucketRawEntity>(this.userBucketTable.name)
         .select('*')
-        .where({ userId });
+        .where(whereClause);
     } catch (error) {
       throw new RepositoryError({
         entity: 'UserBuckets',
