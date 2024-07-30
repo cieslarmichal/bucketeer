@@ -1,12 +1,11 @@
 import { type ColumnDef } from '@tanstack/react-table';
 
+import { Checkbox } from '@/components/ui/checkbox';
 import { type Bucket } from '@common/contracts';
 
 import { cn } from '../../../../../@/lib/utils';
 import { GrantUserAccessDialog } from '../../../user/components/grantUserAccessDialog/grantUserAccessDialog';
 import { DeleteBucketDialog } from '../deleteBucketDialog/deleteBucketDialog';
-
-import { Checkbox } from '@/components/ui/checkbox';
 
 interface HeaderProps {
   className?: string | undefined;
