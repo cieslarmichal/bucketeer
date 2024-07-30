@@ -28,6 +28,7 @@ import { type UuidService } from '../../libs/uuid/services/uuidService/uuidServi
 import { type AccessControlService } from '../authModule/application/services/accessControlService/accessControlService.js';
 import { authSymbols } from '../authModule/symbols.js';
 import { type FindUserBucketsQueryHandler } from '../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
+import { type UserBucketRepository } from '../userModule/domain/repositories/userBucketRepository/userBucketRepository.js';
 import { userSymbols } from '../userModule/symbols.js';
 
 export class ResourceModule implements DependencyInjectionModule {
@@ -107,6 +108,7 @@ export class ResourceModule implements DependencyInjectionModule {
       () =>
         new DeleteBucketCommandHandlerImpl(
           container.get<S3Client>(coreSymbols.s3Client),
+          container.get<UserBucketRepository>(userSymbols.userBucketRepository),
           container.get<LoggerService>(coreSymbols.loggerService),
         ),
     );

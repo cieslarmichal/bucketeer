@@ -6,7 +6,8 @@ export interface CreateUserBucketPayload {
 }
 
 export interface FindUserBucketsPayload {
-  readonly userId: string;
+  readonly userId?: string;
+  readonly bucketName?: string;
 }
 
 export interface DeleteUserBucketPayload {
