@@ -6,6 +6,14 @@ input[type='file'] {
   opacity: 0;
 }
 
+.drag-view-visible {
+  @apply visible bg-green-300 bg-opacity-25;
+}
+
+.drag-view-invisible {
+  @apply hidden;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

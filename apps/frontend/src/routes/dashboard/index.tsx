@@ -77,8 +77,9 @@ function Dashboard(): JSX.Element {
 
   return (
     <div className="w-full flex flex-col items-center justify-center p-4">
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
         <select
+          className="truncate max-w-52 sm:max-w-sm"
           onInput={(e) => {
             navigate({
               search: (prev) => ({ ...prev, bucketName: e.currentTarget.value }),

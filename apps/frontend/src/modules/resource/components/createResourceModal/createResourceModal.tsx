@@ -5,6 +5,7 @@ import { type FC, useEffect, useRef, useState } from 'react';
 import { Button } from '../../../../../@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../../../../../@/components/ui/dialog';
 import { FileInput } from '../../../../../@/components/ui/input';
+import { LoadingSpinner } from '../../../../../@/components/ui/loadingSpinner';
 import { useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
 import { useCreateResourcesMutation } from '../../api/user/mutations/createResourceMutation';
 
@@ -32,7 +33,7 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const { mutateAsync } = useCreateResourcesMutation({});
+  const { mutateAsync, isPending } = useCreateResourcesMutation({});
 
   useEffect(() => {
     let dataTransfer: DataTransfer | undefined;
@@ -67,6 +68,8 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
       }
     };
   }, [files]);
+
+  console.log(isPending);
 
   const onUpload = async (): Promise<void> => {
     if (!files) {
@@ -111,46 +114,62 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
     >
       <DialogTrigger asChild>
         <Button>
-          <ArrowUpOnSquareIcon></ArrowUpOnSquareIcon>
-          <span>Upload a resource</span>
+          <ArrowUpOnSquareIcon className="h-8 w-8"></ArrowUpOnSquareIcon>
+          <span>Upload resources</span>
         </Button>
       </DialogTrigger>
-      <DialogContent>
-        <DialogTitle>Add a file to your bucket :)</DialogTitle>
-        <FileInput
-          className="sm:w-full w-full"
-          containerClassName="sm:w-full w-full"
-          ref={fileInputRef}
-          onChange={(event) => {
-            const files = event.target?.files;
+      <DialogContent className="sm:max-w-4xl w-80 sm:w-[50rem] sm:h-[30rem]">
+        <div className="h-full w-full flex flex-col gap-4">
+          <DialogTitle>Add files to your bucket :)</DialogTitle>
+          <FileInput
+            className="sm:w-full w-full"
+            containerClassName="sm:w-full w-full h-80"
+            ref={fileInputRef}
+            onChange={(event) => {
+              const files = event.target?.files;
 
-            if (!files) {
-              return;
-            }
-
-            const validFiles = [];
-
-            for (const file of files) {
-              const isOneOfAllowedFormats = isAllowedFormat(file.type);
-
-              if (isOneOfAllowedFormats) {
-                validFiles.push(file);
+              if (!files) {
+                return;
               }
-            }
 
-            setFiles(validFiles.length > 0 ? validFiles : []);
-          }}
-          accept={'audio/*' + acceptedImageAndVideoFormats}
-          type="file"
-          multiple={true}
-          fileName={fileName}
-        ></FileInput>
-        <Button
-          onClick={onUpload}
-          disabled={files?.length === 0 ?? false}
-        >
-          Upload
-        </Button>
+              const validFiles = [];
+
+              for (const file of files) {
+                const isOneOfAllowedFormats = isAllowedFormat(file.type);
+
+                if (isOneOfAllowedFormats) {
+                  validFiles.push(file);
+                }
+              }
+
+              setFiles(validFiles.length > 0 ? validFiles : []);
+            }}
+            onFilesValueChange={(files) => {
+              const validFiles = [];
+
+              for (const file of files) {
+                const isOneOfAllowedFormats = isAllowedFormat(file.type);
+
+                if (isOneOfAllowedFormats) {
+                  validFiles.push(file);
+                }
+              }
+
+              setFiles(validFiles.length > 0 ? validFiles : []);
+            }}
+            accept={'audio/*' + acceptedImageAndVideoFormats}
+            type="file"
+            multiple={true}
+            fileName={fileName}
+          ></FileInput>
+          <Button
+            onClick={onUpload}
+            disabled={(files?.length === 0 ?? false) || isPending}
+          >
+            {isPending && <LoadingSpinner />}
+            {!isPending && <>Upload</>}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
