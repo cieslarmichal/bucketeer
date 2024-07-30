@@ -100,7 +100,7 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
           result.Contents.map(async (resultEntry) => {
             const { Key, LastModified, Size } = resultEntry;
 
-            const [url, previewUrl, metadataResult] = await Promise.all([
+            const [url, previewUrl, metadataResult, previewMetadataResult] = await Promise.all([
               getSignedUrl(
                 this.s3Client,
                 new GetObjectCommand({
@@ -123,6 +123,12 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
                   Key: Key as string,
                 }),
               ),
+              this.s3Client.send(
+                new HeadObjectCommand({
+                  Bucket: bucketPreviewsName,
+                  Key: Key as string,
+                }),
+              ),
             ]);
 
             return {
@@ -132,7 +138,10 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
               contentSize: Size as number,
               contentType: metadataResult.ContentType as string,
               url,
-              previewUrl,
+              preview: {
+                url: previewUrl,
+                contentType: previewMetadataResult.ContentType as string,
+              },
             };
           }),
         );

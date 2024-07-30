@@ -25,6 +25,8 @@ describe('ResourceBlobServiceImpl', () => {
 
   const bucketName = 'resources';
 
+  const previewsBucketName = 'resources-previews';
+
   beforeEach(async () => {
     container = TestContainer.create();
 
@@ -33,10 +35,14 @@ describe('ResourceBlobServiceImpl', () => {
     s3TestUtils = container.get<S3TestUtils>(testSymbols.s3TestUtils);
 
     await s3TestUtils.createBucket(bucketName);
+
+    await s3TestUtils.createBucket(previewsBucketName);
   });
 
   afterEach(async () => {
     await s3TestUtils.deleteBucket(bucketName);
+
+    await s3TestUtils.deleteBucket(previewsBucketName);
   });
 
   describe('download', () => {
@@ -200,7 +206,19 @@ describe('ResourceBlobServiceImpl', () => {
     it('returns resources metadata with single page', async () => {
       await s3TestUtils.uploadObject(bucketName, sampleFileName1, path.join(resourcesDirectory, sampleFileName1));
 
+      await s3TestUtils.uploadObject(
+        previewsBucketName,
+        sampleFileName1,
+        path.join(resourcesDirectory, sampleFileName1),
+      );
+
       await s3TestUtils.uploadObject(bucketName, sampleFileName2, path.join(resourcesDirectory, sampleFileName2));
+
+      await s3TestUtils.uploadObject(
+        previewsBucketName,
+        sampleFileName2,
+        path.join(resourcesDirectory, sampleFileName2),
+      );
 
       const { items, totalPages } = await resourceBlobService.getResourcesMetadata({
         bucketName,
@@ -228,11 +246,19 @@ describe('ResourceBlobServiceImpl', () => {
 
       await s3TestUtils.uploadObject(bucketName, resourceName1, path.join(resourcesDirectory, sampleFileName1));
 
+      await s3TestUtils.uploadObject(previewsBucketName, resourceName1, path.join(resourcesDirectory, sampleFileName1));
+
       await s3TestUtils.uploadObject(bucketName, resourceName2, path.join(resourcesDirectory, sampleFileName2));
+
+      await s3TestUtils.uploadObject(previewsBucketName, resourceName2, path.join(resourcesDirectory, sampleFileName2));
 
       await s3TestUtils.uploadObject(bucketName, resourceName3, path.join(resourcesDirectory, sampleFileName2));
 
+      await s3TestUtils.uploadObject(previewsBucketName, resourceName3, path.join(resourcesDirectory, sampleFileName2));
+
       await s3TestUtils.uploadObject(bucketName, resourceName4, path.join(resourcesDirectory, sampleFileName2));
+
+      await s3TestUtils.uploadObject(previewsBucketName, resourceName4, path.join(resourcesDirectory, sampleFileName2));
 
       const { items: items1, totalPages: totalPages1 } = await resourceBlobService.getResourcesMetadata({
         bucketName,

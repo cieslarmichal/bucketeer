@@ -366,7 +366,7 @@ export class ResourceHttpController implements HttpController {
       contentSize: resource.contentSize,
       url: resource.url,
       contentType: resource.contentType,
-      previewUrl: resource.previewUrl,
+      preview: resource.preview,
     };
   }
 }

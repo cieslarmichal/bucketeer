@@ -38,6 +38,8 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
 
   const bucketName = 'resources';
 
+  const previewsBucketName = 'resources-previews';
+
   beforeEach(async () => {
     container = TestContainer.create();
 
@@ -56,6 +58,8 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     await userBucketTestUtils.truncate();
 
     await s3TestUtils.createBucket(bucketName);
+
+    await s3TestUtils.createBucket(previewsBucketName);
   });
 
   afterEach(async () => {
@@ -66,6 +70,8 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
     await sqliteDatabaseClient.destroy();
 
     await s3TestUtils.deleteBucket(bucketName);
+
+    await s3TestUtils.deleteBucket(previewsBucketName);
   });
 
   it('throws an error - when user does not exist', async () => {
@@ -120,7 +126,11 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
 
     await s3TestUtils.uploadObject(bucketName, sampleFileName1, path.join(resourcesDirectory, sampleFileName1));
 
+    await s3TestUtils.uploadObject(previewsBucketName, sampleFileName1, path.join(resourcesDirectory, sampleFileName1));
+
     await s3TestUtils.uploadObject(bucketName, sampleFileName2, path.join(resourcesDirectory, sampleFileName2));
+
+    await s3TestUtils.uploadObject(previewsBucketName, sampleFileName2, path.join(resourcesDirectory, sampleFileName2));
 
     const { resourcesMetadata, totalPages } = await queryHandler.execute({
       userId: user.id,
@@ -145,7 +155,10 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
       contentSize: 17839845,
       contentType: 'video/mp4',
       url: expect.any(String),
-      previewUrl: expect.any(String),
+      preview: {
+        url: expect.any(String),
+        contentType: 'video/mp4',
+      },
     });
 
     expect(resourcesMetadata[file2Index]).toEqual({
@@ -155,7 +168,10 @@ describe('FindResourcesMetadataQueryHandlerImpl', () => {
       contentSize: 7735619,
       contentType: 'image/jpeg',
       url: expect.any(String),
-      previewUrl: expect.any(String),
+      preview: {
+        url: expect.any(String),
+        contentType: 'image/jpeg',
+      },
     });
   });
 });

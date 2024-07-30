@@ -19,7 +19,7 @@ import { type FindUserBucketsQueryHandler } from '../../../../userModule/applica
 import { type ResourceBlobService } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
 
 interface VideoInfo {
-  readonly duration: number;
+  readonly duration: number | undefined;
 }
 
 export class UploadResourcesCommandHandlerImpl implements UploadResourcesCommandHandler {
@@ -171,7 +171,7 @@ export class UploadResourcesCommandHandlerImpl implements UploadResourcesCommand
 
     const { duration } = await this.getVideoInfo(videoPath);
 
-    const previewDuration = Math.min(duration, 3);
+    const previewDuration = duration ? Math.min(duration, 3) : 3;
 
     await new Promise(async (resolve, reject) => {
       ffmpeg()
@@ -196,11 +196,13 @@ export class UploadResourcesCommandHandlerImpl implements UploadResourcesCommand
           return reject(error);
         }
 
-        const { duration } = videoInfo.format;
+        const duration = Number(videoInfo.format.duration);
 
-        return resolve({
-          duration: Math.floor(Number(duration)),
-        });
+        if (Number.isNaN(duration)) {
+          return resolve({ duration: undefined });
+        }
+
+        return resolve({ duration: Math.floor(duration) });
       });
     });
   }
