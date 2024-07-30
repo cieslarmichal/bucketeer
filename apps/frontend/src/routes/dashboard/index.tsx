@@ -1,8 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { z } from 'zod';
 
+import { LoadingSpinner } from '../../../@/components/ui/loadingSpinner';
 import { findBucketsQueryOptions } from '../../modules/bucket/api/user/queries/findBuckets/findBucketsQueryOptions';
 import { DataTable } from '../../modules/common/components/dataTable/dataTable';
 import { requireAuth } from '../../modules/core/auth/requireAuth';
@@ -15,7 +16,7 @@ import { imageTableColumns } from '../../modules/resource/components/imageTableC
 
 const searchSchema = z.object({
   page: z.number().default(0),
-  bucketName: z.string().default(''),
+  bucketName: z.string().optional(),
 });
 
 export const Route = createFileRoute('/dashboard/')({
@@ -49,11 +50,20 @@ function Dashboard(): JSX.Element {
   const { data: resourcesData, isFetched: isResourcesFetched } = useQuery({
     ...findBucketResourcesQueryOptions({
       accessToken: accessToken as string,
-      bucketName,
+      bucketName: bucketName ?? '',
       page,
       pageSize,
     }),
   });
+
+  useEffect(() => {
+    if (!bucketName && isBucketsFetched && (bucketsData?.data?.length ?? 0) > 0) {
+      navigate({
+        search: (prev) => ({ ...prev, bucketName: bucketsData?.data[0].name ?? '' }),
+      });
+    }
+    // eslint-disable-next-line
+  }, [isBucketsFetched, bucketName, bucketsData?.data]);
 
   const pageCount = useMemo(() => {
     return resourcesData?.metadata.totalPages || 1;
@@ -95,9 +105,9 @@ function Dashboard(): JSX.Element {
             </option>
           ))}
         </select>
-        <CreateResourceModal bucketName={bucketName}></CreateResourceModal>
+        <CreateResourceModal bucketName={bucketName ?? ''}></CreateResourceModal>
       </div>
-      {isBucketsFetched && !isResourcesFetched && <div>Loading</div>}
+      {isBucketsFetched && !isResourcesFetched && bucketName && <LoadingSpinner></LoadingSpinner>}
       {isBucketsFetched && isResourcesFetched && (
         <DataTable
           columns={imageTableColumns}

@@ -1,23 +1,17 @@
 import { ArrowUpOnSquareIcon } from '@heroicons/react/20/solid';
-import { useQueryClient } from '@tanstack/react-query';
 import { type FC, useEffect, useRef, useState } from 'react';
 
 import { Button } from '../../../../../@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../../../../../@/components/ui/dialog';
 import { FileInput } from '../../../../../@/components/ui/input';
 import { LoadingSpinner } from '../../../../../@/components/ui/loadingSpinner';
-import { useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
-import { useCreateResourcesMutation } from '../../api/user/mutations/createResourceMutation';
+import { useFileUpload } from '../../composable/useFileUpload/useFileUpload';
 
 interface CreateResourceModalProps {
   bucketName: string;
 }
 
-const MAX_CHUNK_SIZE = 100_000_000; // ~100MB
-
 const MAX_FILE_SIZE = Number(import.meta.env['VITE_MAX_FILE_SIZE']);
-
-const FILE_UPLOAD_TIMEOUT = Number(import.meta.env['VITE_MAX_FILE_UPLOAD_TIMEOUT']);
 
 const acceptedImageAndVideoFormats =
   'audio/,video/quicktime,video/x-msvideo,video/x-ms-wmv,.jpg,.jpeg,.tiff,.webp,.raw,.png,.mp4,.mov,.avi,.mkv,.wmv,.flv,.webm,.mpeg,.mpg,.3gp,.ogg,.ts,.m4v,.m2ts,.vob,.rm,.rmvb,.divx,.asf,.swf,.f4v' as string;
@@ -27,21 +21,19 @@ const allowedFormats = acceptedImageAndVideoFormats.replaceAll('.', '/').split('
 allowedFormats.push('audio/');
 
 export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }) => {
-  const queryClient = useQueryClient();
-
   const [files, setFiles] = useState<File[]>([]);
-
-  const abortController = useRef(new AbortController());
 
   const [fileName, setFileName] = useState('');
 
   const [open, setOpen] = useState(false);
 
-  const accessToken = useUserTokensStore((selector) => selector.accessToken);
+  const { abortController, isUploading, upload } = useFileUpload({
+    files,
+    setFiles,
+    bucketName,
+  });
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const { mutateAsync, isPending } = useCreateResourcesMutation({});
 
   useEffect(() => {
     let dataTransfer: DataTransfer | undefined;
@@ -84,84 +76,7 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
       return;
     }
 
-    let runningTotalSize = 0;
-
-    const filesCount = files.length;
-
-    let filesToSend: File[] = [];
-
-    for (let i = 0; i < filesCount; i += 1) {
-      const fileSize = files[i].size;
-
-      runningTotalSize += fileSize;
-
-      abortController.current.signal.addEventListener('abort', () => {
-        setFiles([]);
-
-        runningTotalSize = 0;
-      });
-
-      if (fileSize > MAX_CHUNK_SIZE) {
-        const timeout = setTimeout(() => {
-          abortController.current.abort();
-        }, FILE_UPLOAD_TIMEOUT);
-
-        await mutateAsync({
-          accessToken: accessToken as string,
-          bucketName,
-          files: [files[i] as File],
-          signal: abortController.current.signal,
-        });
-
-        clearTimeout(timeout);
-
-        continue;
-      }
-
-      filesToSend.push(files[i] as unknown as File);
-
-      if (runningTotalSize >= MAX_CHUNK_SIZE) {
-        const timeout = setTimeout(() => {
-          abortController.current.abort();
-        }, FILE_UPLOAD_TIMEOUT);
-
-        await mutateAsync({
-          accessToken: accessToken as string,
-          bucketName,
-          files: filesToSend,
-          signal: abortController.current.signal,
-        });
-
-        clearTimeout(timeout);
-
-        filesToSend = [];
-
-        runningTotalSize = 0;
-      }
-
-      if (i === files.length - 1) {
-        const timeout = setTimeout(() => {
-          abortController.current.abort();
-        }, FILE_UPLOAD_TIMEOUT);
-
-        await mutateAsync({
-          accessToken: accessToken as string,
-          bucketName,
-          files,
-          signal: abortController.current.signal,
-        });
-
-        clearTimeout(timeout);
-
-        filesToSend = [];
-      }
-    }
-
-    await queryClient.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === 'findBucketResources' && query.queryKey[1] === bucketName,
-    });
-
-    setFiles([]);
+    await upload();
 
     setFileName('');
 
@@ -239,10 +154,10 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
           ></FileInput>
           <Button
             onClick={onUpload}
-            disabled={(files?.length === 0 ?? false) || isPending}
+            disabled={(files?.length === 0 ?? false) || isUploading}
           >
-            {isPending && <LoadingSpinner />}
-            {!isPending && <>Upload</>}
+            {isUploading && <LoadingSpinner />}
+            {!isUploading && <>Upload</>}
           </Button>
         </div>
       </DialogContent>

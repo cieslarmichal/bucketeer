@@ -50,12 +50,6 @@ function RootComponent(): JSX.Element {
           <div className="p-4 flex gap-4 items-center">
             {accessToken ? (
               <>
-                <Link
-                  to="/"
-                  className="[&.active]:font-bold"
-                >
-                  Home
-                </Link>{' '}
                 {userRole === 'admin' && (
                   <Link
                     to="/admin"
@@ -65,13 +59,11 @@ function RootComponent(): JSX.Element {
                   </Link>
                 )}
                 <Link
-                  to="/about"
-                  className="[&.active]:font-bold"
-                >
-                  About
-                </Link>
-                <Link
                   to="/dashboard"
+                  search={{
+                    bucketName: undefined,
+                    page: 1,
+                  }}
                   className="[&.active]:font-bold"
                 >
                   Dashboard

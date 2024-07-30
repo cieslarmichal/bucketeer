@@ -80,7 +80,10 @@ function Login(): JSX.Element {
       CookieService.setUserDataCookie(JSON.stringify(userData.data));
 
       navigate({
-        to: '/',
+        to: '/dashboard',
+        search: {
+          page: 1,
+        },
       });
     } catch (error) {
       if (error instanceof ApiError) {

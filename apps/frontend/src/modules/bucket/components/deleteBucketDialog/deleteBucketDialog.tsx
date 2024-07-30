@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import {
@@ -16,12 +16,15 @@ import { Button } from '../../../../../@/components/ui/button';
 import { useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
 import { useDeleteBucketMutation } from '../../api/admin/mutations/deleteBucketMutation/deleteBucketMutation';
 import { adminFindBucketsQueryOptions } from '../../api/admin/queries/adminFindBuckets/adminFindBucketsQueryOptions';
+import { BucketApiQueryKeys } from '../../api/bucketApiQueryKeys';
 
 interface Props {
   bucketName: string;
 }
 
 export const DeleteBucketDialog = ({ bucketName }: Props): JSX.Element => {
+  const queryClient = useQueryClient();
+
   const accessToken = useUserTokensStore.getState().accessToken;
 
   const [open, onOpenChange] = useState(false);
@@ -31,7 +34,9 @@ export const DeleteBucketDialog = ({ bucketName }: Props): JSX.Element => {
   const { mutateAsync: deleteBucketMutation } = useDeleteBucketMutation({});
 
   const { refetch: refetchBuckets } = useQuery({
-    ...adminFindBucketsQueryOptions(accessToken as string),
+    ...adminFindBucketsQueryOptions({
+      accessToken: accessToken as string,
+    }),
   });
 
   const onDeleteBucket = async (bucketName: string): Promise<void> => {
@@ -43,6 +48,10 @@ export const DeleteBucketDialog = ({ bucketName }: Props): JSX.Element => {
     onOpenChange(false);
 
     refetchBuckets();
+
+    await queryClient.invalidateQueries({
+      predicate: (query) => query.queryKey[0] === BucketApiQueryKeys.adminFindBuckets,
+    });
   };
 
   return (
