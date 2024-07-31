@@ -28,6 +28,10 @@ export const useCreateResourcesMutation = (
     });
 
     if (!response.success) {
+      if (response.body.context && 'reason' in response.body.context) {
+        throw new Error((response.body.context?.reason as string) ?? 'Unknown error');
+      }
+
       throw new Error(response.body.message);
     }
 
