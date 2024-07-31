@@ -7,6 +7,7 @@ import { Button } from '../../../../../@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../../../@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../../../../@/components/ui/form';
 import { Input } from '../../../../../@/components/ui/input';
+import { useToast } from '../../../../../@/components/ui/use-toast';
 import { useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
 import { useCreateBucketMutation } from '../../api/admin/mutations/createBucketMutation/createBucketMutation';
 import { adminFindBucketsQueryOptions } from '../../api/admin/queries/adminFindBuckets/adminFindBucketsQueryOptions';
@@ -30,6 +31,8 @@ interface CreateBucketDialogProps {
 export const CreateBucketDialog = ({ dialogOpen, onOpenChange }: CreateBucketDialogProps): JSX.Element => {
   const accessToken = useUserTokensStore.getState().accessToken;
 
+  const { toast } = useToast();
+
   const queryClient = useQueryClient();
 
   const createBucketForm = useForm({
@@ -49,22 +52,37 @@ export const CreateBucketDialog = ({ dialogOpen, onOpenChange }: CreateBucketDia
   const { mutateAsync: createBucketMutation } = useCreateBucketMutation({});
 
   const onCreateBucket = async (payload: z.infer<typeof createBucketSchema>): Promise<void> => {
-    await createBucketMutation({
-      accessToken: accessToken as string,
-      bucketName: payload.bucketName.toLowerCase(),
-    });
+    try {
+      await createBucketMutation({
+        accessToken: accessToken as string,
+        bucketName: payload.bucketName.toLowerCase(),
+      });
 
-    // todo: add buckets invalidation
+      // todo: add buckets invalidation
 
-    onOpenChange(false);
+      onOpenChange(false);
 
-    createBucketForm.reset();
+      createBucketForm.reset();
 
-    await refetchBuckets();
+      await refetchBuckets();
 
-    await queryClient.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === BucketApiQueryKeys.adminFindBuckets,
-    });
+      await queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[0] === BucketApiQueryKeys.adminFindBuckets,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        toast({
+          title: 'Something went wrong.',
+          description: error.message,
+        });
+      }
+
+      toast({
+        title: 'Something went wrong.',
+      });
+
+      throw error;
+    }
   };
 
   return (

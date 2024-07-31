@@ -16,7 +16,7 @@ export const adminFindBuckets = async (payload: AdminFindBucketsPayload): Promis
     url: `/admin/buckets`,
     queryParams: {
       page: `${(page ?? 0) + 1}`,
-      pageSize: `${pageSize}`,
+      pageSize: `${pageSize || 10}`,
     },
     headers: {
       Authorization: `Bearer ${accessToken}`,

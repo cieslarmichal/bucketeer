@@ -11,6 +11,7 @@ import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../../../@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '../../../../../@/components/ui/form';
 import { DialogPopoverContent, Popover, PopoverTrigger } from '../../../../../@/components/ui/popover';
+import { useToast } from '../../../../../@/components/ui/use-toast';
 import { cn } from '../../../../../@/lib/utils';
 import { BucketApiQueryKeys } from '../../../bucket/api/bucketApiQueryKeys';
 import { useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
@@ -35,6 +36,8 @@ const grantBucketAccessSchema = z.object({
 const GrantAccessButton = ({ name, form, setDialogOpen }: GrantAccessButtonProps): JSX.Element => {
   const accessToken = useUserTokensStore.getState().accessToken;
 
+  const { toast } = useToast();
+
   const queryClient = useQueryClient();
 
   const [bucketName] = useState(name);
@@ -48,11 +51,31 @@ const GrantAccessButton = ({ name, form, setDialogOpen }: GrantAccessButtonProps
       return;
     }
 
-    await grantBucketAccessMutation({
-      accessToken: accessToken as string,
-      bucketName: payload.bucketName,
-      id: payload.userId,
-    });
+    try {
+      await grantBucketAccessMutation({
+        accessToken: accessToken as string,
+        bucketName: payload.bucketName,
+        id: payload.userId,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        toast({
+          title: 'Something went wrong.',
+          description: error.message || 'Unknown error',
+          variant: 'destructive',
+        });
+
+        return;
+      }
+
+      toast({
+        title: 'Something went wrong.',
+        description: 'Unknown error',
+        variant: 'destructive',
+      });
+
+      return;
+    }
 
     setDialogOpen(false);
 

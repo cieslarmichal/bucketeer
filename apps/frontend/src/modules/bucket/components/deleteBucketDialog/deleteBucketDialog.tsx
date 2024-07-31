@@ -13,6 +13,7 @@ import {
   AlertDialogTrigger,
 } from '../../../../../@/components/ui/alert-dialog';
 import { Button } from '../../../../../@/components/ui/button';
+import { useToast } from '../../../../../@/components/ui/use-toast';
 import { useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
 import { useDeleteBucketMutation } from '../../api/admin/mutations/deleteBucketMutation/deleteBucketMutation';
 import { adminFindBucketsQueryOptions } from '../../api/admin/queries/adminFindBuckets/adminFindBucketsQueryOptions';
@@ -23,6 +24,8 @@ interface Props {
 }
 
 export const DeleteBucketDialog = ({ bucketName }: Props): JSX.Element => {
+  const { toast } = useToast();
+
   const queryClient = useQueryClient();
 
   const accessToken = useUserTokensStore.getState().accessToken;
@@ -40,10 +43,22 @@ export const DeleteBucketDialog = ({ bucketName }: Props): JSX.Element => {
   });
 
   const onDeleteBucket = async (bucketName: string): Promise<void> => {
-    await deleteBucketMutation({
-      accessToken: accessToken as string,
-      bucketName,
-    });
+    try {
+      await deleteBucketMutation({
+        accessToken: accessToken as string,
+        bucketName,
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        toast({
+          title: 'Something went wrong',
+          description: error.message,
+          variant: 'destructive',
+        });
+
+        return;
+      }
+    }
 
     onOpenChange(false);
 

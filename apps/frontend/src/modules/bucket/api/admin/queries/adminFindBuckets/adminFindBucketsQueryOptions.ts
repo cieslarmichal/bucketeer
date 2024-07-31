@@ -1,4 +1,4 @@
-import { type UseQueryOptions, queryOptions } from '@tanstack/react-query';
+import { type UseQueryOptions, keepPreviousData, queryOptions } from '@tanstack/react-query';
 
 import { type FindBucketsResponseBody } from '@common/contracts';
 
@@ -11,4 +11,5 @@ export const adminFindBucketsQueryOptions = (
   queryOptions({
     queryKey: [BucketApiQueryKeys.adminFindBuckets],
     queryFn: () => adminFindBuckets(payload),
+    placeholderData: keepPreviousData,
   });
