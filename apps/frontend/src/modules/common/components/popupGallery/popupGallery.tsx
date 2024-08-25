@@ -1,15 +1,35 @@
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/solid';
 import { Eye } from 'lucide-react';
-import { type ReactNode, useDeferredValue, useEffect, useState } from 'react';
+import { type ReactNode, useDeferredValue, useEffect, useMemo, useState } from 'react';
 
-import { Dialog, DialogContent, DialogTrigger } from '../../../../../@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../../../../../@/components/ui/dialog';
 
 import { cn } from '@/lib/utils';
 
-interface ImageProps {
+const VIDEO_FILE_EXTENSIONS = [
+  '.mp4',
+  '.mkv',
+  '.avi',
+  '.mov',
+  '.wmv',
+  '.flv',
+  '.webm',
+  '.m4v',
+  '.mpeg',
+  '.3gp',
+  '.ogv',
+  '.vob',
+  '.rm',
+  '.divx',
+  '.mxf',
+  '.ts',
+  '.f4v',
+  '.mts',
+  '.m2ts',
+];
+
+interface MediaProps {
   source: string;
-  previewImageSrc: string;
-  alt: string;
   hasNext: boolean;
   hasPrevious: boolean;
   onClick: () => void;
@@ -17,9 +37,11 @@ interface ImageProps {
   onPrevious: () => void;
   onClose: () => void;
   className?: string | undefined;
+  previewImageSrc: string;
+  alt: string;
 }
 
-export function Image({
+export const Media = ({
   alt,
   hasNext,
   hasPrevious,
@@ -30,7 +52,7 @@ export function Image({
   source,
   className,
   previewImageSrc,
-}: ImageProps): JSX.Element {
+}: MediaProps): JSX.Element => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -44,6 +66,12 @@ export function Image({
     setOpen(val);
   };
 
+  const isVideoFile = useMemo(() => {
+    return VIDEO_FILE_EXTENSIONS.some((extension) => {
+      return alt.endsWith(extension);
+    });
+  }, [alt]);
+
   return (
     <Dialog
       open={open}
@@ -51,11 +79,21 @@ export function Image({
     >
       <DialogTrigger asChild>
         <div className="w-full h-full relative group">
-          <img
-            alt={alt}
-            src={source}
-            className={cn('cursor-pointer w-full h-full object-cover aspect-square', className)}
-          />
+          {isVideoFile && (
+            <video className="h-20 w-20">
+              <source
+                src={source}
+                type="video/webm"
+              />
+            </video>
+          )}
+          {!isVideoFile && (
+            <img
+              alt={alt}
+              src={source}
+              className={cn('cursor-pointer w-full h-full object-cover aspect-square', className)}
+            />
+          )}
           <div
             onClick={onClick}
             className="flex justify-center items-center absolute cursor-pointer opacity-0 group-hover:opacity-100 w-full h-full object-fill bg-gray-500/50 inset-0"
@@ -68,19 +106,33 @@ export function Image({
         excludeCloseIcon={true}
         className="p-0 m-0 border-none sm:max-w-4xl "
       >
+        <DialogTitle className="hidden">Image container</DialogTitle>
         <div className="relative">
-          <img
-            alt={alt}
-            src={previewImageSrc}
-            className="w-full h-[80vh] object-cover"
-          />
-          <div className="absolute top-0 left-0 w-full h-full z-10">
+          {isVideoFile && (
+            <video
+              className="w-full h-full"
+              controls
+            >
+              <source
+                src={source}
+                type="video/webm"
+              />
+            </video>
+          )}
+          {!isVideoFile && (
+            <img
+              alt={alt}
+              src={previewImageSrc}
+              className="w-full h-[80vh] object-contain"
+            />
+          )}
+          <div className="absolute top-0 left-0 w-full h-full z-10 pointer-events-none">
             <div className="flex h-full w-full z-10">
               <div className="flex justify-start items-center w-full h-full">
                 {hasPrevious && (
                   <ArrowLeftIcon
                     onClick={onPrevious}
-                    className="cursor-pointer w-20 h-20 text-primary-foreground"
+                    className="opacity-0 hover:opacity-100 cursor-pointer w-20 h-20 text-primary pointer-events-auto"
                   />
                 )}
               </div>
@@ -88,7 +140,7 @@ export function Image({
                 {hasNext && (
                   <ArrowRightIcon
                     onClick={onNext}
-                    className="cursor-pointer w-20 h-20 text-primary-foreground"
+                    className="opacity-0 hover:opacity-100 cursor-pointer w-20 h-20 text-primary pointer-events-auto"
                   />
                 )}
               </div>
@@ -98,7 +150,7 @@ export function Image({
       </DialogContent>
     </Dialog>
   );
-}
+};
 
 export interface PreviewableResource {
   url: string;
@@ -120,10 +172,10 @@ export function PopupGallery({
 
   return (
     <div className="h-20 w-20">
-      <Image
-        source={resources[originalPreviewResourceIndex].url}
-        alt={resources[originalPreviewResourceIndex].name}
-        onClick={() => console.log('clicked')}
+      <Media
+        source={resources[previewResourceIndex].url}
+        alt={resources[previewResourceIndex].name}
+        onClick={() => {}}
         onPrevious={() => setPreviewResourceIndex(previewResourceIndex - 1)}
         onNext={() => setPreviewResourceIndex(previewResourceIndex + 1)}
         previewImageSrc={resources[deferredIndex].url ?? ''}

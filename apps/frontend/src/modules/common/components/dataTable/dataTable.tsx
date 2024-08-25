@@ -36,7 +36,7 @@ interface DataTableProps<TData, TValue> {
   includeColumnsSelector?: boolean;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends object, TValue>({
   columns,
   data,
   pageIndex,
@@ -85,6 +85,13 @@ export function DataTable<TData, TValue>({
       ...state,
     },
     rowCount,
+    getRowId: (originalRow, index) => {
+      if ('id' in originalRow && typeof originalRow.id === 'string') {
+        return originalRow.id;
+      }
+
+      return index.toString();
+    },
   });
 
   return (
