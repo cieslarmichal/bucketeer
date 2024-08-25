@@ -8,6 +8,7 @@ import { useCreateResourcesMutation } from '../../api/user/mutations/createResou
 interface UseFileUploadPayload {
   files: File[];
   setFiles: (files: File[]) => void;
+  onUploaded: () => void;
   bucketName: string;
 }
 
@@ -19,18 +20,25 @@ interface UseFileUploadReturn {
 
 const MAX_CHUNK_SIZE = 100_000_000; // ~100MB
 
-const FILE_UPLOAD_TIMEOUT = Number(import.meta.env['VITE_MAX_FILE_UPLOAD_TIMEOUT']);
+const parsedFileUpload = Number(import.meta.env['VITE_MAX_FILE_UPLOAD_TIMEOUT']);
 
-export const useFileUpload = ({ files, bucketName, setFiles }: UseFileUploadPayload): UseFileUploadReturn => {
+const FILE_UPLOAD_TIMEOUT = Number.isNaN(parsedFileUpload) ? 18 * 1000 : parsedFileUpload;
+
+export const useFileUpload = ({
+  files,
+  bucketName,
+  setFiles,
+  onUploaded,
+}: UseFileUploadPayload): UseFileUploadReturn => {
   const queryClient = useQueryClient();
+
+  const accessToken = useUserTokensStore((selector) => selector.accessToken);
 
   const abortController = useRef(new AbortController());
 
   const { toast } = useToast();
 
   const { mutateAsync, isPending: isUploading } = useCreateResourcesMutation({});
-
-  const accessToken = useUserTokensStore((selector) => selector.accessToken);
 
   const upload = async (): Promise<void> => {
     let runningTotalSize = 0;
@@ -124,6 +132,8 @@ export const useFileUpload = ({ files, bucketName, setFiles }: UseFileUploadPayl
         variant: 'destructive',
       });
     }
+
+    onUploaded();
 
     await queryClient.invalidateQueries({
       predicate: (query) => query.queryKey[0] === 'findBucketResources' && query.queryKey[1] === bucketName,

@@ -31,6 +31,11 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
     files,
     setFiles,
     bucketName,
+    onUploaded: () => {
+      setOpen(false);
+
+      setFileName('');
+    },
   });
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -77,10 +82,6 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
     }
 
     await upload();
-
-    setFileName('');
-
-    setOpen(false);
   };
 
   const isAllowedFormat = (type: string): boolean => {
