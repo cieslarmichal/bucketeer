@@ -76,10 +76,12 @@ export const imageTableColumns: ColumnDef<Resource>[] = [
       const rowModel = table.getRowModel();
 
       return (
-        <PopupGallery
-          previewResourceIndex={row.index}
-          resources={rowModel.rows.map((row) => row.original)}
-        />
+        <div className="w-full flex items-center justify-center">
+          <PopupGallery
+            previewResourceIndex={row.index}
+            resources={rowModel.rows.map((row) => row.original)}
+          />
+        </div>
       );
     },
   },
