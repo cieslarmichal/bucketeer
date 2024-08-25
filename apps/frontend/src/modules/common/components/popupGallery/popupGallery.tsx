@@ -38,6 +38,7 @@ interface MediaProps {
   onClose: () => void;
   className?: string | undefined;
   previewImageSrc: string;
+  previewVideoSrc?: string;
   alt: string;
 }
 
@@ -52,6 +53,7 @@ export const Media = ({
   source,
   className,
   previewImageSrc,
+  previewVideoSrc,
 }: MediaProps): JSX.Element => {
   const [open, setOpen] = useState(false);
 
@@ -78,40 +80,57 @@ export const Media = ({
       onOpenChange={onOpenChange}
     >
       <DialogTrigger asChild>
-        <div className="w-full h-full relative group">
+        <div className="relative group">
           {isVideoFile && (
-            <video className="h-20 w-20">
-              <source
-                src={source}
-                type="video/webm"
-              />
-            </video>
+            <div className="flex items-center justify-center">
+              <video
+                autoPlay
+                loop
+                muted
+                className="w-40 h-40 object-contain"
+              >
+                <source
+                  src={previewVideoSrc}
+                  type="video/webm"
+                />
+              </video>
+              <div
+                onClick={onClick}
+                className="flex justify-center items-center absolute cursor-pointer opacity-0 group-hover:opacity-100 w-full h-full object-fill bg-gray-500/50 inset-0"
+              >
+                <Eye className="absolute opacity-0 group-hover:opacity-100" />
+              </div>
+            </div>
           )}
           {!isVideoFile && (
-            <img
-              alt={alt}
-              src={source}
-              className={cn('cursor-pointer w-full h-full object-cover aspect-square', className)}
-            />
+            <div className="w-40 h-40">
+              <img
+                alt={alt}
+                src={source}
+                className={cn('cursor-pointer w-full h-full object-cover aspect-square', className)}
+              />
+              <div
+                onClick={onClick}
+                className="flex justify-center items-center absolute cursor-pointer opacity-0 group-hover:opacity-100 w-40 h-40 object-fill bg-gray-500/50 inset-0"
+              >
+                <Eye className="absolute opacity-0 group-hover:opacity-100" />
+              </div>
+            </div>
           )}
-          <div
-            onClick={onClick}
-            className="flex justify-center items-center absolute cursor-pointer opacity-0 group-hover:opacity-100 w-full h-full object-fill bg-gray-500/50 inset-0"
-          >
-            <Eye className="absolute opacity-0 group-hover:opacity-100" />
-          </div>
         </div>
       </DialogTrigger>
       <DialogContent
         excludeCloseIcon={true}
-        className="p-0 m-0 border-none sm:max-w-4xl "
+        className="p-0 m-0 border-none sm:max-w-4xl"
       >
-        <DialogTitle className="hidden">Image container</DialogTitle>
-        <div className="relative">
+        <DialogTitle className="hidden">Media container</DialogTitle>
+        <div className="relative w-full flex items-center justify-center">
           {isVideoFile && (
             <video
-              className="w-full h-full"
+              className="max-h-[80vh]"
               controls
+              muted
+              autoPlay
             >
               <source
                 src={source}
@@ -123,7 +142,7 @@ export const Media = ({
             <img
               alt={alt}
               src={previewImageSrc}
-              className="w-full h-[80vh] object-contain"
+              className="w-full object-contain"
             />
           )}
           <div className="absolute top-0 left-0 w-full h-full z-10 pointer-events-none">
@@ -155,6 +174,10 @@ export const Media = ({
 export interface PreviewableResource {
   url: string;
   name: string;
+  preview?: {
+    url?: string;
+    contentType?: string;
+  };
 }
 
 interface PopupGalleryProps {
@@ -171,18 +194,17 @@ export function PopupGallery({
   const deferredIndex = useDeferredValue(previewResourceIndex);
 
   return (
-    <div className="h-20 w-20">
-      <Media
-        source={resources[previewResourceIndex].url}
-        alt={resources[previewResourceIndex].name}
-        onClick={() => {}}
-        onPrevious={() => setPreviewResourceIndex(previewResourceIndex - 1)}
-        onNext={() => setPreviewResourceIndex(previewResourceIndex + 1)}
-        previewImageSrc={resources[deferredIndex].url ?? ''}
-        hasPrevious={previewResourceIndex - 1 >= 0}
-        hasNext={resources.length > previewResourceIndex + 1}
-        onClose={() => setPreviewResourceIndex(originalPreviewResourceIndex)}
-      />
-    </div>
+    <Media
+      source={resources[previewResourceIndex].url}
+      alt={resources[previewResourceIndex].name}
+      onClick={() => {}}
+      onPrevious={() => setPreviewResourceIndex(previewResourceIndex - 1)}
+      onNext={() => setPreviewResourceIndex(previewResourceIndex + 1)}
+      previewImageSrc={resources[deferredIndex].url ?? ''}
+      previewVideoSrc={resources[deferredIndex].preview?.url}
+      hasPrevious={previewResourceIndex - 1 >= 0}
+      hasNext={resources.length > previewResourceIndex + 1}
+      onClose={() => setPreviewResourceIndex(originalPreviewResourceIndex)}
+    />
   );
 }
