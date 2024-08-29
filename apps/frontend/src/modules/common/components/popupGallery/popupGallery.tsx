@@ -1,6 +1,6 @@
 import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/react/24/solid';
 import { Eye } from 'lucide-react';
-import { type ReactNode, useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { type FC, type ReactNode, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../../../../../@/components/ui/dialog';
 
@@ -42,6 +42,52 @@ interface MediaProps {
   alt: string;
 }
 
+interface MiniatureVideoProps {
+  previewVideoSrc: string | undefined;
+  onClick: () => void;
+}
+
+const MiniatureVideo: FC<MiniatureVideoProps> = ({ previewVideoSrc, onClick }) => {
+  const videoRef = useRef<HTMLVideoElement>();
+
+  const eyeRef = useRef<HTMLDivElement>();
+
+  useEffect(() => {
+    if (!videoRef.current || !eyeRef.current) {
+      return;
+    }
+
+    eyeRef.current.onmouseover = async (): Promise<void> => videoRef.current?.play();
+
+    eyeRef.current.onmouseleave = async (): Promise<void> => videoRef.current?.pause();
+  });
+
+  return (
+    <div className="flex items-center justify-center">
+      <video
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ref={videoRef as any}
+        loop
+        muted
+        className="w-40 h-40 object-contain"
+      >
+        <source
+          src={previewVideoSrc}
+          type="video/webm"
+        />
+      </video>
+      <div
+        onClick={onClick}
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ref={eyeRef as any}
+        className="flex justify-center items-center absolute cursor-pointer opacity-0 group-hover:opacity-100 w-full h-full object-fill bg-gray-500/10 inset-0"
+      >
+        <Eye className="absolute opacity-0 group-hover:opacity-100" />
+      </div>
+    </div>
+  );
+};
+
 export const Media = ({
   alt,
   hasNext,
@@ -82,25 +128,10 @@ export const Media = ({
       <DialogTrigger asChild>
         <div className="relative group">
           {isVideoFile && (
-            <div className="flex items-center justify-center">
-              <video
-                autoPlay
-                loop
-                muted
-                className="w-40 h-40 object-contain"
-              >
-                <source
-                  src={previewVideoSrc}
-                  type="video/webm"
-                />
-              </video>
-              <div
-                onClick={onClick}
-                className="flex justify-center items-center absolute cursor-pointer opacity-0 group-hover:opacity-100 w-full h-full object-fill bg-gray-500/50 inset-0"
-              >
-                <Eye className="absolute opacity-0 group-hover:opacity-100" />
-              </div>
-            </div>
+            <MiniatureVideo
+              previewVideoSrc={previewVideoSrc}
+              onClick={onClick}
+            />
           )}
           {!isVideoFile && (
             <div className="w-40 h-40">
