@@ -19,10 +19,10 @@ const RowsContext = createContext<DefaultValues>(defaultValues);
 const RowsDispatchContext = createContext(null as unknown as Dispatch<RowAction>);
 
 export function RowsProvider({ children }: { children: ReactNode }): JSX.Element {
-  const [breadcrumbKeys, dispatch] = useReducer(rowsReducer, defaultValues);
+  const [rowValues, dispatch] = useReducer(rowsReducer, defaultValues);
 
   return (
-    <RowsContext.Provider value={breadcrumbKeys}>
+    <RowsContext.Provider value={rowValues}>
       <RowsDispatchContext.Provider value={dispatch}>{children}</RowsDispatchContext.Provider>
     </RowsContext.Provider>
   );
