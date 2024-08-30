@@ -10,9 +10,11 @@ import {
   type VisibilityState,
   getFilteredRowModel,
   type TableState,
+  type Row,
 } from '@tanstack/react-table';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { RowsProvider, useRowsDispatch } from './rowsContext';
 import { Input } from '../../../../../@/components/ui/input';
 
 import { Button } from '@/components/ui/button';
@@ -36,6 +38,84 @@ interface DataTableProps<TData, TValue> {
   includeColumnsSelector?: boolean;
 }
 
+interface EnhancedTableRowProps {
+  row: Row<unknown>;
+}
+
+function EnhancedTableRow({ row }: EnhancedTableRowProps): JSX.Element {
+  const rowRef = useRef<HTMLTableRowElement | null>(null);
+
+  const dispatch = useRowsDispatch();
+
+  useEffect(() => {
+    let isTouched = false;
+
+    const handleFocus = (): void => {
+      if (!isTouched) {
+        dispatch({
+          focusedRow: row.index
+        });
+      }
+    };
+    const handleBlur = (): void => {
+      if (!isTouched) {
+        dispatch({
+          focusedRow: null
+        });
+      }
+    };
+
+    const handleTouchStart = (): void => {
+      isTouched = true;
+      dispatch({
+        focusedRow: row.index
+      });
+    };
+    const handleTouchEnd = (): void => {
+      setTimeout(() => {
+        isTouched = false;
+      }, 300);
+    };
+
+    const rowElement = rowRef.current;
+
+    if (rowElement) {
+      rowElement.addEventListener('focus', handleFocus);
+      rowElement.addEventListener('blur', handleBlur);
+      rowElement.addEventListener('touchstart', handleTouchStart);
+      rowElement.addEventListener('touchend', handleTouchEnd);
+      rowElement.addEventListener('click', handleFocus);
+    }
+
+    return (): void => {
+      if (rowElement) {
+        rowElement.removeEventListener('focus', handleFocus);
+        rowElement.removeEventListener('blur', handleBlur);
+        rowElement.removeEventListener('touchstart', handleTouchStart);
+        rowElement.removeEventListener('touchend', handleTouchEnd);
+        rowElement.removeEventListener('click', handleFocus);
+      }
+    };
+  }, [dispatch]);
+
+  return (
+    <TableRow
+      ref={rowRef}
+      key={row.id}
+      data-state={row.getIsSelected() && 'selected'}
+    >
+      {row.getVisibleCells().map((cell) => (
+        <TableCell
+          className="h-20"
+          key={cell.id}
+        >
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </TableCell>
+      ))}
+    </TableRow>
+  );
+}
+
 export function DataTable<TData extends object, TValue>({
   columns,
   data,
@@ -48,11 +128,8 @@ export function DataTable<TData extends object, TValue>({
   includeColumnsSelector = false,
 }: DataTableProps<TData, TValue>): JSX.Element {
   const [sorting, setSorting] = useState<SortingState>([]);
-
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-
   const state: Partial<TableState> = {
     sorting,
     columnFilters,
@@ -155,32 +232,25 @@ export function DataTable<TData extends object, TValue>({
             ))}
           </TableHeader>
           <TableBody>
+            <RowsProvider>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      className="h-20"
-                      key={cell.id}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
+                  <EnhancedTableRow
+                    key={`${row.id}-wrapper`}
+                    row={row}
+                  />
+                ))
+              ) : (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
-                >
+                  >
                   No results.
                 </TableCell>
               </TableRow>
             )}
+            </RowsProvider>
           </TableBody>
         </Table>
       </div>

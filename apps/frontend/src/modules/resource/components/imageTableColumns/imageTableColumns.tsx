@@ -17,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useRowsContext } from '../../../common/components/dataTable/rowsContext';
 
 interface HeaderProps {
   className?: string | undefined;
@@ -74,12 +75,14 @@ export const imageTableColumns: ColumnDef<Resource>[] = [
     accessorKey: 'url',
     cell: ({ row, table }): JSX.Element => {
       const rowModel = table.getRowModel();
+      const rowContext = useRowsContext();
 
       return (
         <div className="w-full flex items-center justify-center">
           <PopupGallery
             previewResourceIndex={row.index}
             resources={rowModel.rows.map((row) => row.original)}
+            isFocused={rowContext.focusedRow === row.index}
           />
         </div>
       );
