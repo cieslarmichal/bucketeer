@@ -40,33 +40,55 @@ interface MediaProps {
   previewImageSrc: string;
   previewVideoSrc?: string;
   alt: string;
+  isFocused: boolean;
 }
 
 interface MiniatureVideoProps {
   previewVideoSrc: string | undefined;
   onClick: () => void;
+  isFocused?: boolean;
 }
 
-const MiniatureVideo: FC<MiniatureVideoProps> = ({ previewVideoSrc, onClick }) => {
-  const videoRef = useRef<HTMLVideoElement>();
-
-  const eyeRef = useRef<HTMLDivElement>();
+const MiniatureVideo: FC<MiniatureVideoProps> = ({ previewVideoSrc, isFocused, onClick }) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const eyeRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!videoRef.current || !eyeRef.current) {
       return;
     }
 
-    eyeRef.current.onmouseover = async (): Promise<void> => videoRef.current?.play();
+    const onMouseOver = async (): Promise<void> => videoRef.current?.play();
+    const onMouseLeave = async (): Promise<void> => videoRef.current?.pause();
 
-    eyeRef.current.onmouseleave = async (): Promise<void> => videoRef.current?.pause();
-  });
+    const videoRefInternal = videoRef.current;
+
+    if (isFocused) {
+      videoRefInternal.play();
+    } else if (!isFocused) {
+      videoRefInternal.pause();
+    }
+
+    const eyeRefInternal = eyeRef.current;
+
+    eyeRefInternal.addEventListener
+    eyeRefInternal.addEventListener("onmouseover", onMouseOver);
+    eyeRefInternal.addEventListener("onmouseleave", onMouseLeave);
+
+    return (): void => {
+      if (!videoRefInternal || !eyeRefInternal) {
+        return;
+      }
+
+      eyeRefInternal.removeEventListener("onmouseover", onMouseOver)
+      eyeRefInternal.removeEventListener("onmouseleave", onMouseLeave)
+    };
+  }, [isFocused]);
 
   return (
     <div className="flex items-center justify-center">
       <video
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ref={videoRef as any}
+        ref={videoRef}
         loop
         muted
         className="w-40 h-40 object-contain"
@@ -78,8 +100,7 @@ const MiniatureVideo: FC<MiniatureVideoProps> = ({ previewVideoSrc, onClick }) =
       </video>
       <div
         onClick={onClick}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ref={eyeRef as any}
+        ref={eyeRef}
         className="flex justify-center items-center absolute cursor-pointer opacity-0 group-hover:opacity-100 w-full h-full object-fill bg-gray-500/10 inset-0"
       >
         <Eye className="absolute opacity-0 group-hover:opacity-100" />
@@ -96,6 +117,7 @@ export const Media = ({
   onNext,
   onPrevious,
   onClose,
+  isFocused,
   source,
   className,
   previewImageSrc,
@@ -131,6 +153,7 @@ export const Media = ({
             <MiniatureVideo
               previewVideoSrc={previewVideoSrc}
               onClick={onClick}
+              isFocused={isFocused}
             />
           )}
           {!isVideoFile && (
@@ -214,10 +237,12 @@ export interface PreviewableResource {
 interface PopupGalleryProps {
   previewResourceIndex: number;
   resources: PreviewableResource[];
+  isFocused: boolean;
 }
 
 export function PopupGallery({
   resources,
+  isFocused,
   previewResourceIndex: originalPreviewResourceIndex,
 }: PopupGalleryProps): ReactNode {
   const [previewResourceIndex, setPreviewResourceIndex] = useState(originalPreviewResourceIndex);
@@ -236,6 +261,7 @@ export function PopupGallery({
       hasPrevious={previewResourceIndex - 1 >= 0}
       hasNext={resources.length > previewResourceIndex + 1}
       onClose={() => setPreviewResourceIndex(originalPreviewResourceIndex)}
+      isFocused={isFocused}
     />
   );
 }
