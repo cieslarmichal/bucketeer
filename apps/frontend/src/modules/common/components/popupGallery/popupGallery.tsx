@@ -71,7 +71,6 @@ const MiniatureVideo: FC<MiniatureVideoProps> = ({ previewVideoSrc, isFocused, o
 
     const eyeRefInternal = eyeRef.current;
 
-    eyeRefInternal.addEventListener
     eyeRefInternal.addEventListener("onmouseover", onMouseOver);
     eyeRefInternal.addEventListener("onmouseleave", onMouseLeave);
 
