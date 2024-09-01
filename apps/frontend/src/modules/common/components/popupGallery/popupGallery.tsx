@@ -52,35 +52,42 @@ interface MiniatureVideoProps {
 const MiniatureVideo: FC<MiniatureVideoProps> = ({ previewVideoSrc, isFocused, onClick }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const eyeRef = useRef<HTMLDivElement | null>(null);
+  const [hovering, setHovering] = useState(false);
 
   useEffect(() => {
     if (!videoRef.current || !eyeRef.current) {
       return;
     }
 
-    const onMouseOver = async (): Promise<void> => videoRef.current?.play();
-    const onMouseLeave = async (): Promise<void> => videoRef.current?.pause();
-
     const videoRefInternal = videoRef.current;
+
+    const onMouseOver = async (): Promise<void> => {
+      setHovering(true);
+      return videoRefInternal.play();
+    };
+    const onMouseLeave = async (): Promise<void> => {
+      setHovering(false);
+      return videoRefInternal.pause();
+    };
 
     if (isFocused) {
       videoRefInternal.play();
-    } else if (!isFocused) {
+    } else if (!isFocused && !hovering) {
       videoRefInternal.pause();
     }
 
     const eyeRefInternal = eyeRef.current;
 
-    eyeRefInternal.addEventListener("onmouseover", onMouseOver);
-    eyeRefInternal.addEventListener("onmouseleave", onMouseLeave);
+    eyeRefInternal.addEventListener("mouseover", onMouseOver);
+    eyeRefInternal.addEventListener("mouseleave", onMouseLeave);
 
     return (): void => {
       if (!videoRefInternal || !eyeRefInternal) {
         return;
       }
 
-      eyeRefInternal.removeEventListener("onmouseover", onMouseOver)
-      eyeRefInternal.removeEventListener("onmouseleave", onMouseLeave)
+      eyeRefInternal.removeEventListener("mouseover", onMouseOver)
+      eyeRefInternal.removeEventListener("mouseleave", onMouseLeave)
     };
   }, [isFocused]);
 
