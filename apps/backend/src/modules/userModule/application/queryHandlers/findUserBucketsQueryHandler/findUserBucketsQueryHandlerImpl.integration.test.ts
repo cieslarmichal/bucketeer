@@ -21,7 +21,7 @@ describe('FindUserBucketsQueryHandler', () => {
 
   let s3TestUtils: S3TestUtils;
 
-  const bucketName = 'bucketName';
+  const bucketName = 'existing-bucket-name';
 
   beforeEach(async () => {
     const container = TestContainer.create();
@@ -56,14 +56,14 @@ describe('FindUserBucketsQueryHandler', () => {
   it('returns no buckets when UserBucket exists but bucket does not exist in S3', async () => {
     const user = await userTestUtils.createAndPersist();
 
-    const userBucket = await userBucketTestUtils.createAndPersist({ input: { userId: user.id } });
+    await userBucketTestUtils.createAndPersist({ input: { userId: user.id } });
 
     const { buckets } = await findUserBucketsQueryHandler.execute({ userId: user.id });
 
-    expect(buckets).toEqual([{ name: userBucket.bucketName }]);
+    expect(buckets).toEqual([]);
   });
 
-  it('returns UserBucket when UserBucket exists and bucketalso exists in S3', async () => {
+  it('returns UserBucket when UserBucket exists and bucket also exists in S3', async () => {
     const user = await userTestUtils.createAndPersist();
 
     const userBucket = await userBucketTestUtils.createAndPersist({

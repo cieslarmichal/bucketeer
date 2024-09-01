@@ -11,7 +11,9 @@ interface CreateResourceModalProps {
   bucketName: string;
 }
 
-const MAX_FILE_SIZE = Number(import.meta.env['VITE_MAX_FILE_SIZE']);
+const DEFAULT_MAX_FILE_SIZE = 3865470566;
+
+const MAX_FILE_SIZE = Number(import.meta.env['VITE_MAX_FILE_SIZE']) || DEFAULT_MAX_FILE_SIZE;
 
 const acceptedImageAndVideoFormats =
   'audio/,video/quicktime,video/x-msvideo,video/x-ms-wmv,.jpg,.jpeg,.tiff,.webp,.raw,.png,.mp4,.mov,.avi,.mkv,.wmv,.flv,.webm,.mpeg,.mpg,.3gp,.ogg,.ts,.m4v,.m2ts,.vob,.rm,.rmvb,.divx,.asf,.swf,.f4v' as string;
