@@ -43,6 +43,7 @@ import { coreSymbols } from '../../core/symbols.js';
 import { type DependencyInjectionContainer } from '../../libs/dependencyInjection/dependencyInjectionContainer.js';
 import { type DependencyInjectionModule } from '../../libs/dependencyInjection/dependencyInjectionModule.js';
 import { type LoggerService } from '../../libs/logger/services/loggerService/loggerService.js';
+import { type S3Client } from '../../libs/s3/clients/s3Client/s3Client.js';
 import { type UuidService } from '../../libs/uuid/services/uuidService/uuidService.js';
 import { type AccessControlService } from '../authModule/application/services/accessControlService/accessControlService.js';
 import { type TokenService } from '../authModule/application/services/tokenService/tokenService.js';
@@ -189,7 +190,11 @@ export class UserModule implements DependencyInjectionModule {
 
     container.bind<FindUserBucketsQueryHandler>(
       symbols.findUserBucketsQueryHandler,
-      () => new FindUserBucketsQueryHandlerImpl(container.get<UserBucketRepository>(symbols.userBucketRepository)),
+      () =>
+        new FindUserBucketsQueryHandlerImpl(
+          container.get<UserBucketRepository>(symbols.userBucketRepository),
+          container.get<S3Client>(coreSymbols.s3Client),
+        ),
     );
 
     container.bind<UserHttpController>(

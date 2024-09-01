@@ -5,6 +5,7 @@ import {
   type FindResourcesMetadataQueryHandlerPayload,
   type FindResourcesMetadataQueryHandlerResult,
 } from './findResourcesMetadataQueryHandler.js';
+import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type LoggerService } from '../../../../../libs/logger/services/loggerService/loggerService.js';
 import { ForbiddenAccessError } from '../../../../authModule/application/errors/forbiddenAccessError.js';
 import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
@@ -30,6 +31,16 @@ export class FindResourcesMetadataQueryHandlerImpl implements FindResourcesMetad
         userId,
         bucketName,
         userBuckets: buckets,
+      });
+    }
+
+    const bucketExists = await this.resourceBlobSerice.bucketExists({ bucketName });
+
+    if (!bucketExists) {
+      throw new OperationNotValidError({
+        reason: 'Bucket does not exist.',
+        userId,
+        bucketName,
       });
     }
 
