@@ -13,6 +13,10 @@ import { useUserTokensStore } from '../../modules/core/stores/userTokens/userTok
 import { findBucketResourcesQueryOptions } from '../../modules/resource/api/user/queries/findBucketResources/findBucketResourcesQueryOptions';
 import { CreateResourceModal } from '../../modules/resource/components/createResourceModal/createResourceModal';
 import { imageTableColumns } from '../../modules/resource/components/imageTableColumns/imageTableColumns';
+import { Button } from '../../../@/components/ui/button';
+import { useDownloadResourcesMutation } from '../../modules/resource/api/user/mutations/downloadResourcesMutation';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/solid';
+import { useResourceDownload } from '../../modules/resource/hooks/useResourceDownload';
 
 const searchSchema = z.object({
   page: z.number().default(0),
@@ -31,22 +35,23 @@ export const Route = createFileRoute('/dashboard/')({
 
 function Dashboard(): JSX.Element {
   const accessToken = useUserTokensStore((state) => state.accessToken);
-
   const { bucketName, page } = Route.useSearch({});
+  const userId = useUserStore((state) => state.user.id);
+
+  const { download } = useResourceDownload();
 
   const navigate = useNavigate();
 
-  const userId = useUserStore((state) => state.user.id);
+  const { mutateAsync: downloadAll, isPending: isDownloading } = useDownloadResourcesMutation({});
 
   const bucketsQuery = findBucketsQueryOptions({
     accessToken: accessToken as string,
     userId: userId as string,
   });
-
-  const { data: bucketsData, isFetched: isBucketsFetched } = useQuery(bucketsQuery);
-
+  
   const [pageSize] = useState(10);
 
+  const { data: bucketsData, isFetched: isBucketsFetched } = useQuery(bucketsQuery);
   const { data: resourcesData, isFetched: isResourcesFetched } = useQuery({
     ...findBucketResourcesQueryOptions({
       accessToken: accessToken as string,
@@ -74,7 +79,6 @@ function Dashboard(): JSX.Element {
       search: (prev) => ({ ...prev, page: page + 1 }),
     });
   };
-
   const onPreviousPage = (): void => {
     navigate({
       search: (prev) => ({ ...prev, page: page - 1 }),
@@ -83,6 +87,21 @@ function Dashboard(): JSX.Element {
 
   if (!isBucketsFetched) {
     return <div>Loading ...</div>;
+  }
+
+  const onDownloadAll = async () => {
+    const ids = resourcesData?.data.map((r) => r.id);
+
+    const response = await downloadAll({
+      accessToken: accessToken as string,
+      bucketName: bucketName ?? '',
+      ids,
+    })
+
+    download({
+      name: "resources.zip",
+      src: response,
+    })
   }
 
   return (
@@ -106,6 +125,18 @@ function Dashboard(): JSX.Element {
           ))}
         </select>
         <CreateResourceModal bucketName={bucketName ?? ''}></CreateResourceModal>
+        <Button 
+          className='w-40'
+          disabled={isDownloading}
+          onClick={onDownloadAll}>
+            {isDownloading && <LoadingSpinner size={20} />}
+            {!isDownloading && 
+              <div className='flex gap-2 items-center justify-center'>
+                <ArrowDownTrayIcon className='w-8 h-8' />
+                <span>Download All</span>
+              </div>
+            }
+        </Button>
       </div>
       {isBucketsFetched && !isResourcesFetched && bucketName && <LoadingSpinner></LoadingSpinner>}
       {isBucketsFetched && isResourcesFetched && (

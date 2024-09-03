@@ -2,11 +2,11 @@ import { type FC } from 'react';
 
 import { cn } from '../../lib/utils';
 
-export const LoadingSpinner: FC<{ className?: string }> = ({ className }) => (
+export const LoadingSpinner: FC<{ className?: string; size?: number; }> = ({ className, size = 24 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"

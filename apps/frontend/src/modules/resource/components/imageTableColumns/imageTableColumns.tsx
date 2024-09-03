@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useRowsContext } from '../../../common/components/dataTable/rowsContext';
+import { useResourceDownload } from '../../hooks/useResourceDownload';
 
 interface HeaderProps {
   className?: string | undefined;
@@ -113,7 +114,9 @@ export const imageTableColumns: ColumnDef<Resource>[] = [
   {
     header: () => <Header>Actions</Header>,
     accessorKey: 'actions',
-    cell: (): JSX.Element => {
+    cell: ({ row }): JSX.Element => {
+      const { download } = useResourceDownload();
+
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -130,7 +133,10 @@ export const imageTableColumns: ColumnDef<Resource>[] = [
             className="bg-primary-foreground"
           >
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText('Test me up')}>Download</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => download({
+              src: row.original.url,
+              name: row.original.name
+            })}>Download</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Delete</DropdownMenuItem>
             <DropdownMenuItem>Change name</DropdownMenuItem>

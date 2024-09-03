@@ -43,6 +43,7 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
           actualname: encodeURIComponent(resourceName),
         },
         ContentType: contentType,
+        ContentDisposition: `attachment; filename=${resourceName}`,
       },
     });
 
