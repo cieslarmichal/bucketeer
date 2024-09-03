@@ -78,9 +78,7 @@ export class HttpService {
 
   public static async post<T = unknown>(payload: RequestPayload): Promise<HttpResponse<T>> {
     const { url, headers, body, type = 'json', signal } = payload;
-
     let requestBody: unknown;
-
     let contentType = '';
 
     if (type === 'json') {
@@ -95,7 +93,6 @@ export class HttpService {
       }
 
       requestBody = formData;
-
       contentType = '';
     }
 
@@ -114,12 +111,18 @@ export class HttpService {
       signal,
     });
 
-    const responseBodyText = await response.text();
-
     let responseBody = {};
 
+    if (headers && headers['Accept'] === 'application/octet-stream') {
+      responseBody = await response.blob();
+    }
+
     try {
-      responseBody = JSON.parse(responseBodyText);
+      if (headers && !headers['Accept']) {
+        const responseBodyText = await response.text();
+
+        responseBody = JSON.parse(responseBodyText);
+      }
     } catch (error) {
       responseBody = {};
     }
