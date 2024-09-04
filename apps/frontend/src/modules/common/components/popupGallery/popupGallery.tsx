@@ -181,12 +181,13 @@ export const Media = ({
       </DialogTrigger>
       <DialogContent
         excludeCloseIcon={true}
-        className="p-0 m-0 border-none sm:max-w-4xl"
+        className="p-0 m-0 border-none sm:max-w-screen-xl"
       >
         <DialogTitle className="hidden">Media container</DialogTitle>
         <div className="relative w-full flex items-center justify-center">
           {isVideoFile && (
             <video
+              key={alt}
               className="max-h-[80vh]"
               controls
               muted
