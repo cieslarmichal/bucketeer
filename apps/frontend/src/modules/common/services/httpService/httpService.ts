@@ -120,7 +120,9 @@ export class HttpService {
     try {
       if (headers && !headers['Accept']) {
         const responseBodyText = await response.text();
-
+        responseBody = JSON.parse(responseBodyText);
+      } else if (!headers) {
+        const responseBodyText = await response.text();
         responseBody = JSON.parse(responseBodyText);
       }
     } catch (error) {
