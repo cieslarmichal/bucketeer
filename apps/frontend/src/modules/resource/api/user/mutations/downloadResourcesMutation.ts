@@ -20,7 +20,7 @@ export const useDownloadResourcesMutation = (
     const response = await HttpService.post<DownloadResourcesResponseBody>({
       url: `/buckets/${payload.bucketName}/resources/export`,
       body: {
-        ids: payload.ids,
+        ids: [],
       },
       headers: {
         Authorization: `Bearer ${payload.accessToken}`,
@@ -29,11 +29,11 @@ export const useDownloadResourcesMutation = (
     });
 
     if (!response.success) {
-      throw new ApiError("DownloadException", {
+      throw new ApiError('DownloadException', {
         apiResponseError: response.body.context,
         message: mapper.map(response.statusCode),
-        statusCode: response.statusCode
-      })
+        statusCode: response.statusCode,
+      });
     }
 
     return response.body;
