@@ -1,4 +1,4 @@
-import { type Stats } from 'fs';
+import { existsSync, type Stats } from 'fs';
 import { stat, rm, readdir } from 'fs/promises';
 import { schedule } from 'node-cron';
 import { join } from 'path';
@@ -130,20 +130,22 @@ export class Application {
 
     await this.createAdminUser(container);
 
+    this.createCleanupCronJob();
+
     const server = new HttpServer(container);
 
     await server.start();
-
-    this.createCleanupCronJob();
   }
 
   private static createCleanupCronJob(): void {
     const directoryPath = '/tmp/buckets';
 
-    schedule('*/1 * * * *', async () => {
-      const directories = await readdir(directoryPath);
+    schedule('*/30 * * * *', async () => {
+      if (!existsSync(directoryPath)) {
+        return;
+      }
 
-      console.log({ dirCount: directories.length }, 'Directories fetched.');
+      const directories = await readdir(directoryPath);
 
       await Promise.all(
         directories.map(async (file) => {
@@ -161,7 +163,7 @@ export class Application {
 
           const now = new Date().getTime();
 
-          const subdirCreationTime = new Date(subdirStats.ctime).getTime();
+          const subdirCreationTime = new Date(subdirStats.birthtime).getTime();
 
           const diffInMinutes = (now - subdirCreationTime) / (1000 * 60);
 
