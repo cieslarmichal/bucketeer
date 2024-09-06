@@ -1,5 +1,5 @@
 import archiver from 'archiver';
-import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
+import { createWriteStream, mkdirSync } from 'node:fs';
 
 import {
   type DownloadResourcesQueryHandler,
@@ -8,6 +8,7 @@ import {
 } from './downloadResourcesQueryHandler.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type LoggerService } from '../../../../../libs/logger/services/loggerService/loggerService.js';
+import { type UuidService } from '../../../../../libs/uuid/services/uuidService/uuidService.js';
 import { ForbiddenAccessError } from '../../../../authModule/application/errors/forbiddenAccessError.js';
 import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
 import { type ResourceBlobService } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
@@ -17,6 +18,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
     private readonly resourceBlobSerice: ResourceBlobService,
     private readonly loggerService: LoggerService,
     private readonly findUserBucketsQueryHandler: FindUserBucketsQueryHandler,
+    private readonly uuidService: UuidService,
   ) {}
 
   public async execute(payload: DownloadResourcesQueryHandlerPayload): Promise<DownloadResourcesQueryHandlerResult> {
@@ -35,13 +37,9 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
 
     const blobsIds = await this.resourceBlobSerice.getResourcesIds({ bucketName });
 
-    const baseTempDir = '/tmp/buckets';
+    const tempDir = `/tmp/buckets/${this.uuidService.generateUuid()}`;
 
-    if (!existsSync(baseTempDir)) {
-      mkdirSync(baseTempDir, { recursive: true });
-    }
-
-    const tempDir = `${baseTempDir}/${new Date().getTime()}`;
+    mkdirSync(tempDir, { recursive: true });
 
     this.loggerService.debug({
       message: 'Downloading Resources...',
@@ -112,6 +110,13 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
           blobData.on('end', resolve);
 
           blobData.on('error', reject);
+        });
+
+        this.loggerService.debug({
+          message: 'Resource downloaded.',
+          bucketName,
+          resourceId: blobId,
+          tempFilePath,
         });
 
         archive.file(tempFilePath, { name });

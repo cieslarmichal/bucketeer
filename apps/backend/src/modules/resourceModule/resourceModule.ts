@@ -76,6 +76,7 @@ export class ResourceModule implements DependencyInjectionModule {
           container.get<ResourceBlobService>(symbols.resourceBlobService),
           container.get<LoggerService>(coreSymbols.loggerService),
           container.get<FindUserBucketsQueryHandler>(userSymbols.findUserBucketsQueryHandler),
+          container.get<UuidService>(coreSymbols.uuidService),
         ),
     );
 
