@@ -1,4 +1,5 @@
 import archiver from 'archiver';
+import { createWriteStream, mkdirSync } from 'node:fs';
 
 import {
   type DownloadResourcesQueryHandler,
@@ -7,6 +8,7 @@ import {
 } from './downloadResourcesQueryHandler.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
 import { type LoggerService } from '../../../../../libs/logger/services/loggerService/loggerService.js';
+import { type UuidService } from '../../../../../libs/uuid/services/uuidService/uuidService.js';
 import { ForbiddenAccessError } from '../../../../authModule/application/errors/forbiddenAccessError.js';
 import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
 import { type ResourceBlobService } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
@@ -16,6 +18,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
     private readonly resourceBlobSerice: ResourceBlobService,
     private readonly loggerService: LoggerService,
     private readonly findUserBucketsQueryHandler: FindUserBucketsQueryHandler,
+    private readonly uuidService: UuidService,
   ) {}
 
   public async execute(payload: DownloadResourcesQueryHandlerPayload): Promise<DownloadResourcesQueryHandlerResult> {
@@ -32,13 +35,18 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
       });
     }
 
+    const blobsIds = await this.resourceBlobSerice.getResourcesIds({ bucketName });
+
+    const tempDir = `/tmp/buckets/${this.uuidService.generateUuid()}`;
+
+    mkdirSync(tempDir, { recursive: true });
+
     this.loggerService.debug({
       message: 'Downloading Resources...',
       userId,
       bucketName,
+      tempDir,
     });
-
-    const blobsIds = await this.resourceBlobSerice.getResourcesIds({ bucketName });
 
     if (!blobsIds.length) {
       this.loggerService.error({
@@ -65,6 +73,24 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
 
     const archive = archiver('zip', { zlib: { level: 9 } });
 
+    archive.on('error', (error) => {
+      this.loggerService.error({
+        message: 'Error while creating archive.',
+        userId,
+        bucketName,
+        error,
+      });
+
+      throw error;
+    });
+
+    archive.on('progress', (progress) => {
+      this.loggerService.debug({
+        message: 'Archive in progress...',
+        progress: progress.entries,
+      });
+    });
+
     let archivedResourcesCount = 0;
 
     for (const blobId of blobsIds) {
@@ -74,11 +100,36 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
           resourceId: blobId,
         });
 
-        archive.append(blobData, { name });
+        const tempFilePath = `${tempDir}/${blobId}`;
+
+        const writeStream = createWriteStream(tempFilePath);
+
+        await new Promise<void>((resolve, reject) => {
+          blobData.pipe(writeStream);
+
+          blobData.on('end', resolve);
+
+          blobData.on('error', reject);
+        });
+
+        this.loggerService.debug({
+          message: 'Resource downloaded.',
+          bucketName,
+          resourceId: blobId,
+          tempFilePath,
+        });
+
+        archive.file(tempFilePath, { name });
 
         archivedResourcesCount++;
       }
     }
+
+    this.loggerService.debug({
+      message: 'Finalizing archive...',
+      userId,
+      bucketName,
+    });
 
     archive.finalize();
 
@@ -87,6 +138,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
       userId,
       bucketName,
       count: archivedResourcesCount,
+      tempDir,
     });
 
     return { resourcesData: archive };
