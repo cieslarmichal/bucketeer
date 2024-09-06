@@ -1,6 +1,5 @@
 import archiver from 'archiver';
-import { createWriteStream } from 'node:fs';
-import { dirSync } from 'tmp';
+import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
 
 import {
   type DownloadResourcesQueryHandler,
@@ -36,13 +35,19 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
 
     const blobsIds = await this.resourceBlobSerice.getResourcesIds({ bucketName });
 
-    const tempDir = dirSync({ unsafeCleanup: true });
+    const baseTempDir = '/tmp/buckets';
+
+    if (!existsSync(baseTempDir)) {
+      mkdirSync(baseTempDir, { recursive: true });
+    }
+
+    const tempDir = `${baseTempDir}/${new Date().getTime()}`;
 
     this.loggerService.debug({
       message: 'Downloading Resources...',
       userId,
       bucketName,
-      tempDir: tempDir.name,
+      tempDir,
     });
 
     if (!blobsIds.length) {

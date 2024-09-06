@@ -40,7 +40,6 @@
     "mime": "4.0.4",
     "node-fetch": "3.3.2",
     "pino": "9.3.2",
-    "tmp": "0.2.3",
     "tmp-promise": "3.0.3",
     "uuid": "10.0.0"
   },
@@ -52,7 +51,6 @@
     "@types/ffprobe-static": "2.0.3",
     "@types/fluent-ffmpeg": "2.1.24",
     "@types/jsonwebtoken": "9.0.6",
-    "@types/tmp": "0.2.6",
     "@types/uuid": "10.0.0"
   },
   "volta": {

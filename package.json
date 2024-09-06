@@ -42,6 +42,7 @@
   ],
   "packageManager": "npm@10.8.2",
   "dependencies": {
+    "node-cron": "3.0.3",
     "sharp": "0.33.4"
   }
 }

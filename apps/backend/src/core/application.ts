@@ -1,3 +1,8 @@
+import { type Stats } from 'fs';
+import { stat, rm, readdir } from 'fs/promises';
+import { schedule } from 'node-cron';
+import { join } from 'path';
+
 import { UserRole } from '@common/contracts';
 
 import { ApplicationHttpController } from './api/httpControllers/applicationHttpController/applicationHttpController.js';
@@ -128,5 +133,45 @@ export class Application {
     const server = new HttpServer(container);
 
     await server.start();
+
+    this.createCleanupCronJob();
+  }
+
+  private static createCleanupCronJob(): void {
+    const directoryPath = '/tmp/buckets';
+
+    schedule('*/1 * * * *', async () => {
+      const directories = await readdir(directoryPath);
+
+      console.log({ dirCount: directories.length }, 'Directories fetched.');
+
+      await Promise.all(
+        directories.map(async (file) => {
+          const subdirPath = join(directoryPath, file);
+
+          let subdirStats: Stats;
+
+          try {
+            subdirStats = await stat(subdirPath);
+          } catch {
+            console.error({ subdirPath }, 'Error reading directory, skipping.');
+
+            return;
+          }
+
+          const now = new Date().getTime();
+
+          const subdirCreationTime = new Date(subdirStats.ctime).getTime();
+
+          const diffInMinutes = (now - subdirCreationTime) / (1000 * 60);
+
+          if (diffInMinutes > 30) {
+            await rm(subdirPath, { recursive: true });
+
+            console.log({ subdirPath }, 'Directory deleted.');
+          }
+        }),
+      );
+    });
   }
 }
