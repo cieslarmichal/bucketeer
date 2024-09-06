@@ -102,7 +102,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
           resourceId: blobId,
         });
 
-        const tempFilePath = `${tempDir.name}/${blobId}`;
+        const tempFilePath = `${tempDir}/${blobId}`;
 
         const writeStream = createWriteStream(tempFilePath);
 
@@ -133,7 +133,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
       userId,
       bucketName,
       count: archivedResourcesCount,
-      tempDir: tempDir.name,
+      tempDir,
     });
 
     return { resourcesData: archive };
