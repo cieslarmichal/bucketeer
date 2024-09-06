@@ -1,4 +1,6 @@
 import archiver from 'archiver';
+import { createWriteStream } from 'node:fs';
+import { dirSync } from 'tmp';
 
 import {
   type DownloadResourcesQueryHandler,
@@ -32,13 +34,16 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
       });
     }
 
+    const blobsIds = await this.resourceBlobSerice.getResourcesIds({ bucketName });
+
+    const tempDir = dirSync({ unsafeCleanup: true });
+
     this.loggerService.debug({
       message: 'Downloading Resources...',
       userId,
       bucketName,
+      tempDir: tempDir.name,
     });
-
-    const blobsIds = await this.resourceBlobSerice.getResourcesIds({ bucketName });
 
     if (!blobsIds.length) {
       this.loggerService.error({
@@ -65,6 +70,24 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
 
     const archive = archiver('zip', { zlib: { level: 9 } });
 
+    archive.on('error', (error) => {
+      this.loggerService.error({
+        message: 'Error while creating archive.',
+        userId,
+        bucketName,
+        error,
+      });
+
+      throw error;
+    });
+
+    archive.on('progress', (progress) => {
+      this.loggerService.debug({
+        message: 'Archive in progress...',
+        progress: progress.entries,
+      });
+    });
+
     let archivedResourcesCount = 0;
 
     for (const blobId of blobsIds) {
@@ -74,11 +97,29 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
           resourceId: blobId,
         });
 
-        archive.append(blobData, { name });
+        const tempFilePath = `${tempDir.name}/${blobId}`;
+
+        const writeStream = createWriteStream(tempFilePath);
+
+        await new Promise<void>((resolve, reject) => {
+          blobData.pipe(writeStream);
+
+          blobData.on('end', resolve);
+
+          blobData.on('error', reject);
+        });
+
+        archive.file(tempFilePath, { name });
 
         archivedResourcesCount++;
       }
     }
+
+    this.loggerService.debug({
+      message: 'Finalizing archive...',
+      userId,
+      bucketName,
+    });
 
     archive.finalize();
 
@@ -87,6 +128,7 @@ export class DownloadResourcesQueryHandlerImpl implements DownloadResourcesQuery
       userId,
       bucketName,
       count: archivedResourcesCount,
+      tempDir: tempDir.name,
     });
 
     return { resourcesData: archive };
