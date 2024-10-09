@@ -43,3 +43,5 @@ export * from './schemas/resource/uploadResources.js';
 export * from './schemas/resource/previewType.js';
 
 export * from './schemas/resource/resource.js';
+
+export * from './schemas/resource/updateResource.js';

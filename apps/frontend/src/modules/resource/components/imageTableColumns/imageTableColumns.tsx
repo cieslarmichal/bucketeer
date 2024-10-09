@@ -21,6 +21,7 @@ import { useRowsContext } from '../../../common/components/dataTable/rowsContext
 import { useResourceDownload } from '../../hooks/useResourceDownload';
 import { useState } from 'react';
 import { DeleteResourceModal } from './components/deleteResourceModal/deleteResourceModal';
+import { RenameResourceModal } from './components/renameResourceModal/renameResourceModal';
 
 interface HeaderProps {
   className?: string | undefined;
@@ -119,10 +120,9 @@ export const imageTableColumns: ColumnDef<Resource>[] = [
     cell: ({ row }): JSX.Element => {
       const { download } = useResourceDownload();
       const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+      const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
 
       const handleDeleteConfirm = () => {
-        // Perform delete operation
-        console.log('Resource deleted');
         setIsDeleteModalOpen(false);
       };
 
@@ -155,7 +155,9 @@ export const imageTableColumns: ColumnDef<Resource>[] = [
               <DropdownMenuItem onSelect={handleDeleteClick}>
                 Delete
               </DropdownMenuItem>
-              <DropdownMenuItem>Change name</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setIsRenameModalOpen(true)}>
+                Change name
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -164,6 +166,14 @@ export const imageTableColumns: ColumnDef<Resource>[] = [
             onClose={() => setIsDeleteModalOpen(false)}
             onConfirm={handleDeleteConfirm}
             resourceId={row.original.id}
+          />
+          <RenameResourceModal 
+            isOpen={isRenameModalOpen}
+            onClose={() => setIsRenameModalOpen(false)}
+            onConfirm={() => setIsRenameModalOpen(false)}
+            oldResourceName={row.original.name}
+            resourceId={row.original.id}
+            previewResourceId={row.original.preview.previewId}
           />
         </>
       );

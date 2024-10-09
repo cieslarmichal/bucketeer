@@ -10,6 +10,7 @@ export const resourceMetadataDTOSchema = Type.Object({
   preview: Type.Object({
     url: Type.String(),
     contentType: Type.String(),
+    previewId: Type.String(),
   }),
 });
 

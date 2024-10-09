@@ -8,5 +8,6 @@ export interface Resource {
   readonly preview: {
     readonly url: string;
     readonly contentType: string;
+    readonly previewId: string;
   };
 }

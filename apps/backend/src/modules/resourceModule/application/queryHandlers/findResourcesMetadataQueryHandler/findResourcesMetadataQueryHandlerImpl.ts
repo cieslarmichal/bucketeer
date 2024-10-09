@@ -13,7 +13,7 @@ import { type ResourceBlobService } from '../../../domain/services/resourceBlobS
 
 export class FindResourcesMetadataQueryHandlerImpl implements FindResourcesMetadataQueryHandler {
   public constructor(
-    private readonly resourceBlobSerice: ResourceBlobService,
+    private readonly resourceBlobService: ResourceBlobService,
     private readonly loggerService: LoggerService,
     private readonly findUserBucketsQueryHandler: FindUserBucketsQueryHandler,
   ) {}
@@ -34,7 +34,7 @@ export class FindResourcesMetadataQueryHandlerImpl implements FindResourcesMetad
       });
     }
 
-    const bucketExists = await this.resourceBlobSerice.bucketExists({ bucketName });
+    const bucketExists = await this.resourceBlobService.bucketExists({ bucketName });
 
     if (!bucketExists) {
       throw new OperationNotValidError({
@@ -52,7 +52,7 @@ export class FindResourcesMetadataQueryHandlerImpl implements FindResourcesMetad
       pageSize,
     });
 
-    const { items: resourcesMetadata, totalPages } = await this.resourceBlobSerice.getResourcesMetadata({
+    const { items: resourcesMetadata, totalPages } = await this.resourceBlobService.getResourcesMetadata({
       bucketName,
       page,
       pageSize,

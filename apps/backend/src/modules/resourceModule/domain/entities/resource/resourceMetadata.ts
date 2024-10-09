@@ -8,5 +8,6 @@ export interface ResourceMetadata {
   readonly preview: {
     readonly url: string;
     readonly contentType: string;
+    readonly previewId: string;
   };
 }

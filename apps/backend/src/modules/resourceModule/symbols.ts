@@ -11,6 +11,7 @@ export const symbols = {
   findBucketsQueryHandler: Symbol('findBucketsQueryHandler'),
   createBucketCommandHandler: Symbol('createBucketCommandHandler'),
   deleteBucketCommandHandler: Symbol('deleteBucketCommandHandler'),
+  updateResourceCommandHandler: Symbol('updateResourceCommandHandler'),
 
   resourceHttpController: Symbol('resourceHttpController'),
   adminResourceHttpController: Symbol('adminResourceHttpController'),
