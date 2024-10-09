@@ -167,7 +167,7 @@ export const Media = ({
               <img
                 alt={alt}
                 src={source}
-                className={cn('cursor-pointer w-full h-full object-cover aspect-square', className)}
+                className={cn('cursor-pointer w-full h-full object-contain', className)}
               />
               <div
                 onClick={onClick}

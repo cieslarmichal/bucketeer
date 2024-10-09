@@ -17,6 +17,7 @@ import { Button } from '../../../@/components/ui/button';
 import { useDownloadResourcesMutation } from '../../modules/resource/api/user/mutations/downloadResourcesMutation';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/solid';
 import { useResourceDownload } from '../../modules/resource/hooks/useResourceDownload';
+import { useBucketStore } from '../../modules/bucket/stores/bucketStore';
 
 const searchSchema = z.object({
   page: z.number().default(0),
@@ -37,9 +38,9 @@ function Dashboard(): JSX.Element {
   const accessToken = useUserTokensStore((state) => state.accessToken);
   const { bucketName, page } = Route.useSearch({});
   const userId = useUserStore((state) => state.user.id);
+  const { setBucket } = useBucketStore();
 
   const { download } = useResourceDownload();
-
   const navigate = useNavigate();
 
   const { mutateAsync: downloadAll, isPending: isDownloading } = useDownloadResourcesMutation({});
@@ -60,6 +61,12 @@ function Dashboard(): JSX.Element {
       pageSize,
     }),
   });
+
+  useEffect(() => {
+    setBucket({
+      name: bucketName as string
+    })
+  }, [bucketName, setBucket])
 
   useEffect(() => {
     if (!bucketName && isBucketsFetched && (bucketsData?.data?.length ?? 0) > 0) {
