@@ -162,7 +162,6 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
               preview: {
                 url: previewUrl,
                 contentType: previewMetadataResult.ContentType as string,
-                previewId: previewMetadataResult.Metadata?.['resourceid'] as string,
               },
             };
           }),

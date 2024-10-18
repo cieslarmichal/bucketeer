@@ -173,7 +173,6 @@ export const imageTableColumns: ColumnDef<Resource>[] = [
             onConfirm={() => setIsRenameModalOpen(false)}
             oldResourceName={row.original.name}
             resourceId={row.original.id}
-            previewResourceId={row.original.preview.previewId}
           />
         </>
       );

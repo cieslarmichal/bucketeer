@@ -18,7 +18,6 @@ type Props = {
     onClose: () => void;
     onConfirm: () => void;
     resourceId: string;
-    previewResourceId: string;
     oldResourceName: string;
 }
 
