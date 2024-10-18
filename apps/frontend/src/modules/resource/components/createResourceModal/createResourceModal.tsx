@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../../../../.
 import { FileInput } from '../../../../../@/components/ui/input';
 import { LoadingSpinner } from '../../../../../@/components/ui/loadingSpinner';
 import { useFileUpload } from '../../composable/useFileUpload/useFileUpload';
+import { Progress } from '../../../../../@/components/ui/progress';
+import { cn } from '../../../../../@/lib/utils';
 
 interface CreateResourceModalProps {
   bucketName: string;
@@ -29,7 +31,7 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const { abortController, isUploading, upload } = useFileUpload({
+  const { abortController, isUploading, upload, uploadPercentage, uploadedFilesCount } = useFileUpload({
     files,
     setFiles,
     bucketName,
@@ -153,14 +155,26 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
             multiple={true}
             fileName={fileName}
           ></FileInput>
-          <Button
-            className='w-40'
-            onClick={onUpload}
-            disabled={(files?.length === 0 || false) || isUploading}
-          >
-            {isUploading && <LoadingSpinner />}
-            {!isUploading && <>Upload</>}
-          </Button>
+          <div className='relative'>
+            <Progress value={uploadPercentage} />
+            {files.length > 0 && isUploading && 
+              <div className='absolute top-0 h-4 w-full rounded-full opacity-0 hover:opacity-100'>
+                <div className={cn('flex w-full justify-center items-center text-sm', uploadPercentage > 40 && 'text-black')}>
+                  Uploaded {uploadedFilesCount} / {files.length}
+                </div>
+              </div>
+            }
+          </div>
+          <div className="w-full flex justify-end">
+            <Button
+              className='w-40'
+              onClick={onUpload}
+              disabled={(files?.length === 0 || false) || isUploading}
+            >
+              {isUploading && <LoadingSpinner />}
+              {!isUploading && <>Upload</>}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
