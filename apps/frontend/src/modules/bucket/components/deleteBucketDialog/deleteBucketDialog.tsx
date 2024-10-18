@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 
 import {
@@ -14,9 +14,8 @@ import {
 } from '../../../../../@/components/ui/alert-dialog';
 import { Button } from '../../../../../@/components/ui/button';
 import { useToast } from '../../../../../@/components/ui/use-toast';
-import { useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
+import { userAccessTokenSelector, useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
 import { useDeleteBucketMutation } from '../../api/admin/mutations/deleteBucketMutation/deleteBucketMutation';
-import { adminFindBucketsQueryOptions } from '../../api/admin/queries/adminFindBuckets/adminFindBucketsQueryOptions';
 import { BucketApiQueryKeys } from '../../api/bucketApiQueryKeys';
 
 interface Props {
@@ -25,22 +24,12 @@ interface Props {
 
 export const DeleteBucketDialog = ({ bucketName }: Props): JSX.Element => {
   const { toast } = useToast();
-
   const queryClient = useQueryClient();
-
-  const accessToken = useUserTokensStore.getState().accessToken;
-
-  const [open, onOpenChange] = useState(false);
-
-  const [deleteBucketName, setDeleteBucketName] = useState('');
-
   const { mutateAsync: deleteBucketMutation } = useDeleteBucketMutation({});
 
-  const { refetch: refetchBuckets } = useQuery({
-    ...adminFindBucketsQueryOptions({
-      accessToken: accessToken as string,
-    }),
-  });
+  const accessToken = useUserTokensStore(userAccessTokenSelector);
+  const [open, onOpenChange] = useState(false);
+  const [deleteBucketName, setDeleteBucketName] = useState('');
 
   const onDeleteBucket = async (bucketName: string): Promise<void> => {
     try {
@@ -59,14 +48,11 @@ export const DeleteBucketDialog = ({ bucketName }: Props): JSX.Element => {
         return;
       }
     }
-
-    onOpenChange(false);
-
-    refetchBuckets();
-
     await queryClient.invalidateQueries({
       predicate: (query) => query.queryKey[0] === BucketApiQueryKeys.adminFindBuckets,
     });
+
+    onOpenChange(false);
   };
 
   return (
@@ -95,6 +81,7 @@ export const DeleteBucketDialog = ({ bucketName }: Props): JSX.Element => {
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction asChild>
             <Button
+              type='button'
               className="bg-red-800 hover:bg-red-700"
               onClick={() => onDeleteBucket(deleteBucketName)}
             >

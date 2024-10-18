@@ -26,6 +26,7 @@ import { Skeleton } from '../../../../../@/components/ui/skeleton';
     onPreviousPage?: () => Promise<void> | void;
     filterLabel?: string;
     includeColumnsSelector?: boolean;
+    skeletonSizes: Array<{ width: string, height: string }>
   }
 
   export function DataSkeletonTable<TData extends object, TValue>({
@@ -33,6 +34,7 @@ import { Skeleton } from '../../../../../@/components/ui/skeleton';
     pageIndex,
     pageSize = 10,
     pageCount,
+    skeletonSizes,
     onNextPage,
     onPreviousPage,
   }: DataTableProps<TData, TValue>): JSX.Element {
@@ -105,15 +107,7 @@ import { Skeleton } from '../../../../../@/components/ui/skeleton';
                 <TableRow key={index}>
                   {columns.map((_, cellIndex) => (
                     <TableCell key={cellIndex}>
-                        {cellIndex === 0 && (
-                        <Skeleton className="w-8 h-8" />
-                        )}
-                        {cellIndex === 2 && (
-                            <Skeleton className='w-40 h-40' />
-                        )}
-                        {cellIndex !== 2 && cellIndex !== 0 && (
-                            <Skeleton className="w-full h-10" />
-                        )}
+                      <Skeleton className={`w-${skeletonSizes[cellIndex].width} h-${skeletonSizes[cellIndex].height}`} />
                     </TableCell>
                   ))}
                 </TableRow>

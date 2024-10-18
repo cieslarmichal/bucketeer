@@ -10,7 +10,12 @@ export const createBucketBodyDTOSchema = Type.Object({
     pattern: '^(?!.*\\..*)([a-z0-9])(?:[a-z0-9.-]*[a-z0-9])?$',
 
     minLength: 3,
-    maxLength: 63,
+    /**
+     * JB
+     * Has to be 54, as we are adding `-previews` to a newly created bucket
+     * And we are causing an error down the drain
+     */
+    maxLength: 54,
   }),
 });
 

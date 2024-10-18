@@ -7,6 +7,8 @@ import { useUserTokensStore } from '../../modules/core/stores/userTokens/userTok
 import { adminFindUsersQueryOptions } from '../../modules/user/api/admin/queries/findUsersQuery/findUsersQueryOptions';
 import { CreateUserDialog } from '../../modules/user/components/createUserDialog/createUserDialog';
 import { userTableColumns } from '../../modules/user/components/userTableColumns/userTableColumns';
+import { AdminTabSelector } from '../../modules/admin/components/AdminTabSelector';
+import { TableLayout } from '../../modules/layouts/TableLayout';
 
 export const Route = createFileRoute('/admin/user')({
   component: User,
@@ -32,25 +34,30 @@ function User(): ReactNode {
   }
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="col-start-4 col-span-2">
-        <div className="pb-4">
-          <div>Users</div>
-          <CreateUserDialog
-            onOpenChange={setCreateUserDialogOpen}
-            open={createUserDialogOpen}
-          />
+    <TableLayout
+      TopBar={
+        <div className="flex flex-col items-center">
+        <AdminTabSelector />
+        <div className="col-start-4 col-span-2">
+          <div className="pb-4">
+            <div>Users</div>
+            <CreateUserDialog
+              onOpenChange={setCreateUserDialogOpen}
+              open={createUserDialogOpen}
+            />
+          </div>
         </div>
-        <DataTable
-          columns={userTableColumns}
-          data={users?.data ?? []}
-          pageCount={1}
-          pageIndex={page}
-          pageSize={pageSize}
-          onPreviousPage={() => setPage(page - 1)}
-          onNextPage={() => setPage(page + 1)}
-        />
       </div>
-    </div>
+      }
+      Table={<DataTable
+        columns={userTableColumns}
+        data={users?.data ?? []}
+        pageCount={1}
+        pageIndex={page}
+        pageSize={pageSize}
+        onPreviousPage={() => setPage(page - 1)}
+        onNextPage={() => setPage(page + 1)}
+      />}
+    />
   );
 }
