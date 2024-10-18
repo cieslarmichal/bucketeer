@@ -1,8 +1,18 @@
 import { useNavigate } from "@tanstack/react-router";
 import { TrashIcon, UserIcon } from '@heroicons/react/24/solid';
+import { cn } from "../../../../@/lib/utils";
+import { FC, useMemo } from "react";
 
-export const AdminTabSelector = () => {
+interface AdminTabSelectorProps {
+  currentlySelected: 'bucket' | 'user' | 'none';
+}
+
+export const AdminTabSelector: FC<AdminTabSelectorProps> = ({ currentlySelected }) => {
     const navigate = useNavigate();
+
+    const bucketSelected = useMemo(() => currentlySelected === 'bucket', [currentlySelected]);
+
+    const userSelected = useMemo(() => currentlySelected === 'user', [currentlySelected]);
 
     return (
     <div className="flex justify-center items-center gap-4">
@@ -12,9 +22,9 @@ export const AdminTabSelector = () => {
               to: '/admin/user',
             })
           }
-          className="flex flex-col items-center gap-2 p-6 bg-primary-foreground rounded-md border border-primary cursor-pointer"
+          className={cn("flex flex-col items-center gap-2 p-4 bg-primary-foreground rounded-md border border-primary cursor-pointer", userSelected && 'bg-muted border-accent pointer-events-none')}
         >
-          <UserIcon className="w-12 h-12 pointer-events-none"></UserIcon>
+          <UserIcon className={cn("w-7 h-7 pointer-events-none", userSelected && "text-secondary-foreground")}></UserIcon>
           <p className="text-primary pointer-events-none">Users</p>
         </div>
         <div
@@ -23,9 +33,9 @@ export const AdminTabSelector = () => {
               to: '/admin/bucket',
             })
           }
-          className="flex flex-col items-center gap-2 p-6 bg-primary-foreground rounded-md border border-primary cursor-pointer"
+          className={cn("flex flex-col items-center gap-2 p-4 bg-primary-foreground rounded-md border border-primary cursor-pointer", bucketSelected && 'bg-muted border-accent pointer-events-none')}
         >
-          <TrashIcon className="w-12 h-12 pointer-events-none"></TrashIcon>
+          <TrashIcon className={cn("w-7 h-7 pointer-events-none", bucketSelected && "text-secondary-foreground")}></TrashIcon>
           <p className="text-primary pointer-events-none">Buckets</p>
         </div>
       </div>  

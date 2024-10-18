@@ -15,6 +15,8 @@ export const Route = createFileRoute('/admin/')({
 
 function Admin(): JSX.Element {
   return (
-    <AdminTabSelector />
+    <div className='p-4'>
+      <AdminTabSelector currentlySelected='none' />
+    </div>
   );
 }
