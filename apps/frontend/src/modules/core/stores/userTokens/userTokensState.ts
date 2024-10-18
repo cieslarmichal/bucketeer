@@ -1,6 +1,6 @@
 export interface UserTokensState {
-  accessToken: string | null;
-  refreshToken: string | null;
+  accessToken: string;
+  refreshToken: string;
   setTokens: (tokens: Pick<UserTokensState, 'accessToken' | 'refreshToken'>) => void;
   setAccessToken: (accessToken: string) => void;
   removeTokens: () => void;
