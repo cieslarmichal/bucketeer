@@ -40,9 +40,7 @@ const BucketSelector: FC<BucketSelectorProps> = ({ buckets }) => {
                     key={option.name}
                     value={option.name}
                 >
-                    <span>
-                        {option.name}
-                    </span>
+                    {option.name}
                 </option>
                 ))}
             </select>
@@ -67,7 +65,7 @@ export const DashboardTopBar: FC<DashboardTopBarProps> = ({ bucketName }) => {
       });
     
     return (
-    <div className="flex flex-col w-full sm:flex-row gap-4 sm:gap-8 items-center justify-around">
+    <div className="flex flex-col max-w-[40rem] md:max-w-screen-xl md:min-w-[50rem] w-full sm:flex-row gap-4 sm:gap-8 items-center justify-between px-4">
         { isBucketsFetched && <BucketSelector buckets={bucketsData?.data ?? []} /> }
         { isBucketsFetched && <CreateResourceModal bucketName={bucketName ?? ''}></CreateResourceModal> }
         { isBucketsFetched && 
@@ -84,9 +82,9 @@ export const DashboardTopBar: FC<DashboardTopBarProps> = ({ bucketName }) => {
                     }
             </Button>
         }
-        { !isBucketsFetched && <Skeleton className="w-52 h-10"></Skeleton>}
+        { !isBucketsFetched && <Skeleton className="w-52 h-10"></Skeleton> }
         { !isBucketsFetched && <Skeleton className="w-40 h-10" /> }
-        { !isBucketsFetched && <Skeleton className="w-40 h-10" />}
+        { !isBucketsFetched && <Skeleton className="w-40 h-10" /> }
     </div>
     )
 }

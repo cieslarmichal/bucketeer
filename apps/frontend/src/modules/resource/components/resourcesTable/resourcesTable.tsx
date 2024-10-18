@@ -5,6 +5,7 @@ import { FC, useMemo, useState } from "react";
 import { imageTableColumns } from "../imageTableColumns/imageTableColumns";
 import { DataTable } from "../../../common/components/dataTable/dataTable";
 import { Loader } from "../../../core/components/loader";
+import { DataSkeletonTable } from "../../../common/components/dataTable/dataTableSkeleton";
 
 
 interface ResourcesTableProps {
@@ -34,9 +35,14 @@ export const ResourcesTable: FC<ResourcesTableProps> = ({ bucketName, page, onNe
     return (
         <>
             {!isResourcesFetched && bucketName && 
-                <div className='w-full h-full'>
-                    <Loader />
-                </div>
+                <DataSkeletonTable
+                    columns={imageTableColumns}
+                    pageIndex={page}
+                    pageSize={pageSize}
+                    pageCount={pageCount}
+                    onNextPage={onNextPage}
+                    onPreviousPage={onPreviousPage}
+                />
             }
             {isResourcesFetched && (
                 <DataTable
