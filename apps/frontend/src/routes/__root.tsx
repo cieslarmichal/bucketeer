@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { Toaster } from '../../@/components/ui/toaster';
 import { CookieService } from '../modules/common/services/cookieService/cookieService';
 import { useUserStore } from '../modules/core/stores/userStore/userStore';
-import { useUserTokensStore } from '../modules/core/stores/userTokens/userTokens';
+import { userRefreshTokenSelector, userAccessTokenSelector, useUserTokensStore } from '../modules/core/stores/userTokens/userTokens';
 import { useLogoutUserMutation } from '../modules/user/api/user/mutations/logoutMutation/logoutMutation';
 import { useFindMeQuery } from '../modules/user/api/user/queries/findMeQuery/findMeQuery';
 
@@ -17,21 +17,19 @@ export const Route = createRootRoute({
 });
 
 function RootComponent(): JSX.Element {
-  const accessToken = useUserTokensStore((userTokens) => userTokens.accessToken);
-
-  const refreshToken = useUserTokensStore((userTokens) => userTokens.refreshToken);
-
-  const { mutateAsync: logout } = useLogoutUserMutation({});
+  const accessToken = useUserTokensStore(userAccessTokenSelector);
+  const refreshToken = useUserTokensStore(userRefreshTokenSelector);
 
   const removeTokens = useUserTokensStore((state) => state.removeTokens);
-
   const removeUserDetails = useUserStore((state) => state.removeUser);
+  const setUser = useUserStore((state) => state.setUser);
+
+  const { mutateAsync: logout } = useLogoutUserMutation({});
 
   const { data } = useFindMeQuery({
     accessToken: accessToken as string,
   });
 
-  const setUser = useUserStore((state) => state.setUser);
 
   useEffect(() => {
     if (data?.email) {

@@ -154,6 +154,7 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
             fileName={fileName}
           ></FileInput>
           <Button
+            className='w-40'
             onClick={onUpload}
             disabled={(files?.length === 0 || false) || isUploading}
           >
