@@ -75,8 +75,13 @@ export const RenameResourceModal: FC<Props> = ({
             onConfirm();
         }
 
+        const onModalClosed = () => {
+            form.reset();
+            onClose();
+        }
+
         return (
-            <Dialog open={isOpen} onOpenChange={onClose}>
+            <Dialog open={isOpen} onOpenChange={onModalClosed}>
             <DialogContent className="lg:max-w-xl md:max-w-80 max-w-60">
                 <DialogTitle>Rename resource</DialogTitle>
                 <Form {...form}>
@@ -99,7 +104,7 @@ export const RenameResourceModal: FC<Props> = ({
                     </form>
                 </Form>
                 <div className="flex flex-col-reverse sm:flex-row gap-2 sm:justify-end">
-                <Button variant="ghost" onClick={onClose}>Cancel</Button>
+                <Button variant="ghost" onClick={onModalClosed}>Cancel</Button>
                 <Button
                     type="submit"
                     onClick={async () => await onSubmit(form.getValues())}
