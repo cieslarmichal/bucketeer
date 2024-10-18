@@ -1,3 +1,5 @@
+import { type UpdateResourcePathParams } from '@common/contracts';
+
 import {
   deleteResourceResponseBodyDTOSchema,
   type DeleteResourceResponseBodyDTO,
@@ -35,9 +37,15 @@ import {
 } from './schemas/findUserBucketsSchema.js';
 import { type ResourceMetadataDTO } from './schemas/resourceMetadataDTO.js';
 import {
-  type UploadResourcesResponseBodyDTO,
+  type UpdateResourceBodyDTO,
+  updateResourceBodyDTOSchema,
+  updateResourcePathParamsDTOSchema,
+  updateResourcesResponseBodyDTOSchema,
+} from './schemas/updateResourceSchema.js';
+import {
+  type UploadResourceResponseBodyDTO,
   type UploadResourcesPathParamsDTO,
-  uploadResourcesResponseBodyDTOSchema,
+  uploadResourceResponseBodyDTOSchema,
   uploadResourcesPathParamsDTOSchema,
 } from './schemas/uploadResourceSchema.js';
 import { OperationNotValidError } from '../../../../../common/errors/common/operationNotValidError.js';
@@ -56,6 +64,7 @@ import { SecurityMode } from '../../../../../common/types/http/securityMode.js';
 import { type AccessControlService } from '../../../../authModule/application/services/accessControlService/accessControlService.js';
 import { type FindUserBucketsQueryHandler } from '../../../../userModule/application/queryHandlers/findUserBucketsQueryHandler/findUserBucketsQueryHandler.js';
 import { type DeleteResourceCommandHandler } from '../../../application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandler.js';
+import { type UpdateResourceCommandHandler } from '../../../application/commandHandlers/updateResourceCommandHandler/updateResourceCommandHandler.js';
 import { type UploadResourcesCommandHandler } from '../../../application/commandHandlers/uploadResourcesCommandHandler/uploadResourcesCommandHandler.js';
 import { type DownloadResourcesQueryHandler } from '../../../application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandler.js';
 import { type DownloadVideoPreviewQueryHandler } from '../../../application/queryHandlers/downloadVideoPreviewQueryHandler/downloadVideoPreviewQueryHandler.js';
@@ -70,6 +79,7 @@ export class ResourceHttpController implements HttpController {
     private readonly findResourcesMetadataQueryHandler: FindResourcesMetadataQueryHandler,
     private readonly uploadResourceCommandHandler: UploadResourcesCommandHandler,
     private readonly downloadResourcesQueryHandler: DownloadResourcesQueryHandler,
+    private readonly updateResourceCommandHandler: UpdateResourceCommandHandler,
     private readonly downloadVideoPreviewQueryHandler: DownloadVideoPreviewQueryHandler,
     private readonly findUserBucketsQueryHandler: FindUserBucketsQueryHandler,
     private readonly accessControlService: AccessControlService,
@@ -125,7 +135,7 @@ export class ResourceHttpController implements HttpController {
           },
           response: {
             [HttpStatusCode.created]: {
-              schema: uploadResourcesResponseBodyDTOSchema,
+              schema: uploadResourceResponseBodyDTOSchema,
               description: 'Resources uploaded',
             },
           },
@@ -153,6 +163,26 @@ export class ResourceHttpController implements HttpController {
         securityMode: SecurityMode.bearer,
         tags: ['Resource'],
         description: "Export bucket's resources",
+      }),
+      new HttpRoute({
+        method: HttpMethodName.post,
+        path: ':bucketName/resource/:resourceId/rename',
+        description: 'Rename resource',
+        schema: {
+          request: {
+            body: updateResourceBodyDTOSchema,
+            pathParams: updateResourcePathParamsDTOSchema,
+          },
+          response: {
+            [HttpStatusCode.ok]: {
+              schema: updateResourcesResponseBodyDTOSchema,
+              description: 'Resource updated.',
+            },
+          },
+        },
+        handler: this.renameResource.bind(this),
+        tags: ['Resource'],
+        securityMode: SecurityMode.bearer,
       }),
       new HttpRoute({
         method: HttpMethodName.get,
@@ -279,9 +309,34 @@ export class ResourceHttpController implements HttpController {
     };
   }
 
+  private async renameResource(
+    request: HttpRequest<UpdateResourceBodyDTO, undefined, UpdateResourcePathParams>,
+  ): Promise<HttpOkResponse<UploadResourceResponseBodyDTO>> {
+    const { role, userId } = await this.accessControlService.verifyBearerToken({
+      authorizationHeader: request.headers['authorization'],
+    });
+
+    const { resourceName } = request.body;
+
+    const { bucketName, resourceId } = request.pathParams;
+
+    await this.updateResourceCommandHandler.execute({
+      bucketName,
+      resourceId,
+      resourceName,
+      userId,
+      userRole: role,
+    });
+
+    return {
+      statusCode: HttpStatusCode.ok,
+      body: null,
+    };
+  }
+
   private async uploadResources(
     request: HttpRequest<undefined, undefined, UploadResourcesPathParamsDTO>,
-  ): Promise<HttpCreatedResponse<UploadResourcesResponseBodyDTO>> {
+  ): Promise<HttpCreatedResponse<UploadResourceResponseBodyDTO>> {
     const { userId } = await this.accessControlService.verifyBearerToken({
       authorizationHeader: request.headers['authorization'],
     });

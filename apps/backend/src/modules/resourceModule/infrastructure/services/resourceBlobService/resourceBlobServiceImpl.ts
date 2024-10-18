@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import {
+  CopyObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
@@ -25,6 +26,7 @@ import {
   type GetResourcesMetadataResult,
   type GetResourcesIdsPayload,
   type UploadResourcePayload,
+  type RenameResourcePayload,
 } from '../../../domain/services/resourceBlobService/resourceBlobService.js';
 
 export class ResourceBlobServiceImpl implements ResourceBlobService {
@@ -41,6 +43,7 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
         Body: data,
         Metadata: {
           actualname: encodeURIComponent(resourceName),
+          resourceId,
         },
         ContentType: contentType,
         ContentDisposition: `attachment; filename=${resourceName}`,
@@ -48,6 +51,23 @@ export class ResourceBlobServiceImpl implements ResourceBlobService {
     });
 
     await upload.done();
+  }
+
+  public async updateResource(payload: RenameResourcePayload): Promise<void> {
+    const { bucketName, resourceName, resourceId, newResourceId } = payload;
+
+    const changeObjectCommand = new CopyObjectCommand({
+      Bucket: bucketName,
+      CopySource: `/${bucketName}/${resourceId}`,
+      Key: newResourceId,
+      Metadata: {
+        actualname: encodeURIComponent(resourceName),
+        resourceId: newResourceId,
+      },
+      MetadataDirective: 'REPLACE',
+    });
+
+    await this.s3Client.send(changeObjectCommand);
   }
 
   public async downloadResource(payload: DownloadResourcePayload): Promise<Resource> {

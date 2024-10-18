@@ -11,6 +11,13 @@ export interface UploadResourcePayload {
   readonly contentType: string;
 }
 
+export interface RenameResourcePayload {
+  bucketName: string;
+  resourceName: string;
+  resourceId: string;
+  newResourceId: string;
+}
+
 export interface DownloadResourcePayload {
   readonly resourceId: string;
   readonly bucketName: string;
@@ -47,6 +54,7 @@ export interface DeleteResourcePayload {
 
 export interface ResourceBlobService {
   uploadResource(payload: UploadResourcePayload): Promise<void>;
+  updateResource(payload: RenameResourcePayload): Promise<void>;
   downloadResource(payload: DownloadResourcePayload): Promise<Resource>;
   getResourcesMetadata(payload: GetResourcesMetadataPayload): Promise<GetResourcesMetadataResult>;
   getResourcesIds(payload: GetResourcesIdsPayload): Promise<string[]>;

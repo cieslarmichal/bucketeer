@@ -5,28 +5,7 @@ import { type FC, type ReactNode, useDeferredValue, useEffect, useMemo, useRef, 
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../../../../../@/components/ui/dialog';
 
 import { cn } from '@/lib/utils';
-
-const VIDEO_FILE_EXTENSIONS = [
-  '.mp4',
-  '.mkv',
-  '.avi',
-  '.mov',
-  '.wmv',
-  '.flv',
-  '.webm',
-  '.m4v',
-  '.mpeg',
-  '.3gp',
-  '.ogv',
-  '.vob',
-  '.rm',
-  '.divx',
-  '.mxf',
-  '.ts',
-  '.f4v',
-  '.mts',
-  '.m2ts',
-];
+import { videosExtensions } from '../../constants/fileExtensions';
 
 interface MediaProps {
   source: string;
@@ -143,7 +122,7 @@ export const Media = ({
   };
 
   const isVideoFile = useMemo(() => {
-    return VIDEO_FILE_EXTENSIONS.some((extension) => {
+    return videosExtensions.some((extension) => {
       return alt.endsWith(extension);
     });
   }, [alt]);
@@ -167,7 +146,7 @@ export const Media = ({
               <img
                 alt={alt}
                 src={source}
-                className={cn('cursor-pointer w-full h-full object-cover aspect-square', className)}
+                className={cn('cursor-pointer w-full h-full object-contain', className)}
               />
               <div
                 onClick={onClick}

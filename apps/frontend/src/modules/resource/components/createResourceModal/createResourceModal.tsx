@@ -24,10 +24,10 @@ allowedFormats.push('audio/');
 
 export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }) => {
   const [files, setFiles] = useState<File[]>([]);
-
   const [fileName, setFileName] = useState('');
-
   const [open, setOpen] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { abortController, isUploading, upload } = useFileUpload({
     files,
@@ -39,8 +39,6 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
       setFileName('');
     },
   });
-
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     let dataTransfer: DataTransfer | undefined;
@@ -157,7 +155,7 @@ export const CreateResourceModal: FC<CreateResourceModalProps> = ({ bucketName }
           ></FileInput>
           <Button
             onClick={onUpload}
-            disabled={(files?.length === 0 ?? false) || isUploading}
+            disabled={(files?.length === 0 || false) || isUploading}
           >
             {isUploading && <LoadingSpinner />}
             {!isUploading && <>Upload</>}

@@ -6,6 +6,8 @@ import { type DeleteBucketCommandHandler } from './application/commandHandlers/d
 import { DeleteBucketCommandHandlerImpl } from './application/commandHandlers/deleteBucketCommandHandler/deleteBucketCommandHandlerImpl.js';
 import { type DeleteResourceCommandHandler } from './application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandler.js';
 import { DeleteResourceCommandHandlerImpl } from './application/commandHandlers/deleteResourceCommandHandler/deleteResourceCommandHandlerImpl.js';
+import { type UpdateResourceCommandHandler } from './application/commandHandlers/updateResourceCommandHandler/updateResourceCommandHandler.js';
+import { UpdateResourceCommandHandlerImpl } from './application/commandHandlers/updateResourceCommandHandler/updateResourceCommandHandlerImpl.js';
 import { type UploadResourcesCommandHandler } from './application/commandHandlers/uploadResourcesCommandHandler/uploadResourcesCommandHandler.js';
 import { UploadResourcesCommandHandlerImpl } from './application/commandHandlers/uploadResourcesCommandHandler/uploadResourcesCommandHandlerImpl.js';
 import { type DownloadResourcesQueryHandler } from './application/queryHandlers/downloadResourcesQueryHandler/downloadResourcesQueryHandler.js';
@@ -114,6 +116,16 @@ export class ResourceModule implements DependencyInjectionModule {
         ),
     );
 
+    container.bind<UpdateResourceCommandHandler>(
+      symbols.updateResourceCommandHandler,
+      () =>
+        new UpdateResourceCommandHandlerImpl(
+          container.get<ResourceBlobService>(symbols.resourceBlobService),
+          container.get<FindUserBucketsQueryHandler>(userSymbols.findUserBucketsQueryHandler),
+          container.get<UuidService>(coreSymbols.uuidService),
+        ),
+    );
+
     container.bind<ResourceHttpController>(
       symbols.resourceHttpController,
       () =>
@@ -122,6 +134,7 @@ export class ResourceModule implements DependencyInjectionModule {
           container.get<FindResourcesMetadataQueryHandler>(symbols.findResourcesMetadataQueryHandler),
           container.get<UploadResourcesCommandHandler>(symbols.uploadResourcesCommandHandler),
           container.get<DownloadResourcesQueryHandler>(symbols.downloadResourcesQueryHandler),
+          container.get<UpdateResourceCommandHandler>(symbols.updateResourceCommandHandler),
           container.get<DownloadVideoPreviewQueryHandler>(symbols.downloadVideoPreviewQueryHandler),
           container.get<FindUserBucketsQueryHandler>(userSymbols.findUserBucketsQueryHandler),
           container.get<AccessControlService>(authSymbols.accessControlService),

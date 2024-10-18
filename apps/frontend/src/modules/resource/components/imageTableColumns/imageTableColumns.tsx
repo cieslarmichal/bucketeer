@@ -19,6 +19,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useRowsContext } from '../../../common/components/dataTable/rowsContext';
 import { useResourceDownload } from '../../hooks/useResourceDownload';
+import { useState } from 'react';
+import { DeleteResourceModal } from './components/deleteResourceModal/deleteResourceModal';
+import { RenameResourceModal } from './components/renameResourceModal/renameResourceModal';
 
 interface HeaderProps {
   className?: string | undefined;
@@ -116,32 +119,62 @@ export const imageTableColumns: ColumnDef<Resource>[] = [
     accessorKey: 'actions',
     cell: ({ row }): JSX.Element => {
       const { download } = useResourceDownload();
+      const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+      const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+
+      const handleDeleteConfirm = () => {
+        setIsDeleteModalOpen(false);
+      };
+
+      const handleDeleteClick = () => {
+        setIsDeleteModalOpen(true);
+      };
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="h-8 w-8 p-2"
+        <>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="h-8 w-8 p-2"
+              >
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              className="bg-primary-foreground"
             >
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="bg-primary-foreground"
-          >
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => download({
-              src: row.original.url,
-              name: row.original.name
-            })}>Download</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Delete</DropdownMenuItem>
-            <DropdownMenuItem>Change name</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => download({
+                src: row.original.url,
+                name: row.original.name
+              })}>Download</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={handleDeleteClick}>
+                Delete
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setIsRenameModalOpen(true)}>
+                Change name
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DeleteResourceModal 
+            isOpen={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+            onConfirm={handleDeleteConfirm}
+            resourceId={row.original.id}
+          />
+          <RenameResourceModal 
+            isOpen={isRenameModalOpen}
+            onClose={() => setIsRenameModalOpen(false)}
+            onConfirm={() => setIsRenameModalOpen(false)}
+            oldResourceName={row.original.name}
+            resourceId={row.original.id}
+          />
+        </>
       );
     },
   },
