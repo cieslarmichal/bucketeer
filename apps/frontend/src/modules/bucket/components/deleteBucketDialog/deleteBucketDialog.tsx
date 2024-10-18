@@ -3,8 +3,6 @@ import { useState } from 'react';
 
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -17,6 +15,7 @@ import { useToast } from '../../../../../@/components/ui/use-toast';
 import { userAccessTokenSelector, useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
 import { useDeleteBucketMutation } from '../../api/admin/mutations/deleteBucketMutation/deleteBucketMutation';
 import { BucketApiQueryKeys } from '../../api/bucketApiQueryKeys';
+import { LoadingSpinner } from '../../../../../@/components/ui/loadingSpinner';
 
 interface Props {
   bucketName: string;
@@ -25,7 +24,7 @@ interface Props {
 export const DeleteBucketDialog = ({ bucketName }: Props): JSX.Element => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { mutateAsync: deleteBucketMutation } = useDeleteBucketMutation({});
+  const { mutateAsync: deleteBucketMutation, isPending: isDeleting } = useDeleteBucketMutation({});
 
   const accessToken = useUserTokensStore(userAccessTokenSelector);
   const [open, onOpenChange] = useState(false);
@@ -51,8 +50,6 @@ export const DeleteBucketDialog = ({ bucketName }: Props): JSX.Element => {
     await queryClient.invalidateQueries({
       predicate: (query) => query.queryKey[0] === BucketApiQueryKeys.adminFindBuckets,
     });
-
-    onOpenChange(false);
   };
 
   return (
@@ -78,17 +75,23 @@ export const DeleteBucketDialog = ({ bucketName }: Props): JSX.Element => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction asChild>
+            <Button 
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              className='w-40'
+              >
+              Cancel
+            </Button>
             <Button
               type='button'
-              className="bg-red-800 hover:bg-red-700"
+              className="bg-red-800 hover:bg-red-700 w-40"
               onClick={() => onDeleteBucket(deleteBucketName)}
+              disabled={isDeleting}
             >
-              Delete
+              {!isDeleting && 'Delete'}
+              {isDeleting && <LoadingSpinner />}
             </Button>
-          </AlertDialogAction>
-        </AlertDialogFooter>
+          </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
