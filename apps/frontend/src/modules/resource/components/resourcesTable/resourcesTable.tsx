@@ -4,7 +4,6 @@ import { findBucketResourcesQueryOptions } from "../../api/user/queries/findBuck
 import { FC, useMemo, useState } from "react";
 import { imageTableColumns } from "../imageTableColumns/imageTableColumns";
 import { DataTable } from "../../../common/components/dataTable/dataTable";
-import { Loader } from "../../../core/components/loader";
 import { DataSkeletonTable } from "../../../common/components/dataTable/dataTableSkeleton";
 
 
@@ -31,13 +30,34 @@ export const ResourcesTable: FC<ResourcesTableProps> = ({ bucketName, page, onNe
     const pageCount = useMemo(() => {
         return resourcesData?.metadata.totalPages || 1;
     }, [resourcesData?.metadata.totalPages]);
-    
+
+    const skeletonSizes = [{
+        width: "8",
+        height: "8",
+    }, {
+        width: "full",
+        height: "10",
+    }, {
+        width: "40",
+        height: "40",
+    }, {
+        width: "full",
+        height: "10",
+    }, {
+        width: "full",
+        height: "10",
+    }, {
+        width: "full",
+        height: "10",
+    }];
+
     return (
         <>
             {!isResourcesFetched && bucketName && 
                 <DataSkeletonTable
                     columns={imageTableColumns}
                     pageIndex={page}
+                    skeletonSizes={skeletonSizes}
                     pageSize={pageSize}
                     pageCount={pageCount}
                     onNextPage={onNextPage}

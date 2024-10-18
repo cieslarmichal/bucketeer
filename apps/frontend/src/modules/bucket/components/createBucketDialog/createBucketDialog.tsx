@@ -8,15 +8,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../../../../@/components/ui/form';
 import { Input } from '../../../../../@/components/ui/input';
 import { useToast } from '../../../../../@/components/ui/use-toast';
-import { useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
+import { userAccessTokenSelector, useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
 import { useCreateBucketMutation } from '../../api/admin/mutations/createBucketMutation/createBucketMutation';
 import { adminFindBucketsQueryOptions } from '../../api/admin/queries/adminFindBuckets/adminFindBucketsQueryOptions';
 import { BucketApiQueryKeys } from '../../api/bucketApiQueryKeys';
+import { LoadingSpinner } from '../../../../../@/components/ui/loadingSpinner';
 
 const bucketSchema = z
   .string()
   .min(3)
-  .max(63)
+  .max(54)
   .regex(new RegExp(/^(?!.*\.\.)([a-z0-9])(?:[a-z0-9.-]*[a-z0-9])?$/, 'g'));
 
 const createBucketSchema = z.object({
@@ -29,10 +30,9 @@ interface CreateBucketDialogProps {
 }
 
 export const CreateBucketDialog = ({ dialogOpen, onOpenChange }: CreateBucketDialogProps): JSX.Element => {
-  const accessToken = useUserTokensStore.getState().accessToken;
+  const accessToken = useUserTokensStore(userAccessTokenSelector);
 
   const { toast } = useToast();
-
   const queryClient = useQueryClient();
 
   const createBucketForm = useForm({
@@ -48,8 +48,7 @@ export const CreateBucketDialog = ({ dialogOpen, onOpenChange }: CreateBucketDia
       accessToken: accessToken as string,
     }),
   });
-
-  const { mutateAsync: createBucketMutation } = useCreateBucketMutation({});
+  const { mutateAsync: createBucketMutation, isPending: isCreating } = useCreateBucketMutation({});
 
   const onCreateBucket = async (payload: z.infer<typeof createBucketSchema>): Promise<void> => {
     try {
@@ -58,10 +57,7 @@ export const CreateBucketDialog = ({ dialogOpen, onOpenChange }: CreateBucketDia
         bucketName: payload.bucketName.toLowerCase(),
       });
 
-      // todo: add buckets invalidation
-
       onOpenChange(false);
-
       createBucketForm.reset();
 
       await refetchBuckets();
@@ -120,10 +116,11 @@ export const CreateBucketDialog = ({ dialogOpen, onOpenChange }: CreateBucketDia
                 )}
               />
               <Button
-                disabled={!createBucketForm.formState.isValid}
+                disabled={!createBucketForm.formState.isValid || isCreating }
                 type="submit"
               >
-                Create
+                { !isCreating && <>Create</> }
+                { isCreating && <LoadingSpinner />}
               </Button>
             </form>
           </Form>

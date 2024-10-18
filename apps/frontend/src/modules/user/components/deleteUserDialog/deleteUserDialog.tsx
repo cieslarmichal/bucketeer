@@ -3,8 +3,6 @@ import { type ReactNode, useState } from 'react';
 
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -13,9 +11,10 @@ import {
   AlertDialogTrigger,
 } from '../../../../../@/components/ui/alert-dialog';
 import { Button } from '../../../../../@/components/ui/button';
-import { useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
+import { userAccessTokenSelector, useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
 import { useDeleteUserMutation } from '../../api/admin/mutations/deleteUserMutation/deleteUserMutation';
 import { UserApiQueryKeys } from '../../api/userApiQueryKeys';
+import { LoadingSpinner } from '../../../../../@/components/ui/loadingSpinner';
 
 interface DeleteUserDialogProps {
   userEmail: string;
@@ -26,9 +25,7 @@ export const DeleteUserDialog = ({ userEmail, userId }: DeleteUserDialogProps): 
   const queryClient = useQueryClient();
 
   const [deleteUserAlertDialogOpen, setDeleteUserAlertDialogOpen] = useState(false);
-
-  const accessToken = useUserTokensStore.getState().accessToken;
-
+  const accessToken = useUserTokensStore(userAccessTokenSelector);
   const [deleteUser, setDeleteUser] = useState<
     | {
         email: string;
@@ -37,7 +34,7 @@ export const DeleteUserDialog = ({ userEmail, userId }: DeleteUserDialogProps): 
     | undefined
   >(undefined);
 
-  const { mutateAsync: deleteUserMutation } = useDeleteUserMutation({});
+  const { mutateAsync: deleteUserMutation, isPending: isDeleting } = useDeleteUserMutation({});
 
   const onDeleteUser = async (userId: string): Promise<void> => {
     await deleteUserMutation({
@@ -52,6 +49,8 @@ export const DeleteUserDialog = ({ userEmail, userId }: DeleteUserDialogProps): 
     await queryClient.invalidateQueries({
       predicate: (query) => query.queryKey[0] === UserApiQueryKeys.findUserById && query.queryKey[1] === userId,
     });
+
+    setDeleteUserAlertDialogOpen(false);
   };
 
   return (
@@ -80,15 +79,21 @@ export const DeleteUserDialog = ({ userEmail, userId }: DeleteUserDialogProps): 
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction asChild>
-            <Button
-              className="bg-red-800 hover:bg-red-700"
-              onClick={() => onDeleteUser(deleteUser?.id as string)}
-            >
-              Delete
-            </Button>
-          </AlertDialogAction>
+          <Button
+            variant={'outline'}
+            onClick={() => setDeleteUserAlertDialogOpen(false)}
+            className='w-40'
+          >
+            Cancel
+          </Button>
+          <Button
+            className='w-40 bg-red-800 hover:bg-red-700'
+            onClick={() => onDeleteUser(deleteUser?.id as string)}
+            disabled={isDeleting}
+          >
+            {!isDeleting && 'Delete'}
+            {isDeleting && <LoadingSpinner />}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
