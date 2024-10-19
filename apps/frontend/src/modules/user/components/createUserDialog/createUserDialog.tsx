@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -7,9 +7,10 @@ import { Button } from '../../../../../@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../../../@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../../../../../@/components/ui/form';
 import { Input } from '../../../../../@/components/ui/input';
-import { useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
+import { userAccessTokenSelector, useUserTokensStore } from '../../../core/stores/userTokens/userTokens';
 import { useCreateUserMutation } from '../../api/admin/mutations/createUserMutation/createUserMutation';
 import { adminFindUsersQueryOptions } from '../../api/admin/queries/findUsersQuery/findUsersQueryOptions';
+import { UserApiQueryKeys } from '../../api/userApiQueryKeys';
 
 interface Props {
   open: boolean;
@@ -27,7 +28,9 @@ const createUserSchema = z.object({
 });
 
 export const CreateUserDialog = ({ onOpenChange, open }: Props): JSX.Element => {
-  const accessToken = useUserTokensStore.getState().accessToken;
+  const accessToken = useUserTokensStore(userAccessTokenSelector);
+
+  const queryClient = useQueryClient();
 
   const createUserForm = useForm({
     resolver: zodResolver(createUserSchema),
@@ -51,6 +54,12 @@ export const CreateUserDialog = ({ onOpenChange, open }: Props): JSX.Element => 
       ...payload,
       accessToken: accessToken as string,
     });
+
+    await queryClient.invalidateQueries({
+      predicate: ({ queryKey }) => queryKey[0] === UserApiQueryKeys.findUsers
+    });
+
+    console.log("Beep boop");
 
     onOpenChange(false);
 
