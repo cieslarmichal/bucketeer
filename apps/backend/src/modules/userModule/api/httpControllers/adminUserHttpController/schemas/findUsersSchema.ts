@@ -26,5 +26,5 @@ export const findUsersResponseBodyDTOSchema = Type.Object({
 
 export type FindUsersResponseBodyDTO = TypeExtends<
   Static<typeof findUsersResponseBodyDTOSchema>,
-  contracts.FindUsersResponseBody
+  contracts.FindUsersWithBucketsResponseBody
 >;

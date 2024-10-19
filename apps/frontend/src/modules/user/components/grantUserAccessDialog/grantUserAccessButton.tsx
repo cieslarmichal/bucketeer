@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useGrantBucketAccessMutation } from "../../api/admin/mutations/grantUserBucketAccessMutation/grantUserBucketAccessMutation";
 import { BucketApiQueryKeys } from "../../../bucket/api/bucketApiQueryKeys";
 import { Button } from "../../../../../@/components/ui/button";
+import { LoadingSpinner } from "../../../../../@/components/ui/loadingSpinner";
 
 interface GrantAccessButtonProps {
     name: string;
@@ -24,7 +25,7 @@ export const GrantAccessButton = ({ name, form, setDialogOpen }: GrantAccessButt
     const { toast } = useToast();
   
     const queryClient = useQueryClient();
-    const { mutateAsync: grantBucketAccessMutation } = useGrantBucketAccessMutation({});
+    const { mutateAsync: grantBucketAccessMutation, isPending } = useGrantBucketAccessMutation({});
   
     const onGrantAccess = async (
       payload: { userId: string, bucketName: string },
@@ -76,8 +77,10 @@ export const GrantAccessButton = ({ name, form, setDialogOpen }: GrantAccessButt
             bucketName,
           });
         }}
+        disabled={isPending}
       >
-        Grant
+        {!isPending && "Grant"}
+        {isPending && <LoadingSpinner />}
       </Button>
     );
 };
