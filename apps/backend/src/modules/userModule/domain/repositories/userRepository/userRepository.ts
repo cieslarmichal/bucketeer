@@ -1,4 +1,4 @@
-import { type UserState, type User } from '../../../domain/entities/user/user.js';
+import { type UserState, type User, type UserWithBuckets } from '../../../domain/entities/user/user.js';
 
 export interface SaveUserPayload {
   readonly user: UserState;
@@ -22,6 +22,7 @@ export interface UserRepository {
   saveUser(input: SaveUserPayload): Promise<User>;
   findUser(input: FindUserPayload): Promise<User | null>;
   findUsers(input: FindUsersPayload): Promise<User[]>;
+  findUsersWithBuckets(payload: FindUsersPayload): Promise<UserWithBuckets[]>;
   countUsers(): Promise<number>;
   deleteUser(input: DeleteUserPayload): Promise<void>;
 }

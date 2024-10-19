@@ -11,6 +11,7 @@ export const symbols = {
   revokeBucketAccessCommandHandler: Symbol('revokeBucketAccessCommandHandler'),
   findUserQueryHandler: Symbol('findUserQueryHandler'),
   findUsersQueryHandler: Symbol('findUsersQueryHandler'),
+  findUsersWithBucketsQueryHandler: Symbol('findUsersWithBucketsQueryHandler'),
   findUserBucketsQueryHandler: Symbol('findUserBucketsQueryHandler'),
   loginUserCommandHandler: Symbol('loginUserCommandHandler'),
   refreshUserTokensCommandHandler: Symbol('refreshUserTokensCommandHandler'),

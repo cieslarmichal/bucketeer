@@ -56,9 +56,9 @@ import { type DeleteUserCommandHandler } from '../../../application/commandHandl
 import { type GrantBucketAccessCommandHandler } from '../../../application/commandHandlers/grantBucketAccessCommandHandler/grantBucketAccessCommandHandler.js';
 import { type RevokeBucketAccessCommandHandler } from '../../../application/commandHandlers/revokeBucketAccessCommandHandler/revokeBucketAccessCommandHandler.js';
 import { type FindUserQueryHandler } from '../../../application/queryHandlers/findUserQueryHandler/findUserQueryHandler.js';
-import { type FindUsersQueryHandler } from '../../../application/queryHandlers/findUsersQueryHandler/findUsersQueryHandler.js';
-import { type User } from '../../../domain/entities/user/user.js';
-import { type UserDTO } from '../common/userDTO.js';
+import { type FindUsersWithBucketsQueryHandler } from '../../../application/queryHandlers/findUsersWithBucketsQueryHandler/findUsersWithBucketsQueryHandler.js';
+import { type UserWithBuckets, type User } from '../../../domain/entities/user/user.js';
+import { type UserWithBucketsDTO, type UserDTO } from '../common/userDTO.js';
 
 export class AdminUserHttpController implements HttpController {
   public readonly basePath = '/admin/users';
@@ -67,7 +67,7 @@ export class AdminUserHttpController implements HttpController {
     private readonly createUserCommandHandler: CreateUserCommandHandler,
     private readonly deleteUserCommandHandler: DeleteUserCommandHandler,
     private readonly findUserQueryHandler: FindUserQueryHandler,
-    private readonly findUsersQueryHandler: FindUsersQueryHandler,
+    private readonly findUsersWithBucketsQueryHandler: FindUsersWithBucketsQueryHandler,
     private readonly grantBucketAccessCommandHandler: GrantBucketAccessCommandHandler,
     private readonly revokeBucketAccessCommandHandler: RevokeBucketAccessCommandHandler,
     private readonly accessControlService: AccessControlService,
@@ -289,7 +289,7 @@ export class AdminUserHttpController implements HttpController {
 
     const pageSize = request.queryParams.pageSize ?? 10;
 
-    const { users, totalUsers } = await this.findUsersQueryHandler.execute({
+    const { users, totalUsers } = await this.findUsersWithBucketsQueryHandler.execute({
       page,
       pageSize,
     });
@@ -297,7 +297,7 @@ export class AdminUserHttpController implements HttpController {
     return {
       statusCode: HttpStatusCode.ok,
       body: {
-        data: users.map((user) => this.mapUserToUserDTO(user)),
+        data: users.map((user) => this.mapUserWithBucketsToUserWithBucketsDto(user)),
         metadata: {
           page,
           pageSize,
@@ -330,6 +330,15 @@ export class AdminUserHttpController implements HttpController {
       id: user.getId(),
       email: user.getEmail(),
       role: user.getRole(),
+    };
+  }
+
+  private mapUserWithBucketsToUserWithBucketsDto(user: UserWithBuckets): UserWithBucketsDTO {
+    return {
+      id: user.getId(),
+      email: user.getEmail(),
+      role: user.getRole(),
+      buckets: user.getBuckets(),
     };
   }
 }
