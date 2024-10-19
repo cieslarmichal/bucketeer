@@ -21,7 +21,7 @@ export const ResourcesTable: FC<ResourcesTableProps> = ({ bucketName, page, onNe
     const [totalPages, setTotalPages] = useState(1);
     const [isFirstFetch, setIsFirstFetch] = useState(true);
 
-    const { data: resourcesData, isFetched: isResourcesFetched } = useQuery({
+    const { data: resourcesData, isFetched: isResourcesFetched, isError } = useQuery({
         ...findBucketResourcesQueryOptions({
           accessToken,
           bucketName,
@@ -31,10 +31,10 @@ export const ResourcesTable: FC<ResourcesTableProps> = ({ bucketName, page, onNe
     });
 
     useEffect(() => {
-        if (isFirstFetch) {
+        if (isFirstFetch && isResourcesFetched && !isError) {
             setIsFirstFetch(false);
         }
-      }, [isFirstFetch]);
+      }, [isFirstFetch, isError, isResourcesFetched]);
 
     useEffect(() => {
         if (isResourcesFetched) {
