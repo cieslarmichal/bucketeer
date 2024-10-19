@@ -14,7 +14,7 @@ import { TableLayout } from '../../modules/layouts/TableLayout';
 import { ResourcesTable } from '../../modules/resource/components/resourcesTable/resourcesTable';
 
 const searchSchema = z.object({
-  page: z.number().default(0),
+  page: z.number().default(1),
   bucketName: z.string().optional(),
 });
 
@@ -72,7 +72,7 @@ function Dashboard(): JSX.Element {
     <div className="w-full flex flex-col items-center justify-center p-4">
       <TableLayout
         TopBar={<DashboardTopBar bucketName={bucketName ?? ''} />}
-        Table={<ResourcesTable 
+        Table={<ResourcesTable
           bucketName={bucketName ?? ''}
           onNextPage={onNextPage}
           onPreviousPage={onPreviousPage}

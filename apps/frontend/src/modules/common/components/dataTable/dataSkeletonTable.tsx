@@ -11,7 +11,7 @@ import {
     getFilteredRowModel,
     type TableState,
   } from '@tanstack/react-table';
-  import { useMemo, useState } from 'react';
+  import { ReactNode, useMemo, useState } from 'react';
   
   import { Button } from '@/components/ui/button';
   import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -26,7 +26,8 @@ import { Skeleton } from '../../../../../@/components/ui/skeleton';
     onPreviousPage?: () => Promise<void> | void;
     filterLabel?: string;
     includeColumnsSelector?: boolean;
-    skeletonSizes: Array<{ width: string, height: string }>
+    skeletonSizes: Array<{ width: string, height: string }>;
+    PaginationSlot?: ReactNode;
   }
 
   export function DataSkeletonTable<TData extends object, TValue>({
@@ -37,6 +38,7 @@ import { Skeleton } from '../../../../../@/components/ui/skeleton';
     skeletonSizes,
     onNextPage,
     onPreviousPage,
+    PaginationSlot,
   }: DataTableProps<TData, TValue>): JSX.Element {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -115,6 +117,7 @@ import { Skeleton } from '../../../../../@/components/ui/skeleton';
             </TableBody>
           </Table>
         </div>
+        {PaginationSlot ?? 
         <div className="flex items-center justify-end space-x-2 py-4 mr-4">
           <Button
             variant="outline"
@@ -124,6 +127,7 @@ import { Skeleton } from '../../../../../@/components/ui/skeleton';
               if (onPreviousPage && pageIndex !== undefined) {
                 await onPreviousPage();
               }
+
               table.previousPage();
             }}
             disabled={!table.getCanPreviousPage()}
@@ -138,6 +142,7 @@ import { Skeleton } from '../../../../../@/components/ui/skeleton';
               if (onNextPage && pageIndex !== undefined) {
                 await onNextPage();
               }
+
               table.nextPage();
             }}
             disabled={!table.getCanNextPage()}
@@ -145,6 +150,7 @@ import { Skeleton } from '../../../../../@/components/ui/skeleton';
             Next
           </Button>
         </div>
+      }
       </div>
     );
   }

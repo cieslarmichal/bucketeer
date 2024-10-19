@@ -12,7 +12,7 @@ import {
   type TableState,
   type Row,
 } from '@tanstack/react-table';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
 import { RowsProvider, useRowsDispatch } from './rowsContext';
 import { Input } from '../../../../../@/components/ui/input';
@@ -36,6 +36,7 @@ interface DataTableProps<TData, TValue> {
   onPreviousPage?: () => Promise<void> | void;
   filterLabel?: string;
   includeColumnsSelector?: boolean;
+  PaginationSlot?: ReactNode;
 }
 
 interface EnhancedTableRowProps {
@@ -126,6 +127,7 @@ export function DataTable<TData extends object, TValue>({
   onPreviousPage,
   filterLabel = 'Filter file names...',
   includeColumnsSelector = false,
+  PaginationSlot,
 }: DataTableProps<TData, TValue>): JSX.Element {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -254,38 +256,40 @@ export function DataTable<TData extends object, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4 mr-4">
-        <Button
-          variant="outline"
-          size="sm"
-          className="py-4 px-2"
-          onClick={async () => {
-            if (onPreviousPage && pageIndex !== undefined) {
-              await onPreviousPage();
-            }
+      {PaginationSlot ?? 
+        <div className="flex items-center justify-end space-x-2 py-4 mr-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="py-4 px-2"
+            onClick={async () => {
+              if (onPreviousPage && pageIndex !== undefined) {
+                await onPreviousPage();
+              }
 
-            table.previousPage();
-          }}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="py-4 px-2"
-          onClick={async () => {
-            if (onNextPage && pageIndex !== undefined) {
-              await onNextPage();
-            }
+              table.previousPage();
+            }}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="py-4 px-2"
+            onClick={async () => {
+              if (onNextPage && pageIndex !== undefined) {
+                await onNextPage();
+              }
 
-            table.nextPage();
-          }}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+              table.nextPage();
+            }}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
+      }
     </div>
   );
 }
