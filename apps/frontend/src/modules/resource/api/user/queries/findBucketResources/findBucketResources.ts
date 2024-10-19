@@ -10,13 +10,17 @@ export interface FindBucketResourcesPayload extends FindResourcesPathParams, Fin
   accessToken: string;
 }
 
-export const findBucketResources = async (payload: FindBucketResourcesPayload): Promise<FindResourcesResponseBody> => {
-  const { accessToken, bucketName, page, pageSize } = payload;
+interface InnerPayload extends FindBucketResourcesPayload {
+  signal: AbortSignal;
+}
+
+export const findBucketResources = async (payload: InnerPayload): Promise<FindResourcesResponseBody> => {
+  const { accessToken, bucketName, page, pageSize, signal } = payload;
 
   const queryParams: Record<string, string> = {};
 
   if (page) {
-    queryParams.page = `${page + 1}`;
+    queryParams.page = `${page}`;
   }
 
   if (pageSize) {
@@ -29,6 +33,7 @@ export const findBucketResources = async (payload: FindBucketResourcesPayload): 
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
+    signal,
   });
 
   if (!response.success) {

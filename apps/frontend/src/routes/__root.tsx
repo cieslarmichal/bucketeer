@@ -61,7 +61,7 @@ function RootComponent(): JSX.Element {
                   to="/dashboard"
                   search={{
                     bucketName: undefined,
-                    page: 0,
+                    page: 1,
                   }}
                   className="[&.active]:font-bold"
                 >

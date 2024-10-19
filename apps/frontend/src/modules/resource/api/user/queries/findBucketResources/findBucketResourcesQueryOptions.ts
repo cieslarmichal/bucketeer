@@ -10,6 +10,10 @@ export const findBucketResourcesQueryOptions = (
 ): UseQueryOptions<FindResourcesResponseBody, BaseApiError, FindResourcesResponseBody, string[]> =>
   queryOptions({
     queryKey: ['findBucketResources', payload.bucketName, `${payload.page}`, `${payload.pageSize}`],
-    queryFn: () => findBucketResources(payload),
+    queryFn: ({ signal }) =>
+      findBucketResources({
+        ...payload,
+        signal,
+      }),
     enabled: payload.bucketName !== '',
   });

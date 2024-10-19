@@ -4,7 +4,7 @@ import { userTableColumns } from "../../user/components/userTableColumns/userTab
 import { adminFindUsersQueryOptions } from "../../user/api/admin/queries/findUsersQuery/findUsersQueryOptions";
 import { userAccessTokenSelector, useUserTokensStore } from "../../core/stores/userTokens/userTokens";
 import { useState } from "react";
-import { DataSkeletonTable } from "../../common/components/dataTable/dataTableSkeleton";
+import { DataSkeletonTable } from "../../common/components/dataTable/dataSkeletonTable";
 
 export const UserTable = () => {
     const [page, setPage] = useState(0);

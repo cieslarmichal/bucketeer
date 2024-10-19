@@ -82,7 +82,7 @@ function Login(): JSX.Element {
       navigate({
         to: '/dashboard',
         search: {
-          page: 0,
+          page: 1,
         },
       });
     } catch (error) {

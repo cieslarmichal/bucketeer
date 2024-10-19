@@ -4,7 +4,7 @@ import { DataTable } from "../../common/components/dataTable/dataTable"
 import { adminFindBucketsQueryOptions } from "../../bucket/api/admin/queries/adminFindBuckets/adminFindBucketsQueryOptions";
 import { useMemo, useState } from "react";
 import { userAccessTokenSelector, useUserTokensStore } from "../../core/stores/userTokens/userTokens";
-import { DataSkeletonTable } from "../../common/components/dataTable/dataTableSkeleton";
+import { DataSkeletonTable } from "../../common/components/dataTable/dataSkeletonTable";
 
 
 

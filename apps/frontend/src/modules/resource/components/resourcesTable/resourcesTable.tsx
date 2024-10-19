@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { userAccessTokenSelector, useUserTokensStore } from "../../../core/stores/userTokens/userTokens";
 import { findBucketResourcesQueryOptions } from "../../api/user/queries/findBucketResources/findBucketResourcesQueryOptions";
-import { FC, useMemo, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { imageTableColumns } from "../imageTableColumns/imageTableColumns";
 import { DataTable } from "../../../common/components/dataTable/dataTable";
-import { DataSkeletonTable } from "../../../common/components/dataTable/dataTableSkeleton";
+import { DataSkeletonTable } from "../../../common/components/dataTable/dataSkeletonTable";
+import { TablePagination } from "./tablePagination";
 
 
 interface ResourcesTableProps {
@@ -17,19 +18,31 @@ interface ResourcesTableProps {
 export const ResourcesTable: FC<ResourcesTableProps> = ({ bucketName, page, onNextPage, onPreviousPage }) => {
     const accessToken = useUserTokensStore(userAccessTokenSelector);
     const [pageSize] = useState(10);
+    const [totalPages, setTotalPages] = useState(1);
+    const [isFirstFetch, setIsFirstFetch] = useState(true);
 
-    const { data: resourcesData, isFetched: isResourcesFetched } = useQuery({
+    const { data: resourcesData, isFetched: isResourcesFetched, isError } = useQuery({
         ...findBucketResourcesQueryOptions({
           accessToken,
           bucketName,
           page,
           pageSize,
         }),
-      });
+    });
 
-    const pageCount = useMemo(() => {
-        return resourcesData?.metadata.totalPages || 1;
-    }, [resourcesData?.metadata.totalPages]);
+    useEffect(() => {
+        if (isFirstFetch && isResourcesFetched && !isError) {
+            setIsFirstFetch(false);
+        }
+      }, [isFirstFetch, isError, isResourcesFetched]);
+
+    useEffect(() => {
+        if (isResourcesFetched) {
+            setTotalPages(resourcesData?.metadata.totalPages || 1)
+        }
+    }, 
+    [isResourcesFetched, resourcesData]
+    );
 
     const skeletonSizes = [{
         width: "8",
@@ -59,9 +72,15 @@ export const ResourcesTable: FC<ResourcesTableProps> = ({ bucketName, page, onNe
                     pageIndex={page}
                     skeletonSizes={skeletonSizes}
                     pageSize={pageSize}
-                    pageCount={pageCount}
+                    pageCount={totalPages}
                     onNextPage={onNextPage}
                     onPreviousPage={onPreviousPage}
+                    PaginationSlot={
+                        !isFirstFetch ? <TablePagination 
+                            current={page}
+                            last={totalPages}
+                        /> : <></>
+                    }
                 />
             }
             {isResourcesFetched && (
@@ -70,9 +89,15 @@ export const ResourcesTable: FC<ResourcesTableProps> = ({ bucketName, page, onNe
                     data={resourcesData?.data ?? []}
                     pageIndex={page}
                     pageSize={pageSize}
-                    pageCount={pageCount}
+                    pageCount={totalPages}
                     onNextPage={onNextPage}
                     onPreviousPage={onPreviousPage}
+                    PaginationSlot={
+                        <TablePagination
+                            current={page}
+                            last={totalPages}
+                        />
+                    }
                 />
             )}
         </>

@@ -33,7 +33,7 @@ export class HttpService {
   private static readonly baseUrl = import.meta.env.VITE_API_BASE_URL;
 
   public static async get<T = unknown>(payload: GetRequestPayload): Promise<HttpResponse<T>> {
-    const { url, headers, queryParams } = payload;
+    const { url, headers, queryParams, signal } = payload;
 
     let requestUrl = `${this.baseUrl}${url}`;
 
@@ -49,6 +49,7 @@ export class HttpService {
         Accept: 'application/json',
       },
       method: 'GET',
+      signal
     });
 
     const responseBodyText = await response.text();
