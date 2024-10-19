@@ -6,3 +6,9 @@ export interface UserRawEntity {
   readonly password: string;
   readonly role: UserRole;
 }
+
+export interface UserWithBucketsJoinRawEntity extends Omit<UserRawEntity, 'id'> {
+  readonly userId: string;
+  readonly bucketName: string;
+  readonly bucketId: string;
+}

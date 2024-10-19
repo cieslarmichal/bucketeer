@@ -5,7 +5,7 @@ import { RepositoryError } from '../../../../../common/errors/common/repositoryE
 import { ResourceNotFoundError } from '../../../../../common/errors/common/resourceNotFoundError.js';
 import { type SqliteDatabaseClient } from '../../../../../core/database/sqliteDatabaseClient/sqliteDatabaseClient.js';
 import { type UuidService } from '../../../../../libs/uuid/services/uuidService/uuidService.js';
-import { type User } from '../../../domain/entities/user/user.js';
+import { type UserWithBuckets, type User } from '../../../domain/entities/user/user.js';
 import {
   type UserRepository,
   type SaveUserPayload,
@@ -13,11 +13,16 @@ import {
   type DeleteUserPayload,
   type FindUsersPayload,
 } from '../../../domain/repositories/userRepository/userRepository.js';
-import { type UserRawEntity } from '../../databases/userDatabase/tables/userTable/userRawEntity.js';
+import { UserBucketTable } from '../../databases/userDatabase/tables/userBucketTable/userBucketTable.js';
+import {
+  type UserWithBucketsJoinRawEntity,
+  type UserRawEntity,
+} from '../../databases/userDatabase/tables/userTable/userRawEntity.js';
 import { UserTable } from '../../databases/userDatabase/tables/userTable/userTable.js';
 
 export class UserRepositoryImpl implements UserRepository {
   private readonly userTable = new UserTable();
+  private readonly userBucketTable = new UserBucketTable();
 
   public constructor(
     private readonly sqliteDatabaseClient: SqliteDatabaseClient,
@@ -108,6 +113,7 @@ export class UserRepositoryImpl implements UserRepository {
     try {
       rawEntities = await this.sqliteDatabaseClient<UserRawEntity>(this.userTable.name)
         .select('*')
+        .orderBy('id', 'asc')
         .offset((page - 1) * pageSize)
         .limit(pageSize);
     } catch (error) {
@@ -118,6 +124,41 @@ export class UserRepositoryImpl implements UserRepository {
     }
 
     return rawEntities.map((rawEntity) => this.userMapper.mapToDomain(rawEntity));
+  }
+
+  public async findUsersWithBuckets(payload: FindUsersPayload): Promise<UserWithBuckets[]> {
+    const { page, pageSize } = payload;
+
+    let rawEntities: UserWithBucketsJoinRawEntity[];
+
+    try {
+      const result = await this.sqliteDatabaseClient<UserRawEntity>(this.userTable.name)
+        .select(
+          `${this.userTable.name}.id as userId`,
+          `email`,
+          'role',
+          'password',
+          'userBuckets.id as bucketId',
+          'bucketName as bucketName',
+        )
+        .leftJoin(this.userBucketTable.name, (joinCallback) => {
+          joinCallback.on(`${this.userBucketTable.name}.userId`, '=', `${this.userTable.name}.id`);
+        })
+        .orderBy(`${this.userTable.name}.id`, 'asc')
+        .offset((page - 1) * pageSize)
+        .limit(pageSize);
+
+      rawEntities = result;
+    } catch (error) {
+      console.error(error);
+
+      throw new RepositoryError({
+        entity: 'Users',
+        operation: 'findWithBuckets',
+      });
+    }
+
+    return this.userMapper.mapToDomainWithBuckets(rawEntities);
   }
 
   public async countUsers(): Promise<number> {

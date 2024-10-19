@@ -1,5 +1,7 @@
 import { type UserRole } from '@common/contracts';
 
+import { type UserBucketRawEntity } from '../../../infrastructure/databases/userDatabase/tables/userBucketTable/userBucketRawEntity.js';
+
 export interface UserDraft {
   readonly id: string;
   readonly email: string;
@@ -53,5 +55,22 @@ export class User {
 
   public getState(): UserState {
     return this.state;
+  }
+}
+
+export interface UserWithBucketsDraft extends UserDraft {
+  buckets: UserBucketRawEntity[];
+}
+
+export class UserWithBuckets extends User {
+  private readonly buckets: UserBucketRawEntity[];
+  public constructor(draft: UserWithBucketsDraft) {
+    super(draft);
+
+    this.buckets = draft.buckets;
+  }
+
+  public getBuckets(): UserBucketRawEntity[] {
+    return [...this.buckets];
   }
 }
