@@ -59,8 +59,6 @@ export const CreateUserDialog = ({ onOpenChange, open }: Props): JSX.Element => 
       predicate: ({ queryKey }) => queryKey[0] === UserApiQueryKeys.findUsers
     });
 
-    console.log("Beep boop");
-
     onOpenChange(false);
 
     createUserForm.reset();
